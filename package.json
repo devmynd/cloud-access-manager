@@ -1,0 +1,9 @@
+{
+  "name": "cloud-access-manager",
+  "version": "0.0.0",
+  "main": "index.js",
+  "bin": { "cam": "cli.js" },
+  "repository": "git@github.com:devmynd/cloud-access-manager.git",
+  "author": "Michael Evans <michael.evans@devmynd.com>",
+  "license": "MIT"
+}
