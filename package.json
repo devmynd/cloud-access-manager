@@ -14,7 +14,10 @@
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "commander": "^2.11.0",
+    "inquirer": "^3.1.1"
+  },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",

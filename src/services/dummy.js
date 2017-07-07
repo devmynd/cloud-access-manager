@@ -7,8 +7,8 @@ export const dummyConfigKeys = ['apiToken']
 export class DummyProvider implements ServiceProvider {
   apiToken: string
 
-  constructor (apiToken: string) {
-    this.apiToken = apiToken
+  constructor (config: { apiToken: string }) {
+    this.apiToken = config.apiToken
   }
 
   listAccounts (): Array<UserAccount> {

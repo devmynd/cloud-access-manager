@@ -1,8 +1,29 @@
 #!/usr/bin/env node
 // @flow
 
-function helloWorld (name: string): string {
-  return `hello ${name}`
-}
+import { factory } from '../lib/factories/service-module-factory'
+var program = require('commander')
+var inquirer = require('inquirer');
 
-console.log(helloWorld('world'))
+program
+  .command('config <service>')
+  .description('configures a service provider with the required api keys')
+  .action(function (service) {
+    let configKeys = factory(service).configKeys
+
+    var questions = []
+    configKeys.forEach(function (key) {
+      questions.push({
+        type: 'input',
+        name: key,
+        message: `enter ${key}:`
+      })
+    })
+
+
+    inquirer.prompt(questions).then(function (values) {
+      console.log(values)
+    })
+  })
+
+program.parse(process.argv)
