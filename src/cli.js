@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // @flow
 
-import { factory } from '../lib/factories/service-module-factory'
+import { factory } from './factories/service-module-factory'
+import { ConfigStore } from './data/config-store'
+
 var program = require('commander')
-var inquirer = require('inquirer');
+var inquirer = require('inquirer')
 
 program
   .command('config <service>')
@@ -20,9 +22,9 @@ program
       })
     })
 
-
     inquirer.prompt(questions).then(function (values) {
-      console.log(values)
+      let store = new ConfigStore()
+      store.save(service, values)
     })
   })
 

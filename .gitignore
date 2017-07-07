@@ -60,3 +60,5 @@ typings/
 # ignore compiled lib directory
 lib/
 
+# Persistence of service config settings
+.services.json

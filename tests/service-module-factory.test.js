@@ -1,5 +1,5 @@
 /* eslint-env jest */
-const factory = require('../lib/factories/service-module-factory').factory
+import { factory } from '../lib/factories/service-module-factory'
 
 test('reads config keys', () => {
   let module = factory('dummy')
