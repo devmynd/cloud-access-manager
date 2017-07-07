@@ -3,16 +3,20 @@
   "version": "0.0.0",
   "main": "index.js",
   "bin": {
-    "cam": "cli.js"
+    "cam": "lib/cli.js"
   },
   "scripts": {
-    "test": "standard && jest"
+    "test": "standard && jest",
+    "build": "babel src/ -d lib/",
+    "prepublish": "yarn run build"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
   "license": "MIT",
-  "dependencies": { },
+  "dependencies": {},
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-flow": "^6.23.0",
     "jest": "^20.0.4",
     "standard": "^10.0.2"
   }
