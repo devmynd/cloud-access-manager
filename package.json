@@ -6,9 +6,10 @@
     "cam": "lib/cli.js"
   },
   "scripts": {
-    "test": "standard && jest",
+    "test": "standard && yarn build && jest",
     "build": "yarn flow && babel src/ -d lib/",
-    "prepublish": "yarn run build"
+    "prepublish": "yarn run build",
+    "fix": "standard --fix"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",

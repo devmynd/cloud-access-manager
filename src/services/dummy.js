@@ -9,12 +9,11 @@ export class Config {
 export class Provider implements ServiceProvider {
   config: Config
 
-  constructor(config: Config) {
+  constructor (config: Config) {
     this.config = config
   }
 
-  listAccounts(): Array<UserAccount> {
+  listAccounts (): Array<UserAccount> {
     return []
   }
 }
-
