@@ -5,10 +5,15 @@
   "bin": {
     "cam": "cli.js"
   },
+  "scripts": {
+    "test": "jest"
+  },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
   "license": "MIT",
-  "dependencies": {
+  "dependencies": { },
+  "devDependencies": {
+    "jest": "^20.0.4",
     "standard": "^10.0.2"
   }
 }
