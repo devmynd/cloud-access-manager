@@ -2,15 +2,13 @@
 import type { ServiceProvider } from '../types/service-provider'
 import type { UserAccount } from '../types/user-account'
 
-export class Config {
+export const dummyConfigKeys = ['apiToken']
+
+export class DummyProvider implements ServiceProvider {
   apiToken: string
-}
 
-export class Provider implements ServiceProvider {
-  config: Config
-
-  constructor (config: Config) {
-    this.config = config
+  constructor (apiToken: string) {
+    this.apiToken = apiToken
   }
 
   listAccounts (): Array<UserAccount> {
