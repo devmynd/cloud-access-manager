@@ -6,7 +6,7 @@
     "cam": "cli.js"
   },
   "scripts": {
-    "test": "jest"
+    "test": "standard && jest"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
