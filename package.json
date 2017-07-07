@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "standard && jest",
-    "build": "babel src/ -d lib/",
+    "build": "yarn flow && babel src/ -d lib/",
     "prepublish": "yarn run build"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
