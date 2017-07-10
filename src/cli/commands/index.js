@@ -1,3 +1,3 @@
 // @flow
 export { config } from './config'
-export { listAll } from './list'
+export { listAll, listByService } from './list'

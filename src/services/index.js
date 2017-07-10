@@ -6,3 +6,11 @@ import { dummyProviderModule } from '../services/dummy'
 export const modules = {
   'dummy': dummyProviderModule
 }
+
+export function getModule (serviceKey: string) {
+  const module = modules[serviceKey]
+  if (!module) {
+    throw new Error(`unknown serviceKey: '${serviceKey}'`)
+  }
+  return module
+}

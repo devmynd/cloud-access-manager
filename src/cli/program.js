@@ -9,8 +9,14 @@ program
   .action(commands.config)
 
 program
-  .command('list')
+  .command('list [service]')
   .description('lists all user email addresses by service')
-  .action(commands.listAll)
+  .action((service) => {
+    if (service) {
+      commands.listByService(service)
+    } else {
+      commands.listAll()
+    }
+  })
 
 program.parse(process.argv)

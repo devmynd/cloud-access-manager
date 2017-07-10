@@ -1,14 +1,19 @@
 // @flow
-import { modules } from './../../services'
+import { modules, getModule } from './../../services'
 import { configStore } from './../../data/config-store'
 import { terminal as term } from 'terminal-kit'
 
-export const listAll = () => {
+function loadConfig (serviceName: string) {
+  const config = configStore.get(serviceName)
+  if (!config) {
+    throw new Error(`Service '${serviceName}' not yet configured. Run 'cam config ${serviceName}'`)
+  }
+  return config
+}
+
+export function listAll () {
   const serviceProviders = Object.keys(modules).map((serviceName) => {
-    const config = configStore.get(serviceName)
-    if (!config) {
-      throw new Error(`Service '${serviceName}' not yet configured. Run 'cam config ${serviceName}'`)
-    }
+    const config = loadConfig(serviceName)
     return modules[serviceName].providerFactory(config)
   })
 
@@ -51,4 +56,25 @@ export const listAll = () => {
       term('\n')
     }
   })
+}
+
+export const listByService = (serviceName: string) => {
+  const module = getModule(serviceName)
+  const config = loadConfig(serviceName)
+  module.providerFactory(config).listAccounts().then((accounts) => {
+    accounts.forEach((account) => {
+      term.green(`${account.email}`)
+
+      if (account.assets.length > 0) {
+        term.magenta(' (')
+      }
+      term.magenta(account.assets.join(' | '))
+      if (account.assets.length > 0) {
+        term.magenta(')')
+      }
+
+      term('\n')
+    })
+  })
+  console.log(`list by ${module}`)
 }
