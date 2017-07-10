@@ -5,6 +5,7 @@ import { modules } from './services'
 import { ConfigStore } from './data/config-store'
 import inquirer from 'inquirer'
 import program from 'commander'
+import { terminal as term }  from 'terminal-kit'
 
 function getModule (service) {
   const module = modules[service]
@@ -58,19 +59,32 @@ program
     )
 
     Promise.all(promises).then((serviceAccountLists) => {
-      // todo: reduce
-      console.log(serviceAccountLists)
-    })
+      const users = serviceAccountLists.reduce((users, serviceAccountList) => {
+        serviceAccountList.accounts.forEach((account) => {
+          let userInfo = users[account.email] || { services: {} }
+          userInfo.services[serviceAccountList.serviceName] = { assets: account.assets }
+          users[account.email] = userInfo
+        })
+        return users
+      }, {})
 
-    // const users = serviceProviders.reduce((users, provider) => {
-    //   provider.listAccounts().then((accounts) => {
-    //     accounts.forEach((account) => {
-    //       users[account['email']] = account['assets']
-    //     })
-    //   })
-    //   console.log(users)
-    //   return users
-    // }, {})
+      for (let email in users) {
+        term.green(`${email}\n`)
+        for (let serviceName in users[email].services) {
+          term.cyan(`\t${serviceName}`)
+          const service = users[email].services[serviceName]
+          if (service.assets.length > 0) {
+            term.magenta(' (')
+          }
+          term.magenta(service.assets.join(' | '))
+          if (service.assets.length > 0) {
+            term.magenta(')')
+          }
+          term('\n')
+        }
+        term('\n')
+      }
+    })
   })
 
 program.parse(process.argv)
