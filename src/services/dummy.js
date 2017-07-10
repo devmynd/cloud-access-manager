@@ -1,10 +1,8 @@
 // @flow
-import type { ServiceProvider } from '../types/service-provider'
+import type { ServiceProvider, ServiceProviderModule } from '../types/service-provider'
 import type { UserAccount } from '../types/user-account'
 
-export const configKeys = ['apiToken']
-
-export class Provider implements ServiceProvider {
+class DummyProvider implements ServiceProvider {
   apiToken: string
 
   constructor (config: { apiToken: string }) {
@@ -13,5 +11,12 @@ export class Provider implements ServiceProvider {
 
   listAccounts (): Array<UserAccount> {
     return []
+  }
+}
+
+export const dummyProviderModule: ServiceProviderModule = {
+  configKeys: ['apiToken'],
+  providerFactory (config) {
+    return new DummyProvider(config)
   }
 }

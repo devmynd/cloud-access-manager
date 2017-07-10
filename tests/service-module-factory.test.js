@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { factory } from '../lib/factories/service-module-factory'
+import { factory } from '../lib/services'
 
 test('reads config keys', () => {
   let module = factory('dummy')

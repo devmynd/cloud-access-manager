@@ -1,11 +1,14 @@
+// @flow
+
 // Ensure every module is imported here and included in the `modules` hash below
-import * as dummy from '../services/dummy'
+import type { ServiceProviderModule } from '../types/service-provider'
+import { dummyProviderModule } from '../services/dummy'
 
 let modules = {
-  'dummy': dummy
+  'dummy': dummyProviderModule
 }
 
-export function factory (moduleName: string): { config: any, provider: any } {
+export function factory (moduleName: string): ServiceProviderModule {
   var module = modules[moduleName]
   if (typeof (module) === 'undefined') {
     let err: string = `undefined module: '${moduleName}'`

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // @flow
 
-import { factory } from './factories/service-module-factory'
+import { factory } from './services'
 import { ConfigStore } from './data/config-store'
 import inquirer from 'inquirer'
 import program from 'commander'
