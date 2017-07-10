@@ -2,11 +2,16 @@
 import type { ServiceProvider, ServiceProviderModule } from '../types/service-provider'
 import type { UserAccount } from '../types/user-account'
 
-class DummyProvider implements ServiceProvider {
+let configKeys = ['apiToken']
+type DummyConfig = {
   apiToken: string
+}
 
-  constructor (config: { apiToken: string }) {
-    this.apiToken = config.apiToken
+class DummyProvider implements ServiceProvider {
+  config: DummyConfig
+
+  constructor (config: DummyConfig) {
+    this.config = config
   }
 
   listAccounts (): Array<UserAccount> {
@@ -15,7 +20,7 @@ class DummyProvider implements ServiceProvider {
 }
 
 export const dummyProviderModule: ServiceProviderModule = {
-  configKeys: ['apiToken'],
+  configKeys: configKeys,
   providerFactory (config) {
     return new DummyProvider(config)
   }
