@@ -2,7 +2,7 @@
 import type { UserAccount } from './user-account'
 
 export interface ServiceProvider {
-  listAccounts (): Array<UserAccount>
+  listAccounts (): Promise<Array<UserAccount>>
 }
 
 export type ServiceProviderModule = {

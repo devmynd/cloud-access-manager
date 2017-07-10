@@ -1,6 +1,5 @@
 // @flow
 import type { ServiceProvider, ServiceProviderModule } from '../types/service-provider'
-import type { UserAccount } from '../types/user-account'
 
 let configKeys = ['dummyApiToken']
 type DummyConfig = {
@@ -14,8 +13,19 @@ class DummyProvider implements ServiceProvider {
     this.config = config
   }
 
-  listAccounts (): Array<UserAccount> {
-    return []
+  listAccounts () {
+    return new Promise((resolve, reject) => {
+      resolve([
+        {
+          email: 'shamyle@devmynd.com',
+          assets: ['Project A', 'Project B']
+        },
+        {
+          email: 'ty@devmynd.com',
+          assets: []
+        }
+      ])
+    })
   }
 }
 
