@@ -1,11 +1,15 @@
 // @flow
-import { getModule } from './../../services'
+import { getConfigKeys } from './../../service-providers'
 import { configStore } from './../../data/config-store'
 import inquirer from 'inquirer'
 
 export function config (serviceName: string) {
-  const module = getModule(serviceName)
-  const questions = module.configKeys.map((key) => ({
+  const configKeys = getConfigKeys(serviceName)
+  if (!configKeys) {
+    throw new Error(`undefined module ${serviceName}`)
+  }
+
+  const questions = configKeys.map((key) => ({
     type: 'input',
     name: key,
     message: `enter ${key}:`

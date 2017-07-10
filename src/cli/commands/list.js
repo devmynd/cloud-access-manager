@@ -1,80 +1,41 @@
 // @flow
-import { modules, getModule } from './../../services'
-import { configStore } from './../../data/config-store'
+import * as serviceProviders from './../../service-providers'
 import { terminal as term } from 'terminal-kit'
 
-function loadConfig (serviceName: string) {
-  const config = configStore.get(serviceName)
-  if (!config) {
-    throw new Error(`Service '${serviceName}' not yet configured. Run 'cam config ${serviceName}'`)
-  }
-  return config
+function print (summaries, displayServices: bool = true) {
+  summaries.forEach((summary) => {
+    term.green(`${summary.email}`)
+    summary.services.forEach((service) => {
+      if (displayServices) {
+        term.cyan(`\n\t${service.name}`)
+      }
+      if (service.assets.length > 0) {
+        term.magenta(' (')
+      }
+      term.magenta(service.assets.join(' | '))
+      if (service.assets.length > 0) {
+        term.magenta(')')
+      }
+      term('\n')
+    })
+  })
 }
 
 export function listAll () {
-  const serviceProviders = Object.keys(modules).map((serviceName) => {
-    const config = loadConfig(serviceName)
-    return modules[serviceName].providerFactory(config)
-  })
+  const configuredProviders = serviceProviders.getAllConfiguredProviders()
 
-  const promises = serviceProviders.map((provider) =>
-    new Promise((resolve, reject) => {
-      provider.listAccounts().then(
-        (accounts) => {
-          resolve({ serviceName: provider.serviceName, accounts: accounts })
-        },
-        (error) => {
-          reject(error)
-        })
-    })
-  )
-
-  Promise.all(promises).then((serviceAccountLists) => {
-    const users = serviceAccountLists.reduce((users, serviceAccountList) => {
-      serviceAccountList.accounts.forEach((account) => {
-        let userInfo = users[account.email] || { services: {} }
-        userInfo.services[serviceAccountList.serviceName] = { assets: account.assets }
-        users[account.email] = userInfo
-      })
-      return users
-    }, {})
-
-    for (let email in users) {
-      term.green(`${email}\n`)
-      for (let serviceName in users[email].services) {
-        term.cyan(`\t${serviceName}`)
-        const service = users[email].services[serviceName]
-        if (service.assets.length > 0) {
-          term.magenta(' (')
-        }
-        term.magenta(service.assets.join(' | '))
-        if (service.assets.length > 0) {
-          term.magenta(')')
-        }
-        term('\n')
-      }
-      term('\n')
-    }
+  serviceProviders.download(configuredProviders).then((summaries) => {
+    print(summaries)
   })
 }
 
 export const listByService = (serviceName: string) => {
-  const module = getModule(serviceName)
-  const config = loadConfig(serviceName)
-  module.providerFactory(config).listAccounts().then((accounts) => {
-    accounts.forEach((account) => {
-      term.green(`${account.email}`)
+  const provider = serviceProviders.getProvider(serviceName)
+  if (!provider) {
+    throw new Error(`You have not configured ${serviceName}.`)
+  }
 
-      if (account.assets.length > 0) {
-        term.magenta(' (')
-      }
-      term.magenta(account.assets.join(' | '))
-      if (account.assets.length > 0) {
-        term.magenta(')')
-      }
-
-      term('\n')
-    })
+  serviceProviders.download([provider]).then((summaries) => {
+    print(summaries, false)
   })
-  console.log(`list by ${module}`)
 }
