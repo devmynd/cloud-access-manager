@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // @flow
 
-import { factory } from './services'
+import { modules } from './services'
 import { ConfigStore } from './data/config-store'
 import inquirer from 'inquirer'
 import program from 'commander'
@@ -10,10 +10,13 @@ program
   .command('config <service>')
   .description('configures a service provider with the required api keys')
   .action(function (service) {
-    let configKeys = factory(service).configKeys
+    let module = modules[service]
+    if (!module) {
+      throw new Error(`unknown module: '${service}'`)
+    }
 
     var questions = []
-    configKeys.forEach(function (key) {
+    module.configKeys.forEach(function (key) {
       questions.push({
         type: 'input',
         name: key,
