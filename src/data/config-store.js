@@ -1,5 +1,5 @@
 // @flow
-import * as fs from 'file-system'
+import fs from 'file-system'
 
 const filePath = './.services.json'
 

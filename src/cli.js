@@ -3,9 +3,8 @@
 
 import { factory } from './factories/service-module-factory'
 import { ConfigStore } from './data/config-store'
-import * as inquirer from 'inquirer'
-
-var program = require('commander')
+import inquirer from 'inquirer'
+import program from 'commander'
 
 program
   .command('config <service>')
