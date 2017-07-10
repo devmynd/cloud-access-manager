@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "main": "index.js",
   "bin": {
-    "cam": "lib/cli.js"
+    "cam": "lib/cli/program.js"
   },
   "scripts": {
     "test": "standard && yarn build && jest",

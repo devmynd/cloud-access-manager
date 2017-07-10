@@ -14,16 +14,14 @@ function readConfig () {
   return data
 }
 
-export class ConfigStore {
-
-
-  save (moduleName: string, config: any): void {
+export const configStore = {
+  save: (moduleName: string, config: any) => {
     const data = readConfig()
     data[moduleName] = config
     fs.writeFileSync(filePath, JSON.stringify(data))
-  }
+  },
 
-  get (moduleName: string): any {
+  get: (moduleName: string) => {
     const data = readConfig()
     return data[moduleName]
   }
