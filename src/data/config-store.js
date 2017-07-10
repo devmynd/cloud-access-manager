@@ -1,6 +1,5 @@
 // @flow
 import * as fs from 'file-system'
-// var fs = require('file-system')
 
 const filePath = './.services.json'
 
