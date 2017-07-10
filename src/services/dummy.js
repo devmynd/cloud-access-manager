@@ -2,9 +2,9 @@
 import type { ServiceProvider, ServiceProviderModule } from '../types/service-provider'
 import type { UserAccount } from '../types/user-account'
 
-let configKeys = ['apiToken']
+let configKeys = ['dummyApiToken']
 type DummyConfig = {
-  apiToken: string
+  dummyApiToken: string
 }
 
 class DummyProvider implements ServiceProvider {
