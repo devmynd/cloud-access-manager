@@ -7,6 +7,9 @@ type DummyConfig = {
 }
 
 class DummyProvider implements ServiceProvider {
+
+  serviceName = 'Dummy Service'
+
   config: DummyConfig
 
   constructor (config: DummyConfig) {
