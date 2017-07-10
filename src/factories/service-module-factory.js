@@ -1,11 +1,15 @@
-import { dummyConfigKeys, DummyProvider } from '../services/dummy'
+// Ensure every module is imported here and included in the `modules` hash below
+import * as dummy from '../services/dummy'
+
+let modules = {
+  'dummy': dummy
+}
 
 export function factory (moduleName: string): { config: any, provider: any } {
-  switch (moduleName) {
-    case 'dummy':
-      return { configKeys: dummyConfigKeys, Provider: DummyProvider }
-    default:
-      let err: string = `undefined module: '${moduleName}'`
-      throw err
+  var module = modules[moduleName]
+  if (typeof (module) === 'undefined') {
+    let err: string = `undefined module: '${moduleName}'`
+    throw err
   }
+  return module
 }
