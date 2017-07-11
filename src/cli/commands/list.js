@@ -19,21 +19,19 @@ function print (summaries, displayServices: bool = true) {
   })
 }
 
-export function listAll () {
+export async function listAll () {
   const configuredProviders = serviceProviders.getAllConfiguredProviders()
 
-  serviceProviders.download(configuredProviders).then((summaries) => {
-    print(summaries)
-  })
+  const summaries = await serviceProviders.download(configuredProviders)
+  print(summaries)
 }
 
-export const listByService = (serviceName: string) => {
+export async function listByService (serviceName: string) {
   const provider = serviceProviders.getProvider(serviceName)
   if (!provider) {
     throw new Error(`You have not configured ${serviceName}.`)
   }
 
-  serviceProviders.download([provider]).then((summaries) => {
-    print(summaries, false)
-  })
+  const summaries = await serviceProviders.download([provider])
+  print(summaries, false)
 }
