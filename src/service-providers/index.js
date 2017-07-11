@@ -33,31 +33,22 @@ export function getProvider (serviceName: string): ?ServiceProvider {
   }
 }
 
-export function download (serviceProviders: Array<ServiceProvider>) : Promise<Array<UserServiceSummary>> {
-  const promises = serviceProviders.map((provider) =>
-    new Promise((resolve, reject) => {
-      provider.listAccounts().then(
-        (accounts) => {
-          resolve({ serviceName: provider.serviceName, accounts: accounts })
-        },
-        (error) => {
-          reject(error)
-        })
-    })
-  )
-
-  return new Promise((resolve, reject) => {
-    Promise.all(promises).then((serviceAccountLists) => {
-      const userSummaryLookup = serviceAccountLists.reduce((userSummaryLookup, serviceAccountList) => {
-        serviceAccountList.accounts.forEach((account) => {
-          let userServiceSummary = userSummaryLookup[account.email] || { email: account.email, services: [] }
-          userServiceSummary.services.push({ name: serviceAccountList.serviceName, assets: account.assets })
-          userSummaryLookup[account.email] = userServiceSummary
-        })
-        return userSummaryLookup
-      }, {})
-      const summaries = Object.keys(userSummaryLookup).map((key) => userSummaryLookup[key])
-      resolve(summaries)
-    })
+export async function download (serviceProviders: Array<ServiceProvider>) : Promise<Array<UserServiceSummary>> {
+  const promises = serviceProviders.map(async (provider) => {
+    const accounts = await provider.listAccounts()
+    return { serviceName: provider.serviceName, accounts: accounts }
   })
+
+  const serviceAccountLists = await Promise.all(promises)
+
+  const userSummaryLookup = serviceAccountLists.reduce((userSummaryLookup, serviceAccountList) => {
+    serviceAccountList.accounts.forEach((account) => {
+      let userServiceSummary = userSummaryLookup[account.email] || { email: account.email, services: [] }
+      userServiceSummary.services.push({ name: serviceAccountList.serviceName, assets: account.assets })
+      userSummaryLookup[account.email] = userServiceSummary
+    })
+    return userSummaryLookup
+  }, {})
+
+  return Object.keys(userSummaryLookup).map((key) => userSummaryLookup[key])
 }
