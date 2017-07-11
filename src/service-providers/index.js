@@ -5,7 +5,7 @@ import { dummyProviderModule } from './dummy'
 import { configStore } from './../data/config-store'
 import type { UserServiceSummary, ServiceProvider } from './../types'
 
-export const modules = {
+const modules = {
   'dummy': dummyProviderModule
 }
 
