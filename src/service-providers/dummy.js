@@ -20,11 +20,15 @@ class DummyProvider implements ServiceProvider {
       resolve([
         {
           email: 'shamyle@devmynd.com',
-          assets: ['Project A', 'Project B']
+          assets: []
         },
         {
           email: 'ty@devmynd.com',
-          assets: []
+          assets: ['Project A', 'Project B']
+        },
+        {
+          email: 'mevans@devmynd.com',
+          assets: ["Project/Repo"]
         }
       ])
     })
