@@ -1,5 +1,5 @@
 // @flow
-import type { ServiceProvider, ServiceProviderModule } from '../types/service-provider'
+import type { ServiceProvider, ServiceProviderModule } from '../types'
 
 let configKeys = ['dummyApiToken']
 type DummyConfig = {
@@ -28,7 +28,7 @@ class DummyProvider implements ServiceProvider {
         },
         {
           email: 'mevans@devmynd.com',
-          assets: ["Project/Repo"]
+          assets: ['Project/Repo']
         }
       ])
     })
