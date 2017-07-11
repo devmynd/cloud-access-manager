@@ -19,4 +19,16 @@ program
     }
   })
 
+program
+  .command('audit')
+  .option('-p, --print', 'non-interactive audit that just prints the non-whitelisted users')
+  .description('searches through all services to find any non-whitelisted user accounts')
+  .action((options) => {
+    if (options.print) {
+      commands.audit()
+    } else {
+      console.log('Interactive audit')
+    }
+  })
+
 program.parse(process.argv)

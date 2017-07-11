@@ -1,5 +1,5 @@
 // @flow
-import * as serviceProviders from './../../core/service-providers'
+import * as serviceProvidersModule from './../../core/service-providers'
 import { terminal as term } from 'terminal-kit'
 
 function print (summaries, displayServices: bool = true) {
@@ -20,18 +20,18 @@ function print (summaries, displayServices: bool = true) {
 }
 
 export async function listAll () {
-  const configuredProviders = serviceProviders.getAllConfiguredProviders()
+  const configuredProviders = serviceProvidersModule.getAllConfiguredProviders()
 
-  const summaries = await serviceProviders.download(configuredProviders)
+  const summaries = await serviceProvidersModule.download(configuredProviders)
   print(summaries)
 }
 
 export async function listByService (serviceName: string) {
-  const provider = serviceProviders.getProvider(serviceName)
+  const provider = serviceProvidersModule.getProvider(serviceName)
   if (!provider) {
     throw new Error(`You have not configured ${serviceName}.`)
   }
 
-  const summaries = await serviceProviders.download([provider])
+  const summaries = await serviceProvidersModule.download([provider])
   print(summaries, false)
 }
