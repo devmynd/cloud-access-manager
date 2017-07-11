@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { configStore as store } from '../lib/data/config-store'
+import { configStore as store } from '../lib/core/data/config-store'
 
 test('persist config keys by service', () => {
   store.save('someService', { someKey: 'someValue' })

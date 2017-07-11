@@ -1,8 +1,6 @@
 /* eslint-env jest */
-import { modules } from '../lib/services'
+import { getConfigKeys } from '../lib/core/service-providers'
 
 test('reads config keys', () => {
-  let module = modules['dummy']
-
-  expect(module.configKeys).toEqual(['dummyApiToken'])
+  expect(getConfigKeys('dummy')).toEqual(['dummyApiToken'])
 })

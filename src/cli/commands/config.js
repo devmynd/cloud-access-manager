@@ -1,6 +1,6 @@
 // @flow
-import { getConfigKeys } from './../../service-providers'
-import { configStore } from './../../data/config-store'
+import { getConfigKeys } from './../../core/service-providers'
+import { configStore } from './../../core/data/config-store'
 import inquirer from 'inquirer'
 
 export function config (serviceName: string) {

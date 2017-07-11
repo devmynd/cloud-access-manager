@@ -1,5 +1,5 @@
 // @flow
-import * as serviceProviders from './../../service-providers'
+import * as serviceProviders from './../../core/service-providers'
 import { terminal as term } from 'terminal-kit'
 
 function print (summaries, displayServices: bool = true) {
