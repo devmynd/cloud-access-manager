@@ -1,28 +1,18 @@
 // @flow
 import fs from 'file-system'
+import * as helpers from './helpers'
 
-const filePath = './.services.json'
-
-function readConfig () {
-  var data
-  if (fs.existsSync(filePath)) {
-    let json = fs.readFileSync(filePath, 'utf8')
-    data = JSON.parse(json)
-  } else {
-    data = {}
-  }
-  return data
-}
+process.env.CONFIG_PATH = process.env.CONFIG_PATH || './.services.json'
 
 export const configStore = {
   save: (serviceId: string, config: any) => {
-    const data = readConfig()
+    const data = helpers.readData(process.env.CONFIG_PATH, {})
     data[serviceId] = config
-    fs.writeFileSync(filePath, JSON.stringify(data))
+    fs.writeFileSync(process.env.CONFIG_PATH, JSON.stringify(data))
   },
 
   get: (serviceId: string) => {
-    const data = readConfig()
+    const data = helpers.readData(process.env.CONFIG_PATH, {})
     return data[serviceId]
   }
 }
