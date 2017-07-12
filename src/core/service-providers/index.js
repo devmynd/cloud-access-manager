@@ -1,13 +1,13 @@
 // @flow
 
 // Ensure every module is imported here
-import { dummyProviderModule } from './dummy'
+import { dummyProviderModule, dummyProviderModule2 } from './dummy'
 import { configStore } from './../data/config-store'
 import type { UserServiceSummary, ServiceProvider } from './../types'
 
 // Ensure every module is included in this array
 const modules = [
-  dummyProviderModule
+  dummyProviderModule, dummyProviderModule2
 ]
 
 const moduleLookup = modules.reduce((hash, module) => {

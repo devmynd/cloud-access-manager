@@ -1,4 +1,4 @@
 // @flow
 export { config } from './config'
 export { listAll, listByService } from './list'
-export { audit } from './audit'
+export { audit, interactiveAudit } from './audit'

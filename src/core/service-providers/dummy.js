@@ -18,15 +18,15 @@ class DummyProvider implements ServiceProvider {
       resolve([
         {
           email: 'shamyle@devmynd.com',
-          assets: []
+          assets: ['repo a', 'repo b']
         },
         {
           email: 'ty@devmynd.com',
-          assets: ['Project A', 'Project B']
+          assets: ['repo a', 'repo b']
         },
         {
           email: 'mevans@devmynd.com',
-          assets: ['Project/Repo']
+          assets: ['repo a', 'repo b']
         }
       ])
     })
@@ -36,6 +36,15 @@ class DummyProvider implements ServiceProvider {
 export const dummyProviderModule: ServiceProviderModule = {
   id: 'dummy',
   displayName: 'Dummy Service',
+  configKeys: configKeys,
+  providerFactory (config) {
+    return new DummyProvider(config)
+  }
+}
+
+export const dummyProviderModule2: ServiceProviderModule = {
+  id: 'dummy2',
+  displayName: 'Dummy Service 2',
   configKeys: configKeys,
   providerFactory (config) {
     return new DummyProvider(config)

@@ -27,7 +27,7 @@ program
     if (options.print) {
       commands.audit()
     } else {
-      console.log('Interactive audit')
+      commands.interactiveAudit()
     }
   })
 

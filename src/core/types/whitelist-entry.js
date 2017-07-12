@@ -1,6 +1,11 @@
 // @flow
 
+export type ServiceAccess = {
+  id: string,
+  access: "full" | Array<string>
+}
+
 export type WhitelistEntry = {
   email: string,
-  services: [{ id: string, access: "full" | Array<string> }]
+  services: Array<ServiceAccess>
 }
