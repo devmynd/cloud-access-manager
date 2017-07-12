@@ -7,8 +7,6 @@ type DummyConfig = {
 }
 
 class DummyProvider implements ServiceProvider {
-  serviceName = 'Dummy Service'
-
   config: DummyConfig
 
   constructor (config: DummyConfig) {
@@ -36,6 +34,8 @@ class DummyProvider implements ServiceProvider {
 }
 
 export const dummyProviderModule: ServiceProviderModule = {
+  id: 'dummy',
+  displayName: 'Dummy Service',
   configKeys: configKeys,
   providerFactory (config) {
     return new DummyProvider(config)

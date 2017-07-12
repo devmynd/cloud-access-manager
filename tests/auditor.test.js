@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import * as auditor from '../src/core/auditor'
+import * as auditor from '../lib/core/auditor'
 
 describe('performAudit', () => {
   let userServiceSummaries
@@ -8,11 +8,11 @@ describe('performAudit', () => {
       email: 'user@email.com',
       services: [
         {
-          name: 'test-service',
+          id: 'test-service',
           assets: ['Project A', 'Project B']
         },
         {
-          name: 'another-test-service',
+          id: 'another-test-service',
           assets: ['Repo A', 'Repo B']
         }
       ]
@@ -23,10 +23,10 @@ describe('performAudit', () => {
     const whitelistEntries = [{
       email: 'user@email.com',
       services: [{
-        name: 'test-service',
+        id: 'test-service',
         access: 'full'
       }, {
-        name: 'another-test-service',
+        id: 'another-test-service',
         access: 'full'
       }]
     }]
@@ -39,10 +39,10 @@ describe('performAudit', () => {
     const whitelistEntries = [{
       email: 'user@email.com',
       services: [{
-        name: 'test-service',
+        id: 'test-service',
         access: ['Project A', 'Project B']
       }, {
-        name: 'another-test-service',
+        id: 'another-test-service',
         access: ['Repo A', 'Repo B']
       }]
     }]
@@ -55,10 +55,10 @@ describe('performAudit', () => {
     const whitelistEntries = [{
       email: 'user@email.com',
       services: [{
-        name: 'test-service',
+        id: 'test-service',
         access: 'full'
       }, {
-        name: 'another-test-service',
+        id: 'another-test-service',
         access: ['Repo A']
       }]
     }]
@@ -69,7 +69,7 @@ describe('performAudit', () => {
       email: 'user@email.com',
       services: [
         {
-          name: 'another-test-service',
+          id: 'another-test-service',
           assets: ['Repo B']
         }
       ]
@@ -80,7 +80,7 @@ describe('performAudit', () => {
     const whitelistEntries = [{
       email: 'user@email.com',
       services: [{
-        name: 'test-service',
+        id: 'test-service',
         access: 'full'
       }]
     }]
@@ -91,7 +91,7 @@ describe('performAudit', () => {
       email: 'user@email.com',
       services: [
         {
-          name: 'another-test-service',
+          id: 'another-test-service',
           assets: ['Repo A', 'Repo B']
         }
       ]
@@ -107,11 +107,11 @@ describe('performAudit', () => {
       email: 'user@email.com',
       services: [
         {
-          name: 'test-service',
+          id: 'test-service',
           assets: ['Project A', 'Project B']
         },
         {
-          name: 'another-test-service',
+          id: 'another-test-service',
           assets: ['Repo A', 'Repo B']
         }
       ]

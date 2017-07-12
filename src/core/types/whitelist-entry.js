@@ -2,5 +2,5 @@
 
 export type WhitelistEntry = {
   email: string,
-  services: [{ name: string, access: "full" | Array<string> }]
+  services: [{ id: string, access: "full" | Array<string> }]
 }

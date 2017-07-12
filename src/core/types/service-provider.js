@@ -2,11 +2,13 @@
 import type { UserAccount } from './user-account'
 
 export interface ServiceProvider {
-  serviceName: string;
+
   listAccounts (): Promise<Array<UserAccount>>;
 }
 
 export type ServiceProviderModule = {
+  id: string,
+  displayName: string,
   configKeys: Array<string>,
   providerFactory: Object => ServiceProvider
 }

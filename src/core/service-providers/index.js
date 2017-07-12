@@ -1,42 +1,43 @@
 // @flow
 
-// Ensure every module is imported here and included in the `modules` hash below
+// Ensure every module is imported here
 import { dummyProviderModule } from './dummy'
 import { configStore } from './../data/config-store'
 import type { UserServiceSummary, ServiceProvider } from './../types'
 
-const modules = {
-  'dummy': dummyProviderModule
-}
+// Ensure every module is included in this array
+const modules = [
+  dummyProviderModule
+]
 
-export function getConfigKeys (serviceName: string): ?Array<string> {
-  const module = modules[serviceName]
-  if (module) {
-    return module.configKeys
-  }
-}
+const moduleLookup = modules.reduce((hash, module) => {
+  hash[module.id] = module
+  return hash
+}, {})
 
-export function getAllConfiguredProviders (): Array<ServiceProvider> {
-  return Object.keys(modules).reduce((serviceProviders, serviceName) => {
-    const provider = getProvider(serviceName)
-    if (provider) {
-      serviceProviders.push(provider)
-    }
-    return serviceProviders
-  }, [])
-}
-
-export function getProvider (serviceName: string): ?ServiceProvider {
-  const config = configStore.get(serviceName)
+function getProvider (serviceId: string): ?ServiceProvider {
+  const config = configStore.get(serviceId)
   if (config) {
-    return modules[serviceName].providerFactory(config)
+    return moduleLookup[serviceId].providerFactory(config)
   }
 }
 
-export async function download (serviceProviders: Array<ServiceProvider>) : Promise<Array<UserServiceSummary>> {
-  const promises = serviceProviders.map(async (provider) => {
-    const accounts = await provider.listAccounts()
-    return { serviceName: provider.serviceName, accounts: accounts }
+export async function download (serviceId: 'all' | string) : Promise<Array<UserServiceSummary>> {
+  const serviceIds = serviceId === 'all' ? Object.keys(moduleLookup) : [serviceId]
+
+  const services: Array<{ serviceId: string, provider: ServiceProvider }> = serviceIds.reduce((providers, id) => {
+    const provider = getProvider(id)
+    if (provider) {
+      providers.push({ serviceId: id, provider: provider })
+    }
+    return providers
+  }, [])
+
+  const promises = services.map(async (service) => {
+    const accounts = await service.provider.listAccounts()
+    return {
+      serviceId: service.serviceId,
+      accounts: accounts }
   })
 
   const serviceAccountLists = await Promise.all(promises)
@@ -44,11 +45,26 @@ export async function download (serviceProviders: Array<ServiceProvider>) : Prom
   const userSummaryLookup = serviceAccountLists.reduce((userSummaryLookup, serviceAccountList) => {
     serviceAccountList.accounts.forEach((account) => {
       let userServiceSummary = userSummaryLookup[account.email] || { email: account.email, services: [] }
-      userServiceSummary.services.push({ name: serviceAccountList.serviceName, assets: account.assets })
+      userServiceSummary.services.push({
+        id: serviceAccountList.serviceId,
+        displayName: moduleLookup[serviceAccountList.serviceId].displayName,
+        assets: account.assets })
       userSummaryLookup[account.email] = userServiceSummary
     })
     return userSummaryLookup
   }, {})
 
   return Object.keys(userSummaryLookup).map((key) => userSummaryLookup[key])
+}
+
+export function getConfigKeys (serviceId: string): ?Array<string> {
+  const module = moduleLookup[serviceId]
+  if (module) {
+    return module.configKeys
+  }
+}
+
+export function isConfigured (serviceId: string): boolean {
+  const config = configStore.get(serviceId)
+  return !!config
 }

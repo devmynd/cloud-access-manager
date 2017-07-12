@@ -15,14 +15,14 @@ function readConfig () {
 }
 
 export const configStore = {
-  save: (moduleName: string, config: any) => {
+  save: (serviceId: string, config: any) => {
     const data = readConfig()
-    data[moduleName] = config
+    data[serviceId] = config
     fs.writeFileSync(filePath, JSON.stringify(data))
   },
 
-  get: (moduleName: string) => {
+  get: (serviceId: string) => {
     const data = readConfig()
-    return data[moduleName]
+    return data[serviceId]
   }
 }

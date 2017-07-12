@@ -2,5 +2,5 @@
 
 export type UserServiceSummary = {
   email: string,
-  services: Array<{ name: string, assets: Array<string> }>
+  services: Array<{ id: string, displayName: string, assets: Array<string> }>
 }

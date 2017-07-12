@@ -5,7 +5,7 @@ import lodash from 'lodash'
 export function performAudit (userServiceSummaries: Array<UserServiceSummary>, whitelist: Array<WhitelistEntry>): Array<UserServiceSummary> {
   const whitelistLookup = whitelist.reduce((userHash, entry) => {
     userHash[entry.email] = entry.services.reduce((serviceHash, service) => {
-      serviceHash[service.name] = service.access
+      serviceHash[service.id] = service.access
       return serviceHash
     }, {})
     return userHash
@@ -22,7 +22,7 @@ export function performAudit (userServiceSummaries: Array<UserServiceSummary>, w
       for (let i = summary.services.length - 1; i >= 0; i--) {
         let service = summary.services[i]
 
-        const whitelistServiceEntry = whitelistEntry[service.name]
+        const whitelistServiceEntry = whitelistEntry[service.id]
 
         // not whitelisted
         if (!whitelistServiceEntry) {

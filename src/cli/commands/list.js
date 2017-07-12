@@ -8,7 +8,7 @@ function print (summaries, displayServices: bool = true) {
     term.green(`${summary.email}`)
     summary.services.forEach((service) => {
       if (displayServices) {
-        term.cyan(`\n\t${service.name}`)
+        term.cyan(`\n\t${service.displayName}`)
       }
       if (service.assets.length > 0) {
         term.magenta('\n\t\t')
@@ -20,18 +20,16 @@ function print (summaries, displayServices: bool = true) {
 }
 
 export async function listAll () {
-  const configuredProviders = serviceProvidersModule.getAllConfiguredProviders()
-
-  const summaries = await serviceProvidersModule.download(configuredProviders)
+  const summaries = await serviceProvidersModule.download('all')
   print(summaries)
 }
 
-export async function listByService (serviceName: string) {
-  const provider = serviceProvidersModule.getProvider(serviceName)
-  if (!provider) {
-    throw new Error(`You have not configured ${serviceName}.`)
+export async function listByService (serviceId: string) {
+  if (!serviceProvidersModule.isConfigured(serviceId)) {
+    term.red(`Service '${serviceId}' is not configured. Run 'cam config ${serviceId}'\n`)
+    return
   }
 
-  const summaries = await serviceProvidersModule.download([provider])
+  const summaries = await serviceProvidersModule.download(serviceId)
   print(summaries, false)
 }

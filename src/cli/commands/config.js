@@ -2,11 +2,13 @@
 import { getConfigKeys } from './../../core/service-providers'
 import { configStore } from './../../core/data/config-store'
 import inquirer from 'inquirer'
+import { terminal as term } from 'terminal-kit'
 
-export function config (serviceName: string) {
-  const configKeys = getConfigKeys(serviceName)
+export function config (serviceId: string) {
+  const configKeys = getConfigKeys(serviceId)
   if (!configKeys) {
-    throw new Error(`undefined module ${serviceName}`)
+    term.red(`undefined module ${serviceId}\n`)
+    return
   }
 
   const questions = configKeys.map((key) => ({
@@ -16,6 +18,6 @@ export function config (serviceName: string) {
   }))
 
   inquirer.prompt(questions).then(function (values) {
-    configStore.save(serviceName, values)
+    configStore.save(serviceId, values)
   })
 }
