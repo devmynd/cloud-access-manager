@@ -5,7 +5,9 @@ process.env.WHITELIST_PATH = './.whitelist.test.json'
 
 describe('integration test', () => {
   test('inserts, updates, and reads', () => {
-    fs.unlinkSync(process.env.WHITELIST_PATH)
+    if (fs.existsSync(process.env.WHITELIST_PATH)) {
+      fs.unlinkSync(process.env.WHITELIST_PATH)
+    }
 
     let entry1 = {
       email: 'test-1@test.com',
