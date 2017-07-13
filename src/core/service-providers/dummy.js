@@ -1,16 +1,13 @@
 // @flow
 import type { ServiceProvider, ServiceProviderModule } from '../types'
 
-let configKeys = ['dummyApiToken']
-type DummyConfig = {
-  dummyApiToken: string
-}
+let configKeys = ['Dummy Api Token']
 
 class DummyProvider implements ServiceProvider {
-  config: DummyConfig
+  apiToken: string
 
-  constructor (config: DummyConfig) {
-    this.config = config
+  constructor (config: { 'Dummy Api Token': string }) {
+    this.apiToken = config['Dummy Api Token']
   }
 
   listAccounts () {
@@ -36,15 +33,6 @@ class DummyProvider implements ServiceProvider {
 export const dummyProviderModule: ServiceProviderModule = {
   id: 'dummy',
   displayName: 'Dummy Service',
-  configKeys: configKeys,
-  providerFactory (config) {
-    return new DummyProvider(config)
-  }
-}
-
-export const dummyProviderModule2: ServiceProviderModule = {
-  id: 'dummy2',
-  displayName: 'Dummy Service 2',
   configKeys: configKeys,
   providerFactory (config) {
     return new DummyProvider(config)
