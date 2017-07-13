@@ -16,34 +16,22 @@ export function performAudit (userServiceSummaries: Array<UserServiceSummary>, u
       flaggedSummaries.push(summary)
     } else {
       // todo: refactor to another reduce
-
-      // loop through the summary's services and strip out any services that are whitelisted
-      for (let i = summary.services.length - 1; i >= 0; i--) {
-        let service = summary.services[i]
-
+      summary.services = summary.services.reduce((flaggedServices, service) => {
         const accessRule = user.accessRules[service.id]
-        // not whitelisted
+
         if (!accessRule) {
-          continue
+          flaggedServices.push(service)
+        } else if (accessRule !== 'full') {
+          // Strip out any assets that are whitelisted
+          service.assets = lodash.difference(service.assets, accessRule)
+          if (service.assets.length > 0) {
+            flaggedServices.push(service)
+          }
         }
 
-        // whitelisted full access
-        if (accessRule === 'full') {
-          summary.services.splice(i, 1)
-          continue
-        }
+        return flaggedServices
+      }, [])
 
-        // whitelisted for specific assets
-        // loop through the service's assets, and strip out any assets that are whitelisted
-        service.assets = lodash.difference(service.assets, accessRule)
-
-        // if we stripped out all assets, we have acess to all assets, so strip out the service
-        if (service.assets.length === 0) {
-          summary.services.splice(i, 1)
-        }
-      }
-
-      // if the summary has not been stripped empty, then add it to the list of flagged summaries
       if (summary.services.length > 0) {
         flaggedSummaries.push(summary)
       }
