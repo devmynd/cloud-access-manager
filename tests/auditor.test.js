@@ -23,8 +23,8 @@ describe('performAudit', () => {
     const users = [{
       email: 'user@email.com',
       accessRules: {
-        'test-service': { access: 'full' },
-        'another-test-service': { access: 'full' }
+        'test-service': 'full',
+        'another-test-service': 'full'
       }
     }]
     const results = auditor.performAudit(userServiceSummaries, users)
@@ -36,8 +36,8 @@ describe('performAudit', () => {
     const users = [{
       email: 'user@email.com',
       accessRules: {
-        'test-service': { access: ['Project A', 'Project B'] },
-        'another-test-service': { access: ['Repo A', 'Repo B'] }
+        'test-service': ['Project A', 'Project B'],
+        'another-test-service': ['Repo A', 'Repo B']
       }
     }]
     const results = auditor.performAudit(userServiceSummaries, users)
@@ -49,8 +49,8 @@ describe('performAudit', () => {
     const users = [{
       email: 'user@email.com',
       accessRules: {
-        'test-service': { access: 'full' },
-        'another-test-service': { access: ['Repo A'] }
+        'test-service': 'full',
+        'another-test-service': ['Repo A']
       }
     }]
     const results = auditor.performAudit(userServiceSummaries, users)
@@ -71,7 +71,7 @@ describe('performAudit', () => {
     const users = [{
       email: 'user@email.com',
       accessRules: {
-        'test-service': { access: 'full' }
+        'test-service': 'full'
       }
     }]
     const results = auditor.performAudit(userServiceSummaries, users)

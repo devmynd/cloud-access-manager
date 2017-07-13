@@ -95,9 +95,9 @@ async function selectNewServices (services: Array<ServiceSummary>): Promise<Serv
 
     if (!fullAccess) {
       let selectedAssets = await selectNewAssets(service)
-      accessRule = { access: selectedAssets }
+      accessRule = selectedAssets
     } else {
-      accessRule = { access: 'full' }
+      accessRule = 'full'
     }
     serviceAccess[service.id] = accessRule
   }
@@ -111,8 +111,8 @@ async function updateExistingServices (services: Array<ServiceSummary>, user: Us
     const service = services[i]
     let selectedAssets = await selectNewAssets(service)
     const accessRule = user.accessRules[service.id]
-    if (accessRule && typeof accessRule.access !== 'string') {
-      accessRule.access = accessRule.access.concat(selectedAssets)
+    if (accessRule && typeof accessRule !== 'string') {
+      user.accessRules[service.id] = accessRule.concat(selectedAssets)
     } else {
       throw new Error('unexpectedly did not find service access rule in the existing user record or found unexpected \'full\' access')
     }

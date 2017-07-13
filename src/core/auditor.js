@@ -21,21 +21,21 @@ export function performAudit (userServiceSummaries: Array<UserServiceSummary>, u
       for (let i = summary.services.length - 1; i >= 0; i--) {
         let service = summary.services[i]
 
-        const accessRules = user.accessRules[service.id]
+        const accessRule = user.accessRules[service.id]
         // not whitelisted
-        if (!accessRules) {
+        if (!accessRule) {
           continue
         }
 
         // whitelisted full access
-        if (accessRules.access === 'full') {
+        if (accessRule === 'full') {
           summary.services.splice(i, 1)
           continue
         }
 
         // whitelisted for specific assets
         // loop through the service's assets, and strip out any assets that are whitelisted
-        service.assets = lodash.difference(service.assets, accessRules.access)
+        service.assets = lodash.difference(service.assets, accessRule)
 
         // if we stripped out all assets, we have acess to all assets, so strip out the service
         if (service.assets.length === 0) {
