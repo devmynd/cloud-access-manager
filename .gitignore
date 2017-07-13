@@ -62,6 +62,6 @@ lib/
 
 # Persistence of service config settings
 .services.json
-.whitelist.json
+.users.json
 .services.test.json
-.whitelist.test.json
+.users.test.json

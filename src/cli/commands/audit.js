@@ -3,16 +3,16 @@ import { manager } from './../../core/service-providers/manager'
 import { terminal as term } from 'terminal-kit'
 import * as auditor from './../../core/auditor'
 import * as helpers from '../helpers'
-import { whitelistStore } from '../../core/data/whitelist-store'
+import { userStore } from '../../core/data/user-store'
 import inquirer from 'inquirer'
-import type { UserServiceSummary, ServiceSummary, WhitelistEntry, ServiceAccess } from '../../core/types'
+import type { UserServiceSummary, ServiceSummary, User, AccessRule, ServiceAccessHash } from '../../core/types'
 import lodash from 'lodash'
 
 export async function audit () {
   const summaries = await manager.download('all')
-  const whitelist = whitelistStore.getAll()
+  const users = userStore.getAll()
 
-  const flaggedSummaries = auditor.performAudit(summaries, whitelist)
+  const flaggedSummaries = auditor.performAudit(summaries, users)
   if (flaggedSummaries.length > 0) {
     term.red('The following users have been flagged:\n\n')
     helpers.printSummaries(flaggedSummaries)
@@ -23,42 +23,40 @@ export async function audit () {
 
 export async function interactiveAudit () {
   const summaries = await manager.download('all')
-  const whitelist = whitelistStore.getAll()
+  const users = userStore.getAll()
 
-  const flaggedSummaries = auditor.performAudit(summaries, whitelist)
+  const flaggedSummaries = auditor.performAudit(summaries, users)
 
   for (let i = 0; i < flaggedSummaries.length; i++) {
     const summary = flaggedSummaries[i]
-    const whitelistEntry = lodash.find(whitelist, (entry) => entry.email === summary.email)
-    await auditForUser(summary, whitelistEntry)
+    const user = lodash.find(users, (entry) => entry.email === summary.email)
+    await auditForUser(summary, user)
     term('\n')
   }
 
   audit()
 }
 
-async function auditForUser (summary: UserServiceSummary, existingWhitelistEntry: ?WhitelistEntry): Promise<void> {
+async function auditForUser (summary: UserServiceSummary, existingUser: ?User): Promise<void> {
   term.cyan.bold(`${summary.email}\n`)
 
-  let whitelistEntry = existingWhitelistEntry || { email: summary.email, services: [] }
+  let user: User = existingUser || { email: summary.email, accessRules: {} }
 
-  const whitelistedPartition = lodash.partition(summary.services, (service) => {
-    return !!lodash.find(whitelistEntry.services, (s) => s.id === service.id)
-  })
+  const whitelistedPartition = lodash.partition(summary.services, (service) => user.accessRules.hasOwnProperty(service.id))
   const existingWhitelistedServices = whitelistedPartition[0]
   const newServices = whitelistedPartition[1]
 
   if (newServices.length > 0) {
     const selectedServices = await selectNewServices(newServices)
-    whitelistEntry.services = whitelistEntry.services.concat(selectedServices)
+    user.accessRules = Object.assign(user.accessRules, selectedServices)
   }
 
-  await updateExistingServices(existingWhitelistedServices, whitelistEntry)
+  await updateExistingServices(existingWhitelistedServices, user)
 
-  whitelistStore.save(whitelistEntry)
+  userStore.save(user)
 }
 
-async function selectNewServices (services: Array<ServiceSummary>): Promise<Array<ServiceAccess>> {
+async function selectNewServices (services: Array<ServiceSummary>): Promise<ServiceAccessHash> {
   const question = {
     type: 'checkbox',
     name: 'selectedServices',
@@ -74,12 +72,12 @@ async function selectNewServices (services: Array<ServiceSummary>): Promise<Arra
   }
 
   const selectedServices = (await inquirer.prompt([question])).selectedServices
-  const newWhitelistedServices: Array<ServiceAccess> = []
+  const serviceAccess: ServiceAccessHash = {}
 
-  // loop through new whitelisted services and get full or partial access and if partial, ask for assets
+  // loop through new selected services and get full or partial access and if partial, ask for assets
   for (let i = 0; i < selectedServices.length; i++) {
     const service = selectedServices[i]
-    let accessEntry: ServiceAccess
+    let accessRule: AccessRule
     const question = {
       type: 'list',
       name: 'fullAccess',
@@ -97,26 +95,26 @@ async function selectNewServices (services: Array<ServiceSummary>): Promise<Arra
 
     if (!fullAccess) {
       let selectedAssets = await selectNewAssets(service)
-      accessEntry = { id: service.id, access: selectedAssets }
+      accessRule = { access: selectedAssets }
     } else {
-      accessEntry = { id: service.id, access: 'full' }
+      accessRule = { access: 'full' }
     }
-    newWhitelistedServices.push(accessEntry)
+    serviceAccess[service.id] = accessRule
   }
 
-  return newWhitelistedServices
+  return serviceAccess
 }
 
-async function updateExistingServices (services: Array<ServiceSummary>, entry: WhitelistEntry) {
+async function updateExistingServices (services: Array<ServiceSummary>, user: User) {
   // loop thorugh all existing whitelisted services and ask about assets
   for (let i = 0; i < services.length; i++) {
     const service = services[i]
     let selectedAssets = await selectNewAssets(service)
-    const accessEntry = entry.services.find((serviceAccess) => serviceAccess.id === service.id)
-    if (accessEntry && typeof accessEntry.access !== 'string') {
-      accessEntry.access = accessEntry.access.concat(selectedAssets)
+    const accessRule = user.accessRules[service.id]
+    if (accessRule && typeof accessRule.access !== 'string') {
+      accessRule.access = accessRule.access.concat(selectedAssets)
     } else {
-      throw new Error('unexpectedly did not find service in the existing whitelist entry or found service with unexpected \'full\' access')
+      throw new Error('unexpectedly did not find service access rule in the existing user record or found unexpected \'full\' access')
     }
   }
 }

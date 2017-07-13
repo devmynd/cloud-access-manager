@@ -1,15 +1,15 @@
 // @flow
 import type { ServiceProvider, ServiceProviderModule } from '../types'
 
-let configKeys = ['Api Key', 'Api Secret']
+let configKeys = ['Dummy Api Key', 'Dummy Api Secret']
 
 class DummyProvider implements ServiceProvider {
   apiKey: string
   apiSecret: string
 
-  constructor (config: { 'Api Key': string, 'Api Secret': string }) {
-    this.apiKey = config['Api Key']
-    this.apiSecret = config['Api Secret']
+  constructor (config: { 'Dummy Api Key': string, 'Dummy Api Secret': string }) {
+    this.apiKey = config['Dummy Api Key']
+    this.apiSecret = config['Dummy Api Secret']
   }
 
   listAccounts () {

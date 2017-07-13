@@ -1,12 +1,12 @@
 /* eslint-env jest */
-import { whitelistStore as store } from '../lib/core/data/whitelist-store'
+import { userStore as store } from '../lib/core/data/user-store'
 import fs from 'file-system'
-process.env.WHITELIST_PATH = './.whitelist.test.json'
+process.env.USERS_PATH = './.users.test.json'
 
 describe('integration test', () => {
   test('inserts, updates, and reads', () => {
-    if (fs.existsSync(process.env.WHITELIST_PATH)) {
-      fs.unlinkSync(process.env.WHITELIST_PATH)
+    if (fs.existsSync(process.env.USERS_PATH)) {
+      fs.unlinkSync(process.env.USERS_PATH)
     }
 
     let entry1 = {

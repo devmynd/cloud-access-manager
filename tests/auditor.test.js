@@ -20,49 +20,40 @@ describe('performAudit', () => {
   })
 
   test('it does not flag the user when they have full access to both services', () => {
-    const whitelistEntries = [{
+    const users = [{
       email: 'user@email.com',
-      services: [{
-        id: 'test-service',
-        access: 'full'
-      }, {
-        id: 'another-test-service',
-        access: 'full'
-      }]
+      accessRules: {
+        'test-service': { access: 'full' },
+        'another-test-service': { access: 'full' }
+      }
     }]
-    const results = auditor.performAudit(userServiceSummaries, whitelistEntries)
+    const results = auditor.performAudit(userServiceSummaries, users)
 
     expect(results.length).toBe(0)
   })
 
   test('it does not flag the user when they are whitelisted for each asset in each service', () => {
-    const whitelistEntries = [{
+    const users = [{
       email: 'user@email.com',
-      services: [{
-        id: 'test-service',
-        access: ['Project A', 'Project B']
-      }, {
-        id: 'another-test-service',
-        access: ['Repo A', 'Repo B']
-      }]
+      accessRules: {
+        'test-service': { access: ['Project A', 'Project B'] },
+        'another-test-service': { access: ['Repo A', 'Repo B'] }
+      }
     }]
-    const results = auditor.performAudit(userServiceSummaries, whitelistEntries)
+    const results = auditor.performAudit(userServiceSummaries, users)
 
     expect(results.length).toBe(0)
   })
 
   test('flags the user if there is an asset they are not whitelisted for', () => {
-    const whitelistEntries = [{
+    const users = [{
       email: 'user@email.com',
-      services: [{
-        id: 'test-service',
-        access: 'full'
-      }, {
-        id: 'another-test-service',
-        access: ['Repo A']
-      }]
+      accessRules: {
+        'test-service': { access: 'full' },
+        'another-test-service': { access: ['Repo A'] }
+      }
     }]
-    const results = auditor.performAudit(userServiceSummaries, whitelistEntries)
+    const results = auditor.performAudit(userServiceSummaries, users)
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
@@ -77,14 +68,13 @@ describe('performAudit', () => {
   })
 
   test("flags the user when they aren't whitelisted for one of the services", () => {
-    const whitelistEntries = [{
+    const users = [{
       email: 'user@email.com',
-      services: [{
-        id: 'test-service',
-        access: 'full'
-      }]
+      accessRules: {
+        'test-service': { access: 'full' }
+      }
     }]
-    const results = auditor.performAudit(userServiceSummaries, whitelistEntries)
+    const results = auditor.performAudit(userServiceSummaries, users)
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
@@ -99,8 +89,8 @@ describe('performAudit', () => {
   })
 
   test("flags the user when they aren't whitelisted at all", () => {
-    const whitelistEntries = []
-    const results = auditor.performAudit(userServiceSummaries, whitelistEntries)
+    const users = []
+    const results = auditor.performAudit(userServiceSummaries, users)
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
