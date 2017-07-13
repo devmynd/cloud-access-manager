@@ -1,5 +1,5 @@
 // @flow
-import * as serviceProvidersModule from './../../core/service-providers'
+import { manager } from './../../core/service-providers/manager'
 import { terminal as term } from 'terminal-kit'
 import * as auditor from './../../core/auditor'
 import * as helpers from '../helpers'
@@ -9,7 +9,7 @@ import type { UserServiceSummary, ServiceSummary, WhitelistEntry, ServiceAccess 
 import lodash from 'lodash'
 
 export async function audit () {
-  const summaries = await serviceProvidersModule.download('all')
+  const summaries = await manager.download('all')
   const whitelist = whitelistStore.getAll()
 
   const flaggedSummaries = auditor.performAudit(summaries, whitelist)
@@ -22,7 +22,7 @@ export async function audit () {
 }
 
 export async function interactiveAudit () {
-  const summaries = await serviceProvidersModule.download('all')
+  const summaries = await manager.download('all')
   const whitelist = whitelistStore.getAll()
 
   const flaggedSummaries = auditor.performAudit(summaries, whitelist)

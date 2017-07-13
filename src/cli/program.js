@@ -4,9 +4,15 @@ import program from 'commander'
 import * as commands from './commands'
 
 program
-  .command('config <service>')
+  .command('config [service]')
   .description('configures a service provider with the required api keys')
-  .action(commands.config)
+  .action((service) => {
+    if (service) {
+      commands.configureService(service)
+    } else {
+      commands.listAllConfigs()
+    }
+  })
 
 program
   .command('list [service]')
