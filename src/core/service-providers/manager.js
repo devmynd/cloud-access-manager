@@ -16,7 +16,7 @@ function getProvider (serviceId: string): ?ServiceProvider {
 }
 
 export const manager = {
-  download: async (serviceId: 'all' | string) => {
+  async download (serviceId: 'all' | string) {
     const serviceIds = serviceId === 'all' ? Object.keys(moduleLookup) : [serviceId]
 
     const services: Array<{ serviceId: string, provider: ServiceProvider }> = serviceIds.reduce((providers, id) => {
@@ -51,19 +51,23 @@ export const manager = {
     return Object.keys(userSummaryLookup).map((key) => userSummaryLookup[key])
   },
 
-  getConfigKeys: (serviceId: string) => {
+  getConfigKeys (serviceId: string) {
     const module = moduleLookup[serviceId]
     if (module) {
       return module.configKeys
     }
   },
 
-  isConfigured: (serviceId: string) => {
+  isConfigured (serviceId: string) {
     const config = configStore.get(serviceId)
     return !!config
   },
 
-  listServiceIds: () => {
+  listServiceIds () {
     return Object.keys(moduleLookup)
+  },
+
+  getDisplayName (serviceId: string) {
+    return moduleLookup[serviceId].displayName
   }
 }

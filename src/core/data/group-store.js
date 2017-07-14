@@ -16,7 +16,7 @@ export const groupStore = {
 
   get (groupName: string): Group {
     const data = helpers.readData(process.env.GROUPS_PATH, defaultData)
-    return { name: groupName, accessRules: data[groupName] }
+    return { name: groupName, accessRules: data[groupName] || {} }
   },
 
   getAll (): Array<Group> {
@@ -24,5 +24,11 @@ export const groupStore = {
     return Object.keys(data).map((groupName) => {
       return { name: groupName, accessRules: data[groupName] }
     })
+  },
+
+  deleteGroup (groupName: string) {
+    const data = helpers.readData(process.env.GROUPS_PATH, defaultData)
+    delete data[groupName]
+    fs.writeFileSync(process.env.GROUPS_PATH, JSON.stringify(data))
   }
 }
