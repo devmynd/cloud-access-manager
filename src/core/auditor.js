@@ -1,22 +1,22 @@
 // @flow
-import type { UserServiceSummary, User } from './types'
+import type { UserAccountAggregate, User } from './types'
 import lodash from 'lodash'
 
-export function performAudit (userServiceSummaries: Array<UserServiceSummary>, users: Array<User>): Array<UserServiceSummary> {
+export function performAudit (accounts: Array<UserAccountAggregate>, users: Array<User>): Array<UserAccountAggregate> {
   const userLookup = users.reduce((userHash, user) => {
     userHash[user.email] = user
     return userHash
   }, {})
 
-  return userServiceSummaries.reduce((flaggedSummaries, summary) => {
-    const user = userLookup[summary.email]
+  return accounts.reduce((flaggedAccounts, account) => {
+    const user = userLookup[account.email]
 
     if (!user) {
-      // flag the whole summary
-      flaggedSummaries.push(summary)
+      // flag the whole account
+      flaggedAccounts.push(account)
     } else {
       // todo: refactor to another reduce
-      summary.services = summary.services.reduce((flaggedServices, service) => {
+      account.services = account.services.reduce((flaggedServices, service) => {
         const accessRule = user.accessRules[service.id]
 
         if (!accessRule) {
@@ -32,11 +32,11 @@ export function performAudit (userServiceSummaries: Array<UserServiceSummary>, u
         return flaggedServices
       }, [])
 
-      if (summary.services.length > 0) {
-        flaggedSummaries.push(summary)
+      if (account.services.length > 0) {
+        flaggedAccounts.push(account)
       }
     }
 
-    return flaggedSummaries
+    return flaggedAccounts
   }, [])
 }

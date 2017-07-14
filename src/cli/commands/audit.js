@@ -5,44 +5,44 @@ import * as auditor from './../../core/auditor'
 import * as helpers from '../helpers'
 import { userStore } from '../../core/data/user-store'
 import inquirer from 'inquirer'
-import type { UserServiceSummary, ServiceSummary, User, AccessRule, ServiceAccessHash } from '../../core/types'
+import type { UserAccountAggregate, UserAccountServiceInfo, User, AccessRule, ServiceAccessHash } from '../../core/types'
 import lodash from 'lodash'
 
 export async function audit () {
-  const summaries = await manager.download('all')
+  const accounts = await manager.download('all')
   const users = userStore.getAll()
 
-  const flaggedSummaries = auditor.performAudit(summaries, users)
-  if (flaggedSummaries.length > 0) {
+  const flaggedAccounts = auditor.performAudit(accounts, users)
+  if (flaggedAccounts.length > 0) {
     term.red('The following users have been flagged:\n\n')
-    helpers.printSummaries(flaggedSummaries)
+    helpers.printSummaries(flaggedAccounts)
   } else {
     term.green('No suspicious accounts found. Take a break. Have a 🍺\n\n')
   }
 }
 
 export async function interactiveAudit () {
-  const summaries = await manager.download('all')
+  const accounts = await manager.download('all')
   const users = userStore.getAll()
 
-  const flaggedSummaries = auditor.performAudit(summaries, users)
+  const flaggedAccounts = auditor.performAudit(accounts, users)
 
-  for (let i = 0; i < flaggedSummaries.length; i++) {
-    const summary = flaggedSummaries[i]
-    const user = lodash.find(users, (entry) => entry.email === summary.email)
-    await auditForUser(summary, user)
+  for (let i = 0; i < flaggedAccounts.length; i++) {
+    const account = flaggedAccounts[i]
+    const user = lodash.find(users, (entry) => entry.email === account.email)
+    await auditForUser(account, user)
     term('\n')
   }
 
   audit()
 }
 
-async function auditForUser (summary: UserServiceSummary, existingUser: ?User): Promise<void> {
-  term.cyan.bold(`${summary.email}\n`)
+async function auditForUser (account: UserAccountAggregate, existingUser: ?User): Promise<void> {
+  term.cyan.bold(`${account.email}\n`)
 
-  let user: User = existingUser || { email: summary.email, accessRules: {} }
+  let user: User = existingUser || { email: account.email, accessRules: {} }
 
-  const whitelistedPartition = lodash.partition(summary.services, (service) => user.accessRules.hasOwnProperty(service.id))
+  const whitelistedPartition = lodash.partition(account.services, (service) => user.accessRules.hasOwnProperty(service.id))
   const existingWhitelistedServices = whitelistedPartition[0]
   const newServices = whitelistedPartition[1]
 
@@ -56,7 +56,7 @@ async function auditForUser (summary: UserServiceSummary, existingUser: ?User): 
   userStore.save(user)
 }
 
-async function selectNewServices (services: Array<ServiceSummary>): Promise<ServiceAccessHash> {
+async function selectNewServices (services: Array<UserAccountServiceInfo>): Promise<ServiceAccessHash> {
   const question = {
     type: 'checkbox',
     name: 'selectedServices',
@@ -105,7 +105,7 @@ async function selectNewServices (services: Array<ServiceSummary>): Promise<Serv
   return serviceAccess
 }
 
-async function updateExistingServices (services: Array<ServiceSummary>, user: User) {
+async function updateExistingServices (services: Array<UserAccountServiceInfo>, user: User) {
   // loop thorugh all existing whitelisted services and ask about assets
   for (let i = 0; i < services.length; i++) {
     const service = services[i]
@@ -119,7 +119,7 @@ async function updateExistingServices (services: Array<ServiceSummary>, user: Us
   }
 }
 
-async function selectNewAssets (service: ServiceSummary): Promise<Array<string>> {
+async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<string>> {
   const question = {
     type: 'checkbox',
     name: 'selectedAssets',
