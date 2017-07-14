@@ -3,5 +3,6 @@ import type { ServiceAccessHash } from './'
 
 export type User = {
   email: string,
-  accessRules: ServiceAccessHash
+  accessRules: ServiceAccessHash,
+  groups: Array<string>
 }

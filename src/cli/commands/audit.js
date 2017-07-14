@@ -9,11 +9,7 @@ import inquirer from 'inquirer'
 import type { UserAccountAggregate, UserAccountServiceInfo, User, AccessRule, ServiceAccessHash } from '../../core/types'
 import lodash from 'lodash'
 
-export async function audit () {
-  const accounts = await manager.download('all')
-  const users = userStore.getAll()
-
-  const flaggedAccounts = auditor.performAudit(accounts, users)
+function printFlaggedAccounts (flaggedAccounts: Array<UserAccountAggregate>) {
   if (flaggedAccounts.length > 0) {
     term.red('The following users have been flagged:\n\n')
     helpers.printSummaries(flaggedAccounts)
@@ -22,10 +18,20 @@ export async function audit () {
   }
 }
 
+export async function audit () {
+  const accounts = await manager.download('all')
+  const groups = groupStore.getAll()
+  const users = userStore.getAll()
+
+  const flaggedAccounts = auditor.performAudit(accounts, users, groups)
+  printFlaggedAccounts(flaggedAccounts)
+}
+
 export async function interactiveAudit () {
   const accounts = await manager.download('all')
+  const groups = groupStore.getAll()
   let users = userStore.getAll()
-  let flaggedAccounts = auditor.performAudit(accounts, users)
+  let flaggedAccounts = auditor.performAudit(accounts, users, groups)
 
   const newUserEmails = flaggedAccounts
     .filter((account) => !lodash.find(users, (user) => user.email === account.email))
@@ -40,7 +46,7 @@ export async function interactiveAudit () {
     }
 
     // Perform another audit to refresh after having selected group membership
-    flaggedAccounts = auditor.performAudit(accounts, users)
+    flaggedAccounts = auditor.performAudit(accounts, users, groups)
     users = userStore.getAll()
   }
 
@@ -51,13 +57,12 @@ export async function interactiveAudit () {
     term('\n')
   }
 
-  audit()
+  flaggedAccounts = auditor.performAudit(accounts, users, groups)
+  printFlaggedAccounts(flaggedAccounts)
 }
 
-async function auditForUser (account: UserAccountAggregate, existingUser: ?User): Promise<void> {
+async function auditForUser (account: UserAccountAggregate, user: User): Promise<void> {
   term.cyan.bold(`${account.email}\n`)
-
-  let user: User = existingUser || { email: account.email, accessRules: {} }
 
   const whitelistedPartition = lodash.partition(account.services, (service) => user.accessRules.hasOwnProperty(service.id))
   const existingWhitelistedServices = whitelistedPartition[0]
@@ -152,7 +157,7 @@ async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<
   return selectedAssets
 }
 
-async function selectGroupsForEmail(email: string, groupNames: Array<string>): Promise<Array<string>> {
+async function selectGroupsForEmail (email: string, groupNames: Array<string>): Promise<Array<string>> {
   const question = {
     type: 'checkbox',
     name: 'selectedGroups',

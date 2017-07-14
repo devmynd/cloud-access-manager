@@ -27,7 +27,7 @@ describe('performAudit', () => {
         'another-test-service': 'full'
       }
     }]
-    const results = auditor.performAudit(userServiceSummaries, users)
+    const results = auditor.performAudit(userServiceSummaries, users, [])
 
     expect(results.length).toBe(0)
   })
@@ -40,7 +40,7 @@ describe('performAudit', () => {
         'another-test-service': ['Repo A', 'Repo B']
       }
     }]
-    const results = auditor.performAudit(userServiceSummaries, users)
+    const results = auditor.performAudit(userServiceSummaries, users, [])
 
     expect(results.length).toBe(0)
   })
@@ -53,7 +53,7 @@ describe('performAudit', () => {
         'another-test-service': ['Repo A']
       }
     }]
-    const results = auditor.performAudit(userServiceSummaries, users)
+    const results = auditor.performAudit(userServiceSummaries, users, [])
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
@@ -74,7 +74,7 @@ describe('performAudit', () => {
         'test-service': 'full'
       }
     }]
-    const results = auditor.performAudit(userServiceSummaries, users)
+    const results = auditor.performAudit(userServiceSummaries, users, [])
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
@@ -89,8 +89,11 @@ describe('performAudit', () => {
   })
 
   test("flags the user when they aren't whitelisted at all", () => {
-    const users = []
-    const results = auditor.performAudit(userServiceSummaries, users)
+    const users = [{
+      email: 'user@email.com',
+      accessRules: { }
+    }]
+    const results = auditor.performAudit(userServiceSummaries, users, [])
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
@@ -106,5 +109,23 @@ describe('performAudit', () => {
         }
       ]
     })
+  })
+
+  test('does not flag the user if one of their groups grants them access', () => {
+    const users = [{
+      email: 'user@email.com',
+      groups: ['employee', 'admin'],
+      accessRules: { }
+    }]
+    const groups = [{
+      name: 'employee',
+      accessRules: { 'test-service': 'full' }
+    }, {
+      name: 'admin',
+      accessRules: { 'another-test-service': 'full' }
+    }]
+    const results = auditor.performAudit(userServiceSummaries, users, groups)
+
+    expect(results.length).toBe(0)
   })
 })
