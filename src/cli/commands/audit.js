@@ -4,6 +4,7 @@ import { terminal as term } from 'terminal-kit'
 import * as auditor from './../../core/auditor'
 import * as helpers from '../helpers'
 import { userStore } from '../../core/data/user-store'
+import { groupStore } from '../../core/data/group-store'
 import inquirer from 'inquirer'
 import type { UserAccountAggregate, UserAccountServiceInfo, User, AccessRule, ServiceAccessHash } from '../../core/types'
 import lodash from 'lodash'
@@ -23,9 +24,25 @@ export async function audit () {
 
 export async function interactiveAudit () {
   const accounts = await manager.download('all')
-  const users = userStore.getAll()
+  let users = userStore.getAll()
+  let flaggedAccounts = auditor.performAudit(accounts, users)
 
-  const flaggedAccounts = auditor.performAudit(accounts, users)
+  const newUserEmails = flaggedAccounts
+    .filter((account) => !lodash.find(users, (user) => user.email === account.email))
+    .map((account) => account.email)
+
+  if (newUserEmails.length > 0) {
+    const groupNames = groupStore.getAll().map((group) => group.name)
+    for (let i = 0; i < newUserEmails.length; i++) {
+      const email = newUserEmails[i]
+      const selectedGroups = await selectGroupsForEmail(email, groupNames)
+      userStore.save({ email: email, groups: selectedGroups, accessRules: { } })
+    }
+
+    // Perform another audit to refresh after having selected group membership
+    flaggedAccounts = auditor.performAudit(accounts, users)
+    users = userStore.getAll()
+  }
 
   for (let i = 0; i < flaggedAccounts.length; i++) {
     const account = flaggedAccounts[i]
@@ -133,4 +150,20 @@ async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<
   const selectedAssets = (await inquirer.prompt([question])).selectedAssets
 
   return selectedAssets
+}
+
+async function selectGroupsForEmail(email: string, groupNames: Array<string>): Promise<Array<string>> {
+  const question = {
+    type: 'checkbox',
+    name: 'selectedGroups',
+    choices: groupNames.map((groupName) => {
+      return {
+        name: groupName, value: groupName
+      }
+    }),
+    message: `${email}: Select group membership`
+  }
+  const selectedGroups = (await inquirer.prompt([question])).selectedGroups
+
+  return selectedGroups
 }
