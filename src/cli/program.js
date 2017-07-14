@@ -2,6 +2,7 @@
 // @flow
 import program from 'commander'
 import * as commands from './commands'
+import { terminal as term } from 'terminal-kit'
 
 program
   .command('config [service]')
@@ -34,6 +35,26 @@ program
       commands.audit()
     } else {
       commands.interactiveAudit()
+    }
+  })
+
+program
+  .command('groups [groupName]')
+  .option('-c, --config', 'interactively configures a group (must supply the groupName parameter with it)')
+  .description('shows or configures a group or groups')
+  .action((groupName, options) => {
+    if (options.config) {
+      if (groupName) {
+        commands.configureGroup(groupName)
+      } else {
+        term.red('Missing parameter: groupName\n')
+      }
+    } else {
+      if (groupName) {
+        commands.showGroup(groupName)
+      } else {
+        commands.listGroups()
+      }
     }
   })
 
