@@ -61,7 +61,5 @@ typings/
 lib/
 
 # Persistence of service config settings
-.services.json
-.users.json
-.services.test.json
-.users.test.json
+*.store.json
+

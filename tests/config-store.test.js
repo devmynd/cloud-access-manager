@@ -1,7 +1,7 @@
 /* eslint-env jest */
 import { configStore as store } from '../lib/core/data/config-store'
 import fs from 'file-system'
-process.env.CONFIG_PATH = './.services.test.json'
+process.env.CONFIG_PATH = './.services.test.store.json'
 
 test('persist config keys by service', () => {
   if (fs.existsSync(process.env.CONFIG_PATH)) {

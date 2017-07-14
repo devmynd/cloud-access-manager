@@ -4,7 +4,7 @@ import * as helpers from './helpers'
 import type { User } from '../types'
 import lodash from 'lodash'
 
-process.env.USERS_PATH = process.env.USERS_PATH || './.users.json'
+process.env.USERS_PATH = process.env.USERS_PATH || './.users.store.json'
 
 export const userStore = {
   save (user: User) {
