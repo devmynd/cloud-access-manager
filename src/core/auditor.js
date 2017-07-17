@@ -62,7 +62,6 @@ export class Auditor {
 
   _findUnauthorizedAssets (assets: Array<Asset>, accessRules: Array<AccessRule>) {
     return assets.reduce((unauthorizedAssets, asset) => {
-
       const isAuthorized = lodash.find(accessRules, (rule) => {
         const assetsMatch = rule.asset === '*' || rule.asset === asset.name
         const rolesMatch = rule.role === '*' || rule.role === asset.role

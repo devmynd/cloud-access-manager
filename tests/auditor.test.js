@@ -86,7 +86,7 @@ describe('performAudit', () => {
       services: [
         {
           id: 'another-test-service',
-          assets: ['Repo B']
+          assets: [{ name: 'Repo B', role: 'member' }]
         }
       ]
     })
@@ -108,7 +108,7 @@ describe('performAudit', () => {
       services: [
         {
           id: 'another-test-service',
-          assets: ['Repo A', 'Repo B']
+          assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
       ]
     })
@@ -128,11 +128,11 @@ describe('performAudit', () => {
       services: [
         {
           id: 'test-service',
-          assets: ['Project A', 'Project B']
+          assets: [{ name: 'Project A', role: 'member' }, { name: 'Project B', role: 'member' }]
         },
         {
           id: 'another-test-service',
-          assets: ['Repo A', 'Repo B']
+          assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
       ]
     })
@@ -177,11 +177,11 @@ describe('performAudit', () => {
       services: [
         {
           id: 'test-service',
-          assets: ['Project A']
+          assets: [{ name: 'Project A', role: 'member' }]
         },
         {
           id: 'another-test-service',
-          assets: ['Repo B']
+          assets: [{ name: 'Repo B', role: 'member' }]
         }
       ]
     })
