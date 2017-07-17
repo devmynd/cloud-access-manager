@@ -1,7 +1,7 @@
 // @flow
 import { manager } from './../../core/service-providers/manager'
 import { terminal as term } from 'terminal-kit'
-import * as auditor from './../../core/auditor'
+import { Auditor } from './../../core/auditor'
 import * as helpers from '../helpers'
 import { userStore } from '../../core/data/user-store'
 import { groupStore } from '../../core/data/group-store'
@@ -23,7 +23,7 @@ export async function audit () {
   const groups = groupStore.getAll()
   const users = userStore.getAll()
 
-  const flaggedAccounts = auditor.performAudit(accounts, users, groups)
+  const flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
   printFlaggedAccounts(flaggedAccounts)
 }
 
@@ -31,7 +31,7 @@ export async function interactiveAudit () {
   const accounts = await manager.download('all')
   const groups = groupStore.getAll()
   let users = userStore.getAll()
-  let flaggedAccounts = auditor.performAudit(accounts, users, groups)
+  let flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
 
   const newUserEmails = flaggedAccounts
     .filter((account) => !lodash.find(users, (user) => user.email === account.email))
@@ -46,7 +46,7 @@ export async function interactiveAudit () {
     }
 
     // Perform another audit to refresh after having selected group membership
-    flaggedAccounts = auditor.performAudit(accounts, users, groups)
+    flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
     users = userStore.getAll()
   }
 
@@ -57,7 +57,7 @@ export async function interactiveAudit () {
     term('\n')
   }
 
-  flaggedAccounts = auditor.performAudit(accounts, users, groups)
+  flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
   printFlaggedAccounts(flaggedAccounts)
 }
 
