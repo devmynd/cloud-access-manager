@@ -97,7 +97,7 @@ async function selectNewServices (services: Array<UserAccountServiceInfo>): Prom
   // loop through new selected services and get full or partial access and if partial, ask for assets
   for (let i = 0; i < selectedServices.length; i++) {
     const service = selectedServices[i]
-    let accessRule: AccessRule
+    let accessRules: Array<AccessRule>
     const question = {
       type: 'list',
       name: 'fullAccess',
@@ -115,11 +115,11 @@ async function selectNewServices (services: Array<UserAccountServiceInfo>): Prom
 
     if (!fullAccess) {
       let selectedAssets = await selectNewAssets(service)
-      accessRule = selectedAssets
+      accessRules = selectedAssets
     } else {
-      accessRule = ['*']
+      accessRules = ['*']
     }
-    serviceAccess[service.id] = accessRule
+    serviceAccess[service.id] = accessRules
   }
 
   return serviceAccess

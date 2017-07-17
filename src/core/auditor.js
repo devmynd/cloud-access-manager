@@ -76,7 +76,7 @@ export class Auditor {
   // Private
 
   _getAccessRules (user: User, serviceId: string, groupAccessRules: GroupAccessRuleLookup) {
-    let appliedAccessRules: Array<AccessRule> = []
+    let appliedAccessRules: Array<Array<AccessRule>> = []
 
     if (user.accessRules.hasOwnProperty(serviceId)) {
       appliedAccessRules.push(user.accessRules[serviceId])

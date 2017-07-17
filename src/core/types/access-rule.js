@@ -1,8 +1,7 @@
 // @flow
 
-// todo: refactor access rule to have no properties
-export type AccessRule = Array<string>
+export type AccessRule = string// { asset: string, role: string }
 
 export type ServiceAccessHash = {
-  [string]: AccessRule
+  [string]: Array<AccessRule>
 }
