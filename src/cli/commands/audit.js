@@ -46,8 +46,8 @@ export async function interactiveAudit () {
     }
 
     // Perform another audit to refresh after having selected group membership
-    flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
     users = userStore.getAll()
+    flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
   }
 
   for (let i = 0; i < flaggedAccounts.length; i++) {

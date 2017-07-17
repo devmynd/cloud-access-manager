@@ -24,36 +24,34 @@ export class Auditor {
     return this.accounts.reduce((flaggedAccounts, account) => {
       const user = this.userLookup[account.email]
 
-      account.services = account.services.reduce((flaggedServices, service) => {
-        const accessRules = this._getAccessRules(user, service.id)
-        console.log(`service '${service.id}' access rules:`)
-        console.log(accessRules)
-
-        let shouldFlag = true
-
-        if (this._hasFullAccess(accessRules)) {
-          shouldFlag = false
-        } else {
-          const unauthorizedAssets = this._findUnauthorizedAssets(accessRules, service.assets)
-          console.log('unauthorized assets:')
-          console.log(unauthorizedAssets)
-          service.assets = unauthorizedAssets
-
-          if (unauthorizedAssets.length === 0) {
-            shouldFlag = false
-          }
-        }
-
-        console.log(`should flag: ${shouldFlag ? 'true' : 'false'}`)
-
-        if (shouldFlag) {
-          flaggedServices.push(service)
-        }
-        return flaggedServices
-      }, [])
-
-      if (account.services.length > 0) {
+      if (!user) {
         flaggedAccounts.push(account)
+      } else {
+        account.services = account.services.reduce((flaggedServices, service) => {
+          const accessRules = this._getAccessRules(user, service.id)
+
+          let shouldFlag = true
+
+          if (this._hasFullAccess(accessRules)) {
+            shouldFlag = false
+          } else {
+            const unauthorizedAssets = this._findUnauthorizedAssets(accessRules, service.assets)
+            service.assets = unauthorizedAssets
+
+            if (unauthorizedAssets.length === 0) {
+              shouldFlag = false
+            }
+          }
+
+          if (shouldFlag) {
+            flaggedServices.push(service)
+          }
+          return flaggedServices
+        }, [])
+
+        if (account.services.length > 0) {
+          flaggedAccounts.push(account)
+        }
       }
 
       return flaggedAccounts
