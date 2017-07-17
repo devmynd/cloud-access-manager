@@ -46,7 +46,7 @@ export class Auditor {
           if (allowedAssets.indexOf('*') !== -1) {
             shouldFlag = false
           } else {
-            const unauthorizedAssets = lodash.difference(service.assets, allowedAssets)
+            const unauthorizedAssets = lodash.difference(service.assets.map((a) => a.name), allowedAssets)
             service.assets = unauthorizedAssets
 
             if (unauthorizedAssets.length === 0) {

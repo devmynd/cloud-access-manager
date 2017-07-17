@@ -46,12 +46,12 @@ export const manager: Manager = {
 
     const userSummaryLookup = serviceAccountLists.reduce((userSummaryLookup, serviceAccountList) => {
       serviceAccountList.accounts.forEach((account) => {
-        let userServiceSummary = userSummaryLookup[account.email] || { email: account.email, services: [] }
-        userServiceSummary.services.push({
+        let userAccountAggregate = userSummaryLookup[account.email] || { email: account.email, services: [] }
+        userAccountAggregate.services.push({
           id: serviceAccountList.serviceId,
           displayName: moduleLookup[serviceAccountList.serviceId].displayName,
           assets: account.assets })
-        userSummaryLookup[account.email] = userServiceSummary
+        userSummaryLookup[account.email] = userAccountAggregate
       })
       return userSummaryLookup
     }, {})
