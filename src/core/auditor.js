@@ -39,14 +39,14 @@ export class Auditor {
       } else {
         account.services = account.services.reduce((flaggedServices, service) => {
           const accessRules = this._getAccessRules(user, service.id, groupAccessRules)
-          const allowedAssets = accessRules.map((accessRule) => accessRule.asset)
 
           let shouldFlag = true
 
-          if (allowedAssets.indexOf('*') !== -1) {
+          if (lodash.find(accessRules, (rule) => rule.asset === '*')) {
             shouldFlag = false
           } else {
-            const unauthorizedAssets = lodash.difference(service.assets.map((a) => a.name), allowedAssets)
+            const unauthorizedAssets = lodash.differenceBy(service.assets, accessRules, (obj) => obj.name || obj.asset)
+
             service.assets = unauthorizedAssets
 
             if (unauthorizedAssets.length === 0) {

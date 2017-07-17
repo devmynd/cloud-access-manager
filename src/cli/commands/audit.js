@@ -145,7 +145,7 @@ async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<
     name: 'selectedAssets',
     choices: service.assets.map((asset) => {
       return {
-        name: asset, value: { asset: asset, role: '*' }
+        name: `${asset.name} (${asset.role})`, value: { asset: asset.name, role: asset.role }
       }
     }),
     message: `${service.displayName}: allow the following assets?`
