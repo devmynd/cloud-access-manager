@@ -117,7 +117,7 @@ async function selectNewServices (services: Array<UserAccountServiceInfo>): Prom
       let selectedAssets = await selectNewAssets(service)
       accessRule = selectedAssets
     } else {
-      accessRule = 'full'
+      accessRule = ['*']
     }
     serviceAccess[service.id] = accessRule
   }

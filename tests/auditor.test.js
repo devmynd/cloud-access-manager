@@ -40,8 +40,8 @@ describe('performAudit', () => {
       email: 'user@email.com',
       groups: [],
       accessRules: {
-        'test-service': 'full',
-        'another-test-service': 'full'
+        'test-service': ['*'],
+        'another-test-service': ['*']
       }
     }]
     const results = auditor.performAudit(accounts)
@@ -68,7 +68,7 @@ describe('performAudit', () => {
       email: 'user@email.com',
       groups: [],
       accessRules: {
-        'test-service': 'full',
+        'test-service': ['*'],
         'another-test-service': ['Repo A']
       }
     }]
@@ -91,7 +91,7 @@ describe('performAudit', () => {
       email: 'user@email.com',
       groups: [],
       accessRules: {
-        'test-service': 'full'
+        'test-service': ['*']
       }
     }]
     const results = auditor.performAudit(accounts)
@@ -140,10 +140,10 @@ describe('performAudit', () => {
     }]
     groups = [{
       name: 'employee',
-      accessRules: { 'test-service': 'full' }
+      accessRules: { 'test-service': ['*'] }
     }, {
       name: 'admin',
-      accessRules: { 'another-test-service': 'full' }
+      accessRules: { 'another-test-service': ['*'] }
     }]
     const results = auditor.performAudit(accounts)
 

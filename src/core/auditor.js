@@ -42,10 +42,15 @@ export class Auditor {
 
           let shouldFlag = true
 
-          if (this._hasFullAccess(accessRules)) {
+          let allowedAssets: Array<string> = []
+          accessRules.forEach((accessRule) => {
+            allowedAssets = allowedAssets.concat(accessRule)
+          })
+
+          if (allowedAssets.indexOf('*') !== -1) {
             shouldFlag = false
           } else {
-            const unauthorizedAssets = this._findUnauthorizedAssets(accessRules, service.assets)
+            const unauthorizedAssets = lodash.difference(service.assets, allowedAssets)
             service.assets = unauthorizedAssets
 
             if (unauthorizedAssets.length === 0) {
@@ -85,20 +90,5 @@ export class Auditor {
     })
 
     return appliedAccessRules
-  }
-
-  _hasFullAccess (accessRules: Array<AccessRule>) {
-    return !!lodash.find(accessRules, (accessRule) => accessRule === 'full')
-  }
-
-  _findUnauthorizedAssets (accessRules: Array<AccessRule>, assets: Array<string>) {
-    let allowedAssets: Array<string> = []
-    accessRules.forEach((accessRule) => {
-      if (typeof accessRule !== 'string') {
-        allowedAssets = allowedAssets.concat(accessRule)
-      }
-    })
-
-    return lodash.difference(assets, allowedAssets)
   }
 }
