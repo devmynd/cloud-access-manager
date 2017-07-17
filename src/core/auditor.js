@@ -39,13 +39,9 @@ export class Auditor {
       } else {
         account.services = account.services.reduce((flaggedServices, service) => {
           const accessRules = this._getAccessRules(user, service.id, groupAccessRules)
+          const allowedAssets = accessRules.map((accessRule) => accessRule.asset)
 
           let shouldFlag = true
-
-          let allowedAssets: Array<string> = []
-          accessRules.forEach((accessRule) => {
-            allowedAssets = allowedAssets.concat(accessRule)
-          })
 
           if (allowedAssets.indexOf('*') !== -1) {
             shouldFlag = false
@@ -76,19 +72,23 @@ export class Auditor {
   // Private
 
   _getAccessRules (user: User, serviceId: string, groupAccessRules: GroupAccessRuleLookup) {
-    let appliedAccessRules: Array<Array<AccessRule>> = []
+    let allAccessRules: Array<Array<AccessRule>> = []
 
     if (user.accessRules.hasOwnProperty(serviceId)) {
-      appliedAccessRules.push(user.accessRules[serviceId])
+      allAccessRules.push(user.accessRules[serviceId])
     }
 
     user.groups.forEach((group) => {
       const accessRules = groupAccessRules[group]
       if (accessRules && accessRules.hasOwnProperty(serviceId)) {
-        appliedAccessRules.push(accessRules[serviceId])
+        allAccessRules.push(accessRules[serviceId])
       }
     })
 
-    return appliedAccessRules
+    let flattened: Array<AccessRule> = []
+    allAccessRules.forEach((accessRule) => {
+      flattened = flattened.concat(accessRule)
+    })
+    return flattened
   }
 }

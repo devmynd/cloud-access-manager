@@ -40,7 +40,7 @@ export async function configureGroup (groupName: string) {
         return {
           name: manager.getDisplayName(serviceId),
           value: serviceId,
-          checked: group.accessRules[serviceId].indexOf('*') !== -1
+          checked: !!lodash.find(group.accessRules[serviceId], (accessRule) => accessRule.asset === '*')
         }
       }),
     message: `Grant members full access to which services?`
@@ -50,7 +50,7 @@ export async function configureGroup (groupName: string) {
 
   serviceIds.forEach((id) => {
     if (lodash.includes(selectedServiceIds, id)) {
-      group.accessRules[id] = ['*']
+      group.accessRules[id] = [{ asset: '*', role: '*' }]
     } else {
       delete group.accessRules[id]
     }

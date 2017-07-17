@@ -40,8 +40,8 @@ describe('performAudit', () => {
       email: 'user@email.com',
       groups: [],
       accessRules: {
-        'test-service': ['*'],
-        'another-test-service': ['*']
+        'test-service': [{ asset: '*', role: '*' }],
+        'another-test-service': [{ asset: '*', role: '*' }]
       }
     }]
     const results = auditor.performAudit(accounts)
@@ -54,8 +54,8 @@ describe('performAudit', () => {
       email: 'user@email.com',
       groups: [],
       accessRules: {
-        'test-service': ['Project A', 'Project B'],
-        'another-test-service': ['Repo A', 'Repo B']
+        'test-service': [{ asset: 'Project A', role: '*' }, { asset: 'Project B', role: '*' }],
+        'another-test-service': [{ asset: 'Repo A', role: '*' }, { asset: 'Repo B', role: '*' }]
       }
     }]
     const results = auditor.performAudit(accounts)
@@ -68,8 +68,8 @@ describe('performAudit', () => {
       email: 'user@email.com',
       groups: [],
       accessRules: {
-        'test-service': ['*'],
-        'another-test-service': ['Repo A']
+        'test-service': [{ asset: '*', role: '*' }],
+        'another-test-service': [{ asset: 'Repo A', role: '*' }]
       }
     }]
     const results = auditor.performAudit(accounts)
@@ -91,7 +91,7 @@ describe('performAudit', () => {
       email: 'user@email.com',
       groups: [],
       accessRules: {
-        'test-service': ['*']
+        'test-service': [{ asset: '*', role: '*' }]
       }
     }]
     const results = auditor.performAudit(accounts)
@@ -140,10 +140,10 @@ describe('performAudit', () => {
     }]
     groups = [{
       name: 'employee',
-      accessRules: { 'test-service': ['*'] }
+      accessRules: { 'test-service': [{ asset: '*', role: '*' }] }
     }, {
       name: 'admin',
-      accessRules: { 'another-test-service': ['*'] }
+      accessRules: { 'another-test-service': [{ asset: '*', role: '*' }] }
     }]
     const results = auditor.performAudit(accounts)
 
@@ -159,8 +159,8 @@ describe('performAudit', () => {
     groups = [{
       name: 'employee',
       accessRules: {
-        'test-service': ['Project B'],
-        'another-test-service': ['Repo A']
+        'test-service': [{ asset: 'Project B', role: '*' }],
+        'another-test-service': [{ asset: 'Repo A', role: '*' }]
       }
     }]
     const results = auditor.performAudit(accounts)

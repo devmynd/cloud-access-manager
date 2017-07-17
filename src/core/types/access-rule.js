@@ -1,6 +1,6 @@
 // @flow
 
-export type AccessRule = string// { asset: string, role: string }
+export type AccessRule = { asset: string, role: string }
 
 export type ServiceAccessHash = {
   [string]: Array<AccessRule>

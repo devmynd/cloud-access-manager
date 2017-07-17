@@ -117,7 +117,7 @@ async function selectNewServices (services: Array<UserAccountServiceInfo>): Prom
       let selectedAssets = await selectNewAssets(service)
       accessRules = selectedAssets
     } else {
-      accessRules = ['*']
+      accessRules = [{ asset: '*', role: '*' }]
     }
     serviceAccess[service.id] = accessRules
   }
@@ -139,13 +139,13 @@ async function updateExistingServices (services: Array<UserAccountServiceInfo>, 
   }
 }
 
-async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<string>> {
+async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<AccessRule>> {
   const question = {
     type: 'checkbox',
     name: 'selectedAssets',
     choices: service.assets.map((asset) => {
       return {
-        name: asset, value: asset
+        name: asset, value: { asset: asset, role: '*' }
       }
     }),
     message: `${service.displayName}: allow the following assets?`
