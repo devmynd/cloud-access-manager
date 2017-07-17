@@ -10,10 +10,11 @@ export function printSummaries (accounts: Array<UserAccountAggregate>, displaySe
       if (displayServices) {
         term.cyan(`\n\t${service.displayName}`)
       }
-      if (service.assets.length > 0) {
-        term.magenta('\n\t\t')
-      }
-      term.magenta(service.assets.join('\n\t\t'))
+
+      service.assets.forEach((asset) => {
+        term.magenta(`\n\t\t${asset.name} `)
+        term.yellow(`(${asset.role})`)
+      })
       term('\n')
     })
   })
