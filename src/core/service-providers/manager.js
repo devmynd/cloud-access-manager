@@ -1,7 +1,7 @@
 // @flow
 import { modules } from './../service-providers/index'
 import { configStore } from './../data/config-store'
-import type { ServiceProvider } from './../types'
+import type { ServiceProvider, UserAccountAggregate } from './../types'
 
 const moduleLookup = modules.reduce((hash, module) => {
   hash[module.id] = module
@@ -15,7 +15,15 @@ function getProvider (serviceId: string): ?ServiceProvider {
   }
 }
 
-export const manager = {
+export type Manager = {
+  download (serviceId: 'all' | string): Promise<Array<UserAccountAggregate>>,
+  getConfigKeys (serviceId: string): ?Array<string>,
+  isConfigured (serviceId: string): boolean,
+  listServiceIds (): Array<string>,
+  getDisplayName (serviceId: string): string
+}
+
+export const manager: Manager = {
   async download (serviceId: 'all' | string) {
     const serviceIds = serviceId === 'all' ? Object.keys(moduleLookup) : [serviceId]
 

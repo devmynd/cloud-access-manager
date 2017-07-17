@@ -8,5 +8,6 @@ export type UserAccountServiceInfo = {
 
 export type UserAccountAggregate = {
   email: string,
+  isNewUser?: boolean,
   services: Array<UserAccountServiceInfo>
 }

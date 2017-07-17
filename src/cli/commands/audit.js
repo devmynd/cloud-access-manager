@@ -20,21 +20,20 @@ function printFlaggedAccounts (flaggedAccounts: Array<UserAccountAggregate>) {
 
 export async function audit () {
   const accounts = await manager.download('all')
-  const groups = groupStore.getAll()
-  const users = userStore.getAll()
+  const auditor = new Auditor(userStore, groupStore)
 
-  const flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
+  const flaggedAccounts = auditor.performAudit(accounts)
   printFlaggedAccounts(flaggedAccounts)
 }
 
 export async function interactiveAudit () {
   const accounts = await manager.download('all')
-  const groups = groupStore.getAll()
-  let users = userStore.getAll()
-  let flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
+  const auditor = new Auditor(userStore, groupStore)
+
+  let flaggedAccounts = auditor.performAudit(accounts)
 
   const newUserEmails = flaggedAccounts
-    .filter((account) => !lodash.find(users, (user) => user.email === account.email))
+    .filter((account) => account.isNewUser)
     .map((account) => account.email)
 
   if (newUserEmails.length > 0) {
@@ -46,18 +45,17 @@ export async function interactiveAudit () {
     }
 
     // Perform another audit to refresh after having selected group membership
-    users = userStore.getAll()
-    flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
+    flaggedAccounts = auditor.performAudit(accounts)
   }
 
   for (let i = 0; i < flaggedAccounts.length; i++) {
     const account = flaggedAccounts[i]
-    const user = lodash.find(users, (entry) => entry.email === account.email)
+    const user = userStore.getByEmail(account.email)
     await auditForUser(account, user)
     term('\n')
   }
 
-  flaggedAccounts = new Auditor(accounts, users, groups).performAudit()
+  flaggedAccounts = auditor.performAudit(accounts)
   printFlaggedAccounts(flaggedAccounts)
 }
 

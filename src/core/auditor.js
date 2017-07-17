@@ -1,34 +1,44 @@
 // @flow
-import type { UserAccountAggregate, User, Group, AccessRule, ServiceAccessHash } from './types'
+import type { UserAccountAggregate, User, AccessRule, ServiceAccessHash } from './types'
+import type { UserStore } from './data/user-store'
+import type { GroupStore } from './data/group-store'
 import lodash from 'lodash'
 
 type UserLookup = { [string]: User }
 type GroupAccessRuleLookup = { [string]: ServiceAccessHash }
 
 export class Auditor {
-  accounts: Array<UserAccountAggregate>
-  userLookup: UserLookup
-  groupAccessRules: GroupAccessRuleLookup
+  userStore: UserStore
+  groupStore: GroupStore
 
-  constructor (accounts: Array<UserAccountAggregate>, users: Array<User>, groups: Array<Group>) {
-    this.accounts = accounts
-
-    this.userLookup = {}
-    users.forEach((user) => { this.userLookup[user.email] = user })
-
-    this.groupAccessRules = {}
-    groups.forEach((group) => { this.groupAccessRules[group.name] = group.accessRules })
+  constructor (userStore: UserStore, groupStore: GroupStore) {
+    this.userStore = userStore
+    this.groupStore = groupStore
   }
 
-  performAudit () {
-    return this.accounts.reduce((flaggedAccounts, account) => {
-      const user = this.userLookup[account.email]
+  performAudit (accounts: Array<UserAccountAggregate>) {
+    const users = this.userStore.getAll()
+    const groups = this.groupStore.getAll()
+
+    const userLookup: UserLookup = {}
+    users.forEach((user) => { userLookup[user.email] = user })
+
+    const groupAccessRules: GroupAccessRuleLookup = {}
+    groups.forEach((group) => { groupAccessRules[group.name] = group.accessRules })
+
+    return this._performAudit(accounts, userLookup, groupAccessRules)
+  }
+
+  _performAudit (accounts: Array<UserAccountAggregate>, userLookup: UserLookup, groupAccessRules: GroupAccessRuleLookup) {
+    return accounts.reduce((flaggedAccounts, account) => {
+      const user = userLookup[account.email]
 
       if (!user) {
+        account.isNewUser = true
         flaggedAccounts.push(account)
       } else {
         account.services = account.services.reduce((flaggedServices, service) => {
-          const accessRules = this._getAccessRules(user, service.id)
+          const accessRules = this._getAccessRules(user, service.id, groupAccessRules)
 
           let shouldFlag = true
 
@@ -60,7 +70,7 @@ export class Auditor {
 
   // Private
 
-  _getAccessRules (user: User, serviceId: string) {
+  _getAccessRules (user: User, serviceId: string, groupAccessRules: GroupAccessRuleLookup) {
     let appliedAccessRules: Array<AccessRule> = []
 
     if (user.accessRules.hasOwnProperty(serviceId)) {
@@ -68,7 +78,7 @@ export class Auditor {
     }
 
     user.groups.forEach((group) => {
-      const accessRules = this.groupAccessRules[group]
+      const accessRules = groupAccessRules[group]
       if (accessRules && accessRules.hasOwnProperty(serviceId)) {
         appliedAccessRules.push(accessRules[serviceId])
       }
