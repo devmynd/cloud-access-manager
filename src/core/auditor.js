@@ -1,5 +1,5 @@
 // @flow
-import type { UserAccountAggregate, User, AccessRule, ServiceAccessHash } from './types'
+import type { UserAccountAggregate, User, AccessRule, ServiceAccessHash, Asset } from './types'
 import type { UserStore } from './data/user-store'
 import type { GroupStore } from './data/group-store'
 import lodash from 'lodash'
@@ -39,24 +39,13 @@ export class Auditor {
       } else {
         account.services = account.services.reduce((flaggedServices, service) => {
           const accessRules = this._getAccessRules(user, service.id, groupAccessRules)
+          const unauthorizedAssets = this._findUnauthorizedAssets(service.assets, accessRules)
 
-          let shouldFlag = true
-
-          if (lodash.find(accessRules, (rule) => rule.asset === '*')) {
-            shouldFlag = false
-          } else {
-            const unauthorizedAssets = lodash.differenceBy(service.assets, accessRules, (obj) => obj.name || obj.asset)
-
+          if (unauthorizedAssets.length > 0) {
             service.assets = unauthorizedAssets
-
-            if (unauthorizedAssets.length === 0) {
-              shouldFlag = false
-            }
-          }
-
-          if (shouldFlag) {
             flaggedServices.push(service)
           }
+
           return flaggedServices
         }, [])
 
@@ -70,6 +59,23 @@ export class Auditor {
   }
 
   // Private
+
+  _findUnauthorizedAssets (assets: Array<Asset>, accessRules: Array<AccessRule>) {
+    return assets.reduce((unauthorizedAssets, asset) => {
+
+      const isAuthorized = lodash.find(accessRules, (rule) => {
+        const assetsMatch = rule.asset === '*' || rule.asset === asset.name
+        const rolesMatch = rule.role === '*' || rule.role === asset.role
+        return assetsMatch && rolesMatch
+      })
+
+      if (!isAuthorized) {
+        unauthorizedAssets.push(asset)
+      }
+
+      return unauthorizedAssets
+    }, [])
+  }
 
   _getAccessRules (user: User, serviceId: string, groupAccessRules: GroupAccessRuleLookup) {
     let allAccessRules: Array<Array<AccessRule>> = []
