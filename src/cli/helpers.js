@@ -13,7 +13,9 @@ export function printSummaries (accounts: Array<UserAccountAggregate>, displaySe
 
       service.assets.forEach((asset) => {
         term.magenta(`\n\t\t${asset.name} `)
-        term.yellow(`(${asset.role})`)
+        if (asset.role) {
+          term.yellow(`(${asset.role})`)
+        }
       })
       term('\n')
     })

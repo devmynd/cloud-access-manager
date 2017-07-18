@@ -118,8 +118,9 @@ async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<
     type: 'checkbox',
     name: 'selectedAssets',
     choices: service.assets.map((asset) => {
+      const roleStr = asset.role ? ` (${asset.role})` : ''
       return {
-        name: `${asset.name} (${asset.role})`, value: { asset: asset.name, role: asset.role }
+        name: `${asset.name}${roleStr}`, value: { asset: asset.name, role: asset.role ? asset.role : '*' }
       }
     }),
     message: `${service.displayName}: allow the following assets?`
@@ -146,7 +147,15 @@ async function selectGroupsForEmail (email: string, groupNames: Array<string>): 
 }
 
 async function selectRoles (service: UserAccountServiceInfo): Promise<Array<string>> {
-  const availableRoles = lodash.uniq(service.assets.map((asset) => asset.role))
+
+
+  const availableRoles = lodash.uniq(service.assets.filter((asset) => !!asset.role).map((asset) => asset.role))
+  if (availableRoles.length === 0) {
+    term.red.bold('Error: No role property defined for the asset by the service provider implementation.\n')
+    term.red.bold('Please add roles to your service provider or update your ServiceProviderModule to have the property: hasRole: false\n')
+    return []
+  }
+
   const question = {
     type: 'checkbox',
     name: 'selectedRoles',

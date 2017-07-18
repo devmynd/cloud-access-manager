@@ -2,7 +2,7 @@
 
 export type Asset = {
   name: string,
-  role: string
+  role?: string
 }
 
 export type UserAccount = {
