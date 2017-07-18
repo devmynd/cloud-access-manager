@@ -63,55 +63,37 @@ async function auditForUser (account: UserAccountAggregate, user: User): Promise
   term.cyan.bold(`${account.email}\n`)
 
   const whitelistedPartition = lodash.partition(account.services, (service) => user.accessRules.hasOwnProperty(service.id))
-  const existingWhitelistedServices = whitelistedPartition[0]
+
+  let auditableServices = whitelistedPartition[0]
   const newServices = whitelistedPartition[1]
 
   if (newServices.length > 0) {
-    const selectedServices = await selectNewServices(newServices)
-    user.accessRules = Object.assign(user.accessRules, selectedServices)
+    const selectedServices = await selectServices(newServices)
+    auditableServices = auditableServices.concat(selectedServices)
   }
 
-  await updateExistingServices(existingWhitelistedServices, user)
+  const newAccessRules = await auditServices(auditableServices)
+  Object.keys(newAccessRules).forEach((serviceId) => {
+    const newServiceAccessRules = newAccessRules[serviceId]
+    let userServiceAccessRules = user.accessRules[serviceId]
+    if (userServiceAccessRules) {
+      user.accessRules[serviceId] = userServiceAccessRules.concat(newServiceAccessRules)
+    } else {
+      user.accessRules[serviceId] = newServiceAccessRules
+    }
+  })
 
   userStore.save(user)
 }
 
-async function selectNewServices (services: Array<UserAccountServiceInfo>): Promise<ServiceAccessHash> {
-  const question = {
-    type: 'checkbox',
-    name: 'selectedServices',
-    // create choices for every service that isn't at least partially whitelisted yet
-    choices: services
-      .map((service) => {
-        return {
-          name: service.displayName,
-          value: service
-        }
-      }),
-    message: `Allow the following services?`
-  }
-
-  const selectedServices = (await inquirer.prompt([question])).selectedServices
+async function auditServices (services: Array<UserAccountServiceInfo>): Promise<ServiceAccessHash> {
   const serviceAccess: ServiceAccessHash = {}
 
   // loop through new selected services and get full or partial access and if partial, ask for assets
-  for (let i = 0; i < selectedServices.length; i++) {
-    const service = selectedServices[i]
+  for (let i = 0; i < services.length; i++) {
+    const service = services[i]
     let accessRules: Array<AccessRule>
-    const question = {
-      type: 'list',
-      name: 'fullAccess',
-      choices: [{
-        name: 'Full',
-        value: true
-      }, {
-        name: 'Per Asset',
-        value: false
-      }],
-      message: `${service.displayName}: grant which access level?`
-    }
-
-    const fullAccess = (await inquirer.prompt([question])).fullAccess
+    const fullAccess = await selectFullAccess(service)
 
     if (fullAccess) {
       if (service.hasRoles) {
@@ -129,20 +111,6 @@ async function selectNewServices (services: Array<UserAccountServiceInfo>): Prom
   }
 
   return serviceAccess
-}
-
-async function updateExistingServices (services: Array<UserAccountServiceInfo>, user: User) {
-  // loop thorugh all existing whitelisted services and ask about assets
-  for (let i = 0; i < services.length; i++) {
-    const service = services[i]
-    let selectedAssets = await selectNewAssets(service)
-    const accessRule = user.accessRules[service.id]
-    if (accessRule && typeof accessRule !== 'string') {
-      user.accessRules[service.id] = accessRule.concat(selectedAssets)
-    } else {
-      throw new Error('unexpectedly did not find service access rule in the existing user record or found unexpected \'full\' access')
-    }
-  }
 }
 
 async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<AccessRule>> {
@@ -183,10 +151,45 @@ async function selectRoles (service: UserAccountServiceInfo): Promise<Array<stri
     type: 'checkbox',
     name: 'selectedRoles',
     choices: availableRoles.map((role) => {
-      return { name: role, value: role}
+      return { name: role, value: role }
     }),
     message: `${service.displayName}: grant full access to which roles?`
   }
 
   return (await inquirer.prompt([question])).selectedRoles
+}
+
+async function selectFullAccess (service: UserAccountServiceInfo): Promise<boolean> {
+  const question = {
+    type: 'list',
+    name: 'fullAccess',
+    choices: [{
+      name: 'Full',
+      value: true
+    }, {
+      name: 'Per Asset',
+      value: false
+    }],
+    message: `${service.displayName}: grant which access level?`
+  }
+
+  return (await inquirer.prompt([question])).fullAccess
+}
+
+async function selectServices (services: Array<UserAccountServiceInfo>): Promise <Array<UserAccountServiceInfo>> {
+  const question = {
+    type: 'checkbox',
+    name: 'selectedServices',
+    // create choices for every service that isn't at least partially whitelisted yet
+    choices: services
+      .map((service) => {
+        return {
+          name: service.displayName,
+          value: service
+        }
+      }),
+    message: `Allow the following services?`
+  }
+
+  return (await inquirer.prompt([question])).selectedServices
 }

@@ -18,31 +18,31 @@ class DummyProvider implements ServiceProvider {
         {
           email: 'shamyle@devmynd.com',
           assets: [{
-            name: 'repo a'
-            , role: 'owner'
+            name: 'repo a',
+            role: 'owner'
           }, {
-            name: 'repo b'
-            , role: 'member'
+            name: 'repo b',
+            role: 'member'
           }]
         },
         {
           email: 'ty@devmynd.com',
           assets: [{
-            name: 'repo a'
-            , role: 'member'
+            name: 'repo a',
+            role: 'member'
           }, {
-            name: 'repo b'
-            , role: 'owner'
+            name: 'repo b',
+            role: 'owner'
           }]
         },
         {
           email: 'mevans@devmynd.com',
           assets: [{
-            name: 'repo a'
-            , role: 'member'
+            name: 'repo a',
+            role: 'member'
           }, {
-            name: 'repo b'
-            , role: 'member'
+            name: 'repo b',
+            role: 'member'
           }]
         }
       ])
