@@ -186,4 +186,59 @@ describe('performAudit', () => {
       ]
     })
   })
+
+  test('flags users if they have access but for the wrong role', () => {
+    users = [{
+      email: 'user@email.com',
+      groups: ['employee'],
+      accessRules: {
+        'test-service': [{ asset: 'Project A', role: 'not-member' }]
+      }
+    }]
+    groups = [{
+      name: 'employee',
+      accessRules: {
+        'test-service': [{ asset: 'Project B', role: 'not-member' }],
+        'another-test-service': [{ asset: '*', role: 'not-member' }]
+      }
+    }]
+
+    const results = auditor.performAudit(accounts)
+
+    expect(results.length).toBe(1)
+    expect(results[0]).toEqual({
+      email: 'user@email.com',
+      services: [
+        {
+          id: 'test-service',
+          assets: [{ name: 'Project A', role: 'member' }, { name: 'Project B', role: 'member' }]
+        },
+        {
+          id: 'another-test-service',
+          assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
+        }
+      ]
+    })
+  })
+
+  test('does not flag users who have access with the correct role', () => {
+    users = [{
+      email: 'user@email.com',
+      groups: ['employee'],
+      accessRules: {
+        'test-service': [{ asset: 'Project A', role: 'member' }]
+      }
+    }]
+    groups = [{
+      name: 'employee',
+      accessRules: {
+        'test-service': [{ asset: 'Project B', role: 'member' }],
+        'another-test-service': [{ asset: '*', role: 'member' }]
+      }
+    }]
+
+    const results = auditor.performAudit(accounts)
+
+    expect(results.length).toBe(0)
+  })
 })
