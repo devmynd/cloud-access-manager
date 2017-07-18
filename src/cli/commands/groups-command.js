@@ -75,7 +75,7 @@ export async function configureGroup (groupName: string) {
         .split(',')
         .map((role) => role.trim())
 
-      if (specifiedRoles.length === 0) {
+      if (specifiedRoles[0] === '') {
         allowedRoles.push('*')
       } else {
         allowedRoles = allowedRoles.concat(specifiedRoles)

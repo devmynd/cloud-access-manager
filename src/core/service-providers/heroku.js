@@ -18,11 +18,14 @@ class HerokuProvider implements ServiceProvider {
       return this.heroku.get(`/apps/${app.id}/collaborators`)
     })
     const appCollaborators = await Promise.all(promises)
+
     const userLookup = appCollaborators.reduce((userLookup, collaborators) => {
       collaborators.forEach((collaborator) => {
         const email = collaborator.user.email
+
         let userAccount = userLookup[email] || { email: email, assets: [] }
-        userAccount.assets.push(collaborator.app.name)
+        const role = collaborator.role || 'collaborator'
+        userAccount.assets.push({name: collaborator.app.name, role: role})
         userLookup[email] = userAccount
       })
       return userLookup
