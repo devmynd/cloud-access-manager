@@ -22,9 +22,19 @@ export function showGroup (groupName: string) {
     return
   }
 
-  serviceIds.forEach((id) => {
-    const serviceName = manager.getDisplayName(id)
-    term.cyan(`\t${serviceName}\n`)
+  serviceIds.forEach((serviceId) => {
+    const serviceName = manager.getDisplayName(serviceId)
+    term.cyan(`\t${serviceName}`)
+    if (group.accessRules.hasOwnProperty(serviceId)) {
+      term.yellow(' (')
+      term.yellow(
+        group.accessRules[serviceId]
+          .filter((rule) => rule.asset === '*')
+          .map((rule) => rule.role)
+          .join(','))
+      term.yellow(')')
+    }
+    term('\n')
   })
 }
 
@@ -47,14 +57,38 @@ export async function configureGroup (groupName: string) {
   }
 
   const selectedServiceIds = (await inquirer.prompt([question])).selectedServiceIds
+  let newAccessRules = {}
 
-  serviceIds.forEach((id) => {
-    if (lodash.includes(selectedServiceIds, id)) {
-      group.accessRules[id] = [{ asset: '*', role: '*' }]
+
+  for (let i = 0; i < selectedServiceIds.length; i++) {
+    let serviceId = selectedServiceIds[i]
+    let allowedRoles = []
+    if(manager.hasRoles(serviceId)) {
+      const question = {
+        type: 'input',
+        name: 'roles',
+        message: `${manager.getDisplayName(serviceId)}: Enter allowed roles seperated by comma (or leave blank to allow all):`
+      }
+
+      const specifiedRoles = (await inquirer.prompt([question]))
+        .roles
+        .split(',')
+        .map((role) => role.trim())
+
+      if (specifiedRoles.length === 0) {
+        allowedRoles.push('*')
+      } else {
+        allowedRoles = allowedRoles.concat(specifiedRoles)
+      }
     } else {
-      delete group.accessRules[id]
+      allowedRoles.push('*')
     }
-  })
+
+    newAccessRules[serviceId] = allowedRoles.map((role) => { return { asset: '*', role: role }})
+  }
+
+
+  group.accessRules = newAccessRules
 
   groupStore.save(group)
 }

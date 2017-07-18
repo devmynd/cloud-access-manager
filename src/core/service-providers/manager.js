@@ -20,7 +20,8 @@ export type Manager = {
   getConfigKeys (serviceId: string): ?Array<string>,
   isConfigured (serviceId: string): boolean,
   listServiceIds (): Array<string>,
-  getDisplayName (serviceId: string): string
+  getDisplayName (serviceId: string): string,
+  hasRoles (serviceId: string): boolean
 }
 
 export const manager: Manager = {
@@ -83,5 +84,9 @@ export const manager: Manager = {
 
   getDisplayName (serviceId: string) {
     return moduleLookup[serviceId].displayName
+  },
+
+  hasRoles (serviceId: string) {
+    return moduleLookup[serviceId].hasRoles
   }
 }
