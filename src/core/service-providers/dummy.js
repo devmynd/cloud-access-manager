@@ -17,15 +17,33 @@ class DummyProvider implements ServiceProvider {
       resolve([
         {
           email: 'shamyle@devmynd.com',
-          assets: [{name: 'repo a', role: 'member'}, {name: 'repo b', role: 'member'}]
+          assets: [{
+            name: 'repo a'
+            , role: 'owner'
+          }, {
+            name: 'repo b'
+            , role: 'member'
+          }]
         },
         {
           email: 'ty@devmynd.com',
-          assets: [{name: 'repo a', role: 'member'}, {name: 'repo b', role: 'member'}]
+          assets: [{
+            name: 'repo a'
+            , role: 'member'
+          }, {
+            name: 'repo b'
+            , role: 'owner'
+          }]
         },
         {
           email: 'mevans@devmynd.com',
-          assets: [{name: 'repo a', role: 'member'}, {name: 'repo b', role: 'member'}]
+          assets: [{
+            name: 'repo a'
+            , role: 'member'
+          }, {
+            name: 'repo b'
+            , role: 'member'
+          }]
         }
       ])
     })
@@ -35,6 +53,7 @@ class DummyProvider implements ServiceProvider {
 export const dummyProviderModule: ServiceProviderModule = {
   id: 'dummy',
   displayName: 'Dummy Service',
+  hasRoles: true,
   configKeys: configKeys,
   providerFactory (config) {
     return new DummyProvider(config)

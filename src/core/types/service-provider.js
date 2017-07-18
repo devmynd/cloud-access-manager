@@ -8,6 +8,7 @@ export interface ServiceProvider {
 export type ServiceProviderModule = {
   id: string,
   displayName: string,
+  hasRoles: boolean,
   configKeys: Array<string>,
   providerFactory: Object => ServiceProvider
 }

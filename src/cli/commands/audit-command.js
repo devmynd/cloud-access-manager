@@ -113,11 +113,17 @@ async function selectNewServices (services: Array<UserAccountServiceInfo>): Prom
 
     const fullAccess = (await inquirer.prompt([question])).fullAccess
 
-    if (!fullAccess) {
-      let selectedAssets = await selectNewAssets(service)
-      accessRules = selectedAssets
+    if (fullAccess) {
+      if (service.hasRoles) {
+        const selectedRoles = await selectRoles(service)
+        accessRules = selectedRoles.map((role) => {
+          return { asset: '*', role: role }
+        })
+      } else {
+        accessRules = [{ asset: '*', role: '*' }]
+      }
     } else {
-      accessRules = [{ asset: '*', role: '*' }]
+      accessRules = await selectNewAssets(service)
     }
     serviceAccess[service.id] = accessRules
   }
@@ -169,4 +175,18 @@ async function selectGroupsForEmail (email: string, groupNames: Array<string>): 
   const selectedGroups = (await inquirer.prompt([question])).selectedGroups
 
   return selectedGroups
+}
+
+async function selectRoles (service: UserAccountServiceInfo): Promise<Array<string>> {
+  const availableRoles = lodash.uniq(service.assets.map((asset) => asset.role))
+  const question = {
+    type: 'checkbox',
+    name: 'selectedRoles',
+    choices: availableRoles.map((role) => {
+      return { name: role, value: role}
+    }),
+    message: `${service.displayName}: grant full access to which roles?`
+  }
+
+  return (await inquirer.prompt([question])).selectedRoles
 }
