@@ -40,12 +40,17 @@ export function showGroup (groupName: string) {
 
 export async function configureGroup (groupName: string) {
   const group = groupStore.get(groupName)
-  const serviceIds = manager.listServiceIds()
+  const configuredServiceIds = manager.listServiceIds().filter(manager.isConfigured)
+
+  if (configuredServiceIds.length === 0) {
+    term.red('No services have been configured yet. Please run: cam config <service>\n')
+    return
+  }
 
   const question = {
     type: 'checkbox',
     name: 'selectedServiceIds',
-    choices: serviceIds
+    choices: configuredServiceIds
       .map((serviceId) => {
         return {
           name: manager.getDisplayName(serviceId),
@@ -59,11 +64,10 @@ export async function configureGroup (groupName: string) {
   const selectedServiceIds = (await inquirer.prompt([question])).selectedServiceIds
   let newAccessRules = {}
 
-
   for (let i = 0; i < selectedServiceIds.length; i++) {
     let serviceId = selectedServiceIds[i]
     let allowedRoles = []
-    if(manager.hasRoles(serviceId)) {
+    if (manager.hasRoles(serviceId)) {
       const question = {
         type: 'input',
         name: 'roles',
@@ -84,9 +88,8 @@ export async function configureGroup (groupName: string) {
       allowedRoles.push('*')
     }
 
-    newAccessRules[serviceId] = allowedRoles.map((role) => { return { asset: '*', role: role }})
+    newAccessRules[serviceId] = allowedRoles.map((role) => { return { asset: '*', role: role } })
   }
-
 
   group.accessRules = newAccessRules
 

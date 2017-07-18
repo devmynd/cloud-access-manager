@@ -147,8 +147,6 @@ async function selectGroupsForEmail (email: string, groupNames: Array<string>): 
 }
 
 async function selectRoles (service: UserAccountServiceInfo): Promise<Array<string>> {
-
-
   const availableRoles = lodash.uniq(service.assets.filter((asset) => !!asset.role).map((asset) => asset.role))
   if (availableRoles.length === 0) {
     term.red.bold('Error: No role property defined for the asset by the service provider implementation.\n')
