@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { userStore as store } from '../lib/core/data/user-store'
+import { userStore as store } from '../user-store'
 import fs from 'file-system'
 process.env.USERS_PATH = './.users.test.store.json'
 

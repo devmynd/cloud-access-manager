@@ -11,7 +11,7 @@
     "api": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
     "web": "flow && webpack -d && open -a \"/Applications/Google Chrome.app\" src/web/client/index.html && webpack -d --watch",
     "fix": "standard --fix",
-    "test": "npm run core && jest"
+    "tests": "npm run core && jest lib/"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",

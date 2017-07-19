@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { groupStore as store } from '../lib/core/data/group-store'
+import { groupStore as store } from '../group-store'
 import fs from 'file-system'
 process.env.GROUPS_PATH = './.groups.test.store.json'
 

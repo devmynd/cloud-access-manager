@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { configStore as store } from '../lib/core/data/config-store'
+import { configStore as store } from '../config-store'
 import fs from 'file-system'
 process.env.CONFIG_PATH = './.services.test.store.json'
 

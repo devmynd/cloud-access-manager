@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { Auditor } from '../lib/core/auditor'
+import { Auditor } from '../auditor'
 
 describe('performAudit', () => {
   let accounts
