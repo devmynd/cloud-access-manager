@@ -2,7 +2,6 @@
 // @flow
 import program from 'commander'
 import * as commands from './commands'
-import { terminal as term } from 'terminal-kit'
 
 program
   .command('config [service]')
@@ -39,29 +38,28 @@ program
   })
 
 program
-  .command('groups [groupName]')
-  .option('-c, --config', 'interactively configures a group (must supply the groupName parameter with it)')
-  .option('-d, --delete', 'deletes a group')
-  .description('shows or configures a group or groups')
+  .command('groups')
+  .description('lists all available groups')
+  .action(commands.listGroups)
+
+program
+  .command('group <groupName>')
+  .option('-c, --create', 'creates a new group')
+  .option('-D, --delete', 'deletes a group')
+  .option('-s, --configService <service>', 'adds/updates a service for a group, along with role selection')
+  .option('-r, --removeService <service>', 'removes a service from the group')
+  .description('operations for managing groups')
   .action((groupName, options) => {
-    if (options.config) {
-      if (groupName) {
-        commands.configureGroup(groupName)
-      } else {
-        term.red('Missing parameter: groupName\n')
-      }
+    if (options.create) {
+      commands.createGroup(groupName)
     } else if (options.delete) {
-      if (groupName) {
-        commands.deleteGroup(groupName)
-      } else {
-        term.red('Missing parameter: groupName\n')
-      }
+      commands.deleteGroup(groupName)
+    } else if (options.configService) {
+      commands.configureServiceForGroup(options.configService, groupName)
+    } else if (options.removeService) {
+      commands.removeServiceFromGroup(options.removeService, groupName)
     } else {
-      if (groupName) {
-        commands.showGroup(groupName)
-      } else {
-        commands.listGroups()
-      }
+      commands.showGroup(groupName)
     }
   })
 

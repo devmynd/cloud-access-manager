@@ -8,7 +8,7 @@ export function printSummaries (accounts: Array<UserAccountAggregate>, displaySe
     term.green(`${account.email}`)
     account.services.forEach((service) => {
       if (displayServices) {
-        term.cyan(`\n\t${service.displayName}`)
+        term.cyan(`\n\t${service.id}`)
       }
 
       service.assets.forEach((asset) => {

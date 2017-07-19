@@ -123,7 +123,7 @@ async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<
         name: `${asset.name}${roleStr}`, value: { asset: asset.name, role: asset.role ? asset.role : '*' }
       }
     }),
-    message: `${service.displayName}: allow the following assets?`
+    message: `${service.id}: allow the following assets?`
   }
   const selectedAssets = (await inquirer.prompt([question])).selectedAssets
 
@@ -160,7 +160,7 @@ async function selectRoles (service: UserAccountServiceInfo): Promise<Array<stri
     choices: availableRoles.map((role) => {
       return { name: role, value: role }
     }),
-    message: `${service.displayName}: grant full access to which roles?`
+    message: `${service.id}: grant full access to which roles?`
   }
 
   return (await inquirer.prompt([question])).selectedRoles
@@ -177,7 +177,7 @@ async function selectFullAccess (service: UserAccountServiceInfo): Promise<boole
       name: 'Per Asset',
       value: false
     }],
-    message: `${service.displayName}: grant which access level?`
+    message: `${service.id}: grant which access level?`
   }
 
   return (await inquirer.prompt([question])).fullAccess
@@ -191,7 +191,7 @@ async function selectServices (services: Array<UserAccountServiceInfo>): Promise
     choices: services
       .map((service) => {
         return {
-          name: service.displayName,
+          name: service.id,
           value: service
         }
       }),
