@@ -60,6 +60,8 @@ typings/
 # ignore compiled lib directory
 lib/
 
-# Persistence of service config settings
+# Persistence data files
 *.store.json
 
+# npm lock file
+package-lock.json
