@@ -6,7 +6,7 @@
     "cam": "lib/cli/program.js"
   },
   "scripts": {
-    "core": "babel src/core -d lib/core",
+    "core": "standard && flow && babel src/core -d lib/core",
     "cli": "npm run core && babel src/cli -d lib/cli",
     "api": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
     "web": "flow && webpack -d && open -a \"/Applications/Google Chrome.app\" src/web/client/index.html && webpack -d --watch",

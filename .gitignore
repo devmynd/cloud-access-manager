@@ -62,3 +62,6 @@ lib/
 
 # Persistence data files
 *.store.json
+
+# webpack build dir
+src/web/client/public/
