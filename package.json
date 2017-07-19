@@ -6,10 +6,11 @@
     "cam": "lib/cli/program.js"
   },
   "scripts": {
-    "core": "standard && flow && babel src/core -d lib/core",
-    "cli": "npm run core && babel src/cli -d lib/cli",
+    "core": "babel src/core -d lib/core",
     "api": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
-    "web": "flow && webpack -d && open -a \"/Applications/Google Chrome.app\" src/web/client/index.html && webpack -d --watch",
+    "cli": "standard && flow && npm run core && babel src/cli -d lib/cli",
+    "web": "standard && flow && webpack -d && npm run api",
+    "launch": "open -a \"/Applications/Google Chrome.app\" src/web/client/index.html && webpack -d --watch",
     "fix": "standard --fix",
     "tests": "npm run core && jest lib/"
   },
