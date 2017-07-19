@@ -10,7 +10,7 @@
     "build": "flow && babel src/ -d lib/",
     "prepublish": "npm run build",
     "fix": "standard --fix",
-    "web": "node lib/web/app.js"
+    "web": "npm run build && node lib/web/app.js"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
