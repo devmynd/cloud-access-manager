@@ -6,11 +6,12 @@
     "cam": "lib/cli/program.js"
   },
   "scripts": {
-    "test": "standard && npm run build && jest",
-    "build": "flow && babel src/ -d lib/",
-    "prepublish": "npm run build",
+    "core": "babel src/core -d lib/core",
+    "cli": "npm run core && babel src/cli -d lib/cli",
+    "api": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
+    "web": "flow && webpack -d && open -a \"/Applications/Google Chrome.app\" src/web/client/index.html && webpack -d --watch",
     "fix": "standard --fix",
-    "web": "npm run build && node lib/web/app.js"
+    "test": "npm run core && jest"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
@@ -22,14 +23,19 @@
     "heroku-client": "^3.0.2",
     "inquirer": "^3.1.1",
     "lodash": "^4.17.4",
-    "terminal-kit": "^1.11.1"
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "terminal-kit": "^1.11.1",
+    "webpack": "^3.3.0"
   },
   "devDependencies": {
+    "babel-loader": "^7.1.1",
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-flow": "^6.23.0",
+    "babel-preset-react": "^6.24.1",
     "eslint-plugin-flowtype": "^2.34.1",
     "flow-bin": "^0.49.1",
     "jest": "^20.0.4",
@@ -54,7 +60,8 @@
           }
         }
       ],
-      "flow"
+      "flow",
+      "react"
     ]
   }
 }
