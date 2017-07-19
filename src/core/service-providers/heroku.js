@@ -32,6 +32,10 @@ class HerokuProvider implements ServiceProvider {
     }, [])
     return Object.keys(userLookup).map((email) => userLookup[email])
   }
+
+  async testConnection () {
+    await this.heroku.get('/account')
+  }
 }
 
 export const herokuProviderModule: ServiceProviderModule = {

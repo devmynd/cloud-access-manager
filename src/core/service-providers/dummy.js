@@ -48,6 +48,12 @@ class DummyProvider implements ServiceProvider {
       ])
     })
   }
+
+  async testConnection () {
+    if (this.apiKey === 'invalid') {
+      throw new Error('Invalid api key')
+    }
+  }
 }
 
 export const dummyProviderModule: ServiceProviderModule = {

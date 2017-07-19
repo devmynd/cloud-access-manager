@@ -18,8 +18,18 @@ export function configureService (serviceId: string) {
     message: `enter ${key}:`
   }))
 
-  inquirer.prompt(questions).then(function (values) {
+  inquirer.prompt(questions).then(async function (values) {
     configStore.save(serviceId, values)
+    const provider = manager.getProvider(serviceId)
+    if (provider) {
+      try {
+        await provider.testConnection()
+      } catch (error) {
+        term.red('An error occurred testing the connection with the supplied config values.\n\n')
+        term.red(error)
+        term('\n')
+      }
+    }
   })
 }
 

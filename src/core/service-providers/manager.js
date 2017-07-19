@@ -8,14 +8,8 @@ const moduleLookup = modules.reduce((hash, module) => {
   return hash
 }, {})
 
-function getProvider (serviceId: string): ?ServiceProvider {
-  const config = configStore.get(serviceId)
-  if (config) {
-    return moduleLookup[serviceId].providerFactory(config)
-  }
-}
-
 export type Manager = {
+  getProvider (serviceId: string): ?ServiceProvider,
   download (serviceId: 'all' | string): Promise<Array<UserAccountAggregate>>,
   getConfigKeys (serviceId: string): ?Array<string>,
   isConfigured (serviceId: string): boolean,
@@ -25,11 +19,18 @@ export type Manager = {
 }
 
 export const manager: Manager = {
+  getProvider (serviceId: string) {
+    const config = configStore.get(serviceId)
+    if (config) {
+      return moduleLookup[serviceId].providerFactory(config)
+    }
+  },
+
   async download (serviceId: 'all' | string) {
     const serviceIds = serviceId === 'all' ? Object.keys(moduleLookup) : [serviceId]
 
     const services: Array<{ serviceId: string, provider: ServiceProvider }> = serviceIds.reduce((providers, id) => {
-      const provider = getProvider(id)
+      const provider = this.getProvider(id)
       if (provider) {
         providers.push({ serviceId: id, provider: provider })
       }
