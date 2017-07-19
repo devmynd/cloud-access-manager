@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "main": "index.js",
   "bin": {
-    "cam": "lib/cli/program.js"
+    "cam": "lib/cli/program.js",
+    "run": "lib/web/app.js"
   },
   "scripts": {
-    "test": "standard && yarn build && jest",
-    "build": "yarn flow && babel src/ -d lib/",
-    "prepublish": "yarn run build",
+    "test": "standard && npm run build && jest",
+    "build": "flow && babel src/ -d lib/",
+    "prepublish": "npm run build",
     "fix": "standard --fix"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",

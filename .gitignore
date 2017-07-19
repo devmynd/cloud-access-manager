@@ -62,6 +62,3 @@ lib/
 
 # Persistence data files
 *.store.json
-
-# npm lock file
-package-lock.json
