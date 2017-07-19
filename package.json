@@ -4,7 +4,7 @@
   "main": "index.js",
   "bin": {
     "cam": "lib/cli/program.js",
-    "run": "lib/web/app.js"
+    "web": "lib/web/app.js"
   },
   "scripts": {
     "test": "standard && npm run build && jest",
