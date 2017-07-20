@@ -31,7 +31,7 @@ export const schema = buildSchema(`
 `)
 
 export const root = {
-  accounts: function ({ serviceId }) {
-    return manager.download(serviceId || 'all')
+  accounts: function (args: { serviceId: string }) {
+    return manager.download(args.serviceId || 'all')
   }
 }
