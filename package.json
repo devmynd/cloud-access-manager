@@ -10,9 +10,9 @@
     "api": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
     "cli": "standard && flow && npm run core && babel src/cli -d lib/cli",
     "web": "standard && flow && webpack -d && npm run api",
-    "launch": "open -a \"/Applications/Google Chrome.app\" src/web/client/index.html && webpack -d --watch",
+    "launch": "open -a \"/Applications/Google Chrome.app\" lib/web/client/index.html && webpack -d --watch",
     "fix": "standard --fix",
-    "tests": "npm run core && jest lib/"
+    "test": "npm run core && jest lib/"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
@@ -30,15 +30,16 @@
     "webpack": "^3.3.0"
   },
   "devDependencies": {
-    "babel-loader": "^7.1.1",
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
     "eslint-plugin-flowtype": "^2.34.1",
     "flow-bin": "^0.49.1",
+    "html-webpack-plugin": "^2.29.0",
     "jest": "^20.0.4",
     "standard": "^10.0.2"
   },

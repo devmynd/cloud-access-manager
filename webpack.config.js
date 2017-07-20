@@ -1,7 +1,8 @@
+var HtmlWebpackPlugin = require('html-webpack-plugin')
 var path = require('path')
 
-var BUILD_DIR = path.resolve(__dirname, 'lib/web/client/public')
-var APP_DIR = path.resolve(__dirname, 'src/web/client/app')
+var BUILD_DIR = path.resolve(__dirname, 'lib/web/client')
+var APP_DIR = path.resolve(__dirname, 'src/web/client')
 
 var config = {
   entry: APP_DIR + '/index.js',
@@ -17,7 +18,10 @@ var config = {
         loader: 'babel-loader'
       }
     ]
-  }
+  },
+  plugins: [new HtmlWebpackPlugin({
+    template: APP_DIR + '/index.template.ejs'
+  })]
 }
 
 module.exports = config
