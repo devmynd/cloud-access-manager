@@ -1,0 +1,28 @@
+// @flow
+
+import {
+  // graphql,
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLString
+} from 'graphql'
+
+module.exports = new GraphQLSchema({
+  query: new GraphQLObjectType({
+    name: 'RootQueryType',
+    fields: {
+      hello: {
+        type: GraphQLString,
+        resolve () {
+          return 'world'
+        }
+      },
+      name: {
+        type: GraphQLString,
+        resolve () {
+          return "blah blah bah"
+        }
+      }
+    }
+  })
+})
