@@ -1,28 +1,37 @@
 // @flow
 
+import { manager } from '../../../core/service-providers/manager'
+
 import {
-  // graphql,
-  GraphQLSchema,
-  GraphQLObjectType,
-  GraphQLString
+  buildSchema
 } from 'graphql'
 
-module.exports = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'RootQueryType',
-    fields: {
-      hello: {
-        type: GraphQLString,
-        resolve () {
-          return 'world'
-        }
-      },
-      name: {
-        type: GraphQLString,
-        resolve () {
-          return "blah blah bah"
-        }
-      }
-    }
-  })
-})
+export const schema = buildSchema(`
+  type Asset {
+    name: String!
+    role: String
+  }
+
+  type UserAccountServiceInfo {
+    id: String!
+    displayName: String!
+    hasRoles: Boolean!
+    assets: [Asset]
+  }
+
+  type UserAccountAggregate {
+    email: String!
+    isNewUser: Boolean
+    services: [UserAccountServiceInfo]!
+  }
+
+  type Query {
+    accounts(serviceId: String): [UserAccountAggregate]
+  }
+`)
+
+export const root = {
+  accounts: function ({ serviceId }) {
+    return manager.download(serviceId || 'all')
+  }
+}

@@ -2,7 +2,7 @@
 // @flow
 import express from 'express'
 import graphqlHTTP from 'express-graphql'
-import Schema from './graphql/schema'
+import { schema, root } from './graphql/schema'
 
 const app = express()
 
@@ -11,7 +11,8 @@ app.get('/', function (req, res) {
 })
 
 app.use('/graphql', graphqlHTTP({
-  schema: Schema,
+  schema: schema,
+  rootValue: root,
   graphiql: true
 }))
 
