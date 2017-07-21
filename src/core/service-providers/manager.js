@@ -1,7 +1,8 @@
 // @flow
 import { modules } from './../service-providers/index'
 import { configStore } from './../data/config-store'
-import type { ServiceProvider, UserAccountAggregate, AssetAssignment } from './../types'
+import type { ServiceProvider, ServiceProviderModule, UserAccountAggregate, AssetAssignment, ServiceInfo } from './../types'
+import lodash from 'lodash'
 
 const moduleLookup = modules.reduce((hash, module) => {
   hash[module.id] = module
@@ -11,11 +12,8 @@ const moduleLookup = modules.reduce((hash, module) => {
 export type Manager = {
   getProvider (serviceId: string): ?ServiceProvider,
   download (serviceId: 'all' | string): Promise<Array<UserAccountAggregate>>,
-  getConfigKeys (serviceId: string): ?Array<string>,
-  isConfigured (serviceId: string): boolean,
-  listServiceIds (): Array<string>,
-  getDisplayName (serviceId: string): string,
-  hasRoles (serviceId: string): boolean
+  getServiceInfos (): Array<ServiceInfo>,
+  getServiceInfo (serviceId: string): ?ServiceInfo
 }
 
 export const manager: Manager = {
@@ -52,11 +50,7 @@ export const manager: Manager = {
 
         const module = moduleLookup[serviceAccountList.serviceId]
         const assetAssignment: AssetAssignment = {
-          service: {
-            id: serviceAccountList.serviceId,
-            displayName: module.displayName,
-            hasRoles: module.hasRoles
-          },
+          service: this._mapToServiceInfo(module, true),
           assets: account.assets
         }
 
@@ -69,27 +63,28 @@ export const manager: Manager = {
     return Object.keys(userSummaryLookup).map((key) => userSummaryLookup[key])
   },
 
-  getConfigKeys (serviceId: string) {
+  getServiceInfo (serviceId: string): ?ServiceInfo {
     const module = moduleLookup[serviceId]
     if (module) {
-      return module.configKeys
+      return this._mapToServiceInfo(module, !!configStore.get(serviceId))
     }
   },
 
-  isConfigured (serviceId: string) {
-    const config = configStore.get(serviceId)
-    return !!config
+  getServiceInfos (): Array<ServiceInfo> {
+    const configuredServiceIds = configStore.configuredServiceIds()
+    return Object.keys(moduleLookup).map((serviceId) => {
+      const module = moduleLookup[serviceId]
+      return this._mapToServiceInfo(module, lodash.includes(configuredServiceIds, serviceId))
+    })
   },
 
-  listServiceIds () {
-    return Object.keys(moduleLookup)
-  },
-
-  getDisplayName (serviceId: string) {
-    return moduleLookup[serviceId].displayName
-  },
-
-  hasRoles (serviceId: string) {
-    return moduleLookup[serviceId].hasRoles
+  _mapToServiceInfo (module: ServiceProviderModule, configured: boolean): ServiceInfo {
+    return {
+      id: module.id,
+      displayName: module.displayName,
+      hasRoles: module.hasRoles,
+      isConfigured: configured,
+      configKeys: module.configKeys
+    }
   }
 }

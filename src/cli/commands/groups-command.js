@@ -36,42 +36,47 @@ export function createGroup (groupName: string) {
 
 export async function configureServiceForGroup (serviceId: string, groupName: string) {
   if (!isValidGroup(groupName)) { return }
-  if (!manager.isConfigured(serviceId)) {
-    term.red(`${serviceId} is not configured.\n\n`)
-    term.cyan('\tTo configure, run: ')
-    term(`cam config ${serviceId}\n\n`)
-    return
-  }
-
-  const group = groupStore.get(groupName)
-
-  group.accessRules[serviceId] = group.accessRules[serviceId] || [{ asset: '*', role: '*' }]
-  const existingRoles = group.accessRules[serviceId]
-    .filter((rule) => rule.asset === '*')
-    .map((rule) => rule.role)
-
-  if (manager.hasRoles(serviceId)) {
-    const question = {
-      type: 'input',
-      name: 'roles',
-      default: existingRoles.join(','),
-      message: 'Enter allowed roles seperated by comma (enter * for all roles):'
-    }
-
-    const specifiedRoles = (await inquirer.prompt([question]))
-      .roles
-      .split(',')
-      .map((role) => role.trim())
-
-    if (specifiedRoles[0] === '') {
-      term.red('No roles defined. Service will not be added. If you meant to grant access to all roles, use *\n\n')
+  const serviceInfo = manager.getServiceInfo(serviceId)
+  if (serviceInfo) {
+    if (!serviceInfo.isConfigured) {
+      term.red(`${serviceId} is not configured.\n\n`)
+      term.cyan('\tTo configure, run: ')
+      term(`cam config ${serviceId}\n\n`)
       return
     }
 
-    group.accessRules[serviceId] = specifiedRoles.map((role) => { return { asset: '*', role: role } })
-  }
+    const group = groupStore.get(groupName)
 
-  groupStore.save(group)
+    group.accessRules[serviceId] = group.accessRules[serviceId] || [{ asset: '*', role: '*' }]
+    const existingRoles = group.accessRules[serviceId]
+      .filter((rule) => rule.asset === '*')
+      .map((rule) => rule.role)
+
+    if (serviceInfo.hasRoles) {
+      const question = {
+        type: 'input',
+        name: 'roles',
+        default: existingRoles.join(','),
+        message: 'Enter allowed roles seperated by comma (enter * for all roles):'
+      }
+
+      const specifiedRoles = (await inquirer.prompt([question]))
+        .roles
+        .split(',')
+        .map((role) => role.trim())
+
+      if (specifiedRoles[0] === '') {
+        term.red('No roles defined. Service will not be added. If you meant to grant access to all roles, use *\n\n')
+        return
+      }
+
+      group.accessRules[serviceId] = specifiedRoles.map((role) => { return { asset: '*', role: role } })
+    }
+
+    groupStore.save(group)
+  } else {
+    term.red('invalid service id\n')
+  }
 }
 
 export function removeServiceFromGroup (serviceId: string, groupName: string) {
@@ -111,38 +116,38 @@ export function showGroup (groupName: string) {
 
 export async function configureGroup (groupName: string) {
   const group = groupStore.get(groupName)
-  const configuredServiceIds = manager.listServiceIds().filter(manager.isConfigured)
+  const configuredServiceInfos = manager.getServiceInfos().filter((serviceInfo) => serviceInfo.isConfigured)
 
-  if (configuredServiceIds.length === 0) {
+  if (configuredServiceInfos.length === 0) {
     term.red('No services have been configured yet. Please run: cam config <service>\n')
     return
   }
 
   const question = {
     type: 'checkbox',
-    name: 'selectedServiceIds',
-    choices: configuredServiceIds
-      .map((serviceId) => {
+    name: 'selectedServiceInfos',
+    choices: configuredServiceInfos
+      .map((serviceInfo) => {
         return {
-          name: serviceId,
-          value: serviceId,
-          checked: !!lodash.find(group.accessRules[serviceId], (accessRule) => accessRule.asset === '*')
+          name: serviceInfo.id,
+          value: serviceInfo,
+          checked: !!lodash.find(group.accessRules[serviceInfo.id], (accessRule) => accessRule.asset === '*')
         }
       }),
     message: `Grant members full access to which services?`
   }
 
-  const selectedServiceIds = (await inquirer.prompt([question])).selectedServiceIds
+  const selectedServiceInfos = (await inquirer.prompt([question])).selectedServiceInfos
   let newAccessRules = {}
 
-  for (let i = 0; i < selectedServiceIds.length; i++) {
-    let serviceId = selectedServiceIds[i]
+  for (let i = 0; i < selectedServiceInfos.length; i++) {
+    let serviceInfo = selectedServiceInfos[i]
     let allowedRoles = []
-    if (manager.hasRoles(serviceId)) {
+    if (serviceInfo.hasRoles) {
       const question = {
         type: 'input',
         name: 'roles',
-        message: `${serviceId}: Enter allowed roles seperated by comma (or leave blank to allow all):`
+        message: `${serviceInfo.id}: Enter allowed roles seperated by comma (or leave blank to allow all):`
       }
 
       const specifiedRoles = (await inquirer.prompt([question]))
@@ -159,7 +164,7 @@ export async function configureGroup (groupName: string) {
       allowedRoles.push('*')
     }
 
-    newAccessRules[serviceId] = allowedRoles.map((role) => { return { asset: '*', role: role } })
+    newAccessRules[serviceInfo.id] = allowedRoles.map((role) => { return { asset: '*', role: role } })
   }
 
   group.accessRules = newAccessRules

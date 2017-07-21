@@ -6,15 +6,17 @@
     "cam": "lib/cli/program.js"
   },
   "scripts": {
+    "prebuild": "rm -rf lib/ && standard --fix && flow",
+
     "core": "babel src/core -d lib/core",
     "express": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
-    
-    "api": "standard && flow && npm run express",
-    "cli": "standard && flow && npm run core && babel src/cli -d lib/cli",
-    "web": "standard && flow && webpack -d && npm run express",
+
+    "api": "npm run prebuild && npm run express",
+    "cli": "npm run prebuild && npm run core && babel src/cli -d lib/cli",
+    "web": "npm run prebuild && webpack -d && npm run express",
 
     "launch": "open -a \"/Applications/Google Chrome.app\" lib/web/client/index.html && webpack -d --watch",
-    "fix": "standard --fix",
+
     "test": "npm run core && jest lib/"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",

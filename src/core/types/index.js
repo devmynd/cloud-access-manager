@@ -2,7 +2,8 @@
 
 export type { UserAccount, Asset } from './user-account'
 export type { ServiceProvider, ServiceProviderModule } from './service-provider'
-export type { UserAccountAggregate, AssetAssignment, ServiceInfo } from './user-account-aggregate'
+export type { UserAccountAggregate, AssetAssignment } from './user-account-aggregate'
 export type { AccessRule, ServiceAccessHash } from './access-rule'
 export type { User } from './user'
 export type { Group } from './group'
+export type { ServiceInfo } from './service-info'

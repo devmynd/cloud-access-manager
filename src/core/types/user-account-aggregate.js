@@ -1,11 +1,5 @@
 // @flow
-import type { Asset } from './'
-
-export type ServiceInfo = {
-  id: string,
-  displayName: string,
-  hasRoles: boolean
-}
+import type { Asset, ServiceInfo } from './'
 
 export type AssetAssignment = {
   service: ServiceInfo,

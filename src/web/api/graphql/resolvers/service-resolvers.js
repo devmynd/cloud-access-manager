@@ -3,10 +3,6 @@
 import { configStore } from '../../../../core/data/config-store'
 import { manager } from '../../../../core/service-providers/manager'
 
-export function configKeys (args: { serviceId: string }) {
-  return manager.getConfigKeys(args.serviceId)
-}
-
 export async function configureService (args: { serviceId: string, configJson: string }) {
   const config = JSON.parse(args.configJson)
   configStore.save(args.serviceId, config)
@@ -17,7 +13,11 @@ export async function configureService (args: { serviceId: string, configJson: s
   }
 }
 
-export function listServices (isConfigured: ?boolean) {
-  const serviceIds = manager.listServiceIds()
-  
+export function listServices (args: { isConfigured: ?boolean }) {
+  // const serviceIds = manager.listServiceIds()
+
+}
+
+export function getService (args: { serviceId: string }) {
+  return manager.getServiceInfo(args.serviceId)
 }

@@ -9,11 +9,16 @@ export async function listAll () {
 }
 
 export async function listByService (serviceId: string) {
-  if (!manager.isConfigured(serviceId)) {
-    term.red(`Service '${serviceId}' is not configured. Run 'cam config ${serviceId}'\n`)
-    return
-  }
+  const serviceInfo = manager.getServiceInfo(serviceId)
+  if (serviceInfo) {
+    if (!serviceInfo.isConfigured) {
+      term.red(`Service '${serviceId}' is not configured. Run 'cam config ${serviceId}'\n`)
+      return
+    }
 
-  const summaries = await manager.download(serviceId)
-  helpers.printSummaries(summaries, false)
+    const summaries = await manager.download(serviceId)
+    helpers.printSummaries(summaries, false)
+  } else {
+    term.red(`Invalid service id`)
+  }
 }

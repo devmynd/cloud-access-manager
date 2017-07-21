@@ -2,7 +2,7 @@
 import {
   buildSchema
 } from 'graphql'
-import { configResolvers, accountsResolvers } from './resolvers'
+import { serviceResolvers, accountsResolvers } from './resolvers'
 
 export const schema = buildSchema(`
   type Asset {
@@ -15,6 +15,7 @@ export const schema = buildSchema(`
     displayName: String!
     hasRoles: Boolean!
     isConfigured: Boolean!
+    configKeys: [String]
   }
 
   type AssetAssignment {
@@ -30,7 +31,8 @@ export const schema = buildSchema(`
 
   type Query {
     accounts(serviceId: String): [UserAccountAggregate]
-    configKeys(serviceId: String!): [String]
+    service(serviceId: String!): ServiceInfo
+    services(isConfigured: Boolean): [ServiceInfo]
   }
 
   type Mutation {
@@ -40,7 +42,7 @@ export const schema = buildSchema(`
 
 export const root = {
   accounts: accountsResolvers.listAccounts,
-  configKeys: configResolvers.configKeys,
-  configureService: configResolvers.configureService,
-  services: configResolvers.listServices
+  configureService: serviceResolvers.configureService,
+  services: serviceResolvers.listServices,
+  service: serviceResolvers.getService
 }

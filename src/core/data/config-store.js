@@ -14,5 +14,10 @@ export const configStore = {
   get (serviceId: string) {
     const data = helpers.readData(process.env.CONFIG_PATH, {})
     return data[serviceId]
+  },
+
+  configuredServiceIds (): Array<string> {
+    const data = helpers.readData(process.env.CONFIG_PATH, {})
+    return Object.keys(data)
   }
 }
