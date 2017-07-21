@@ -18,5 +18,6 @@ export async function configureService (args: { serviceId: string, configJson: s
 }
 
 export function listServices (isConfigured: ?boolean) {
-  manager.listServiceIds()
+  const serviceIds = manager.listServiceIds()
+  
 }

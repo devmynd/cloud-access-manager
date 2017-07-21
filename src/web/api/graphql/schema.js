@@ -10,17 +10,22 @@ export const schema = buildSchema(`
     role: String
   }
 
-  type UserAccountServiceInfo {
+  type ServiceInfo {
     id: String!
     displayName: String!
     hasRoles: Boolean!
-    assets: [Asset]
+    isConfigured: Boolean!
+  }
+
+  type AssetAssignment {
+    service: ServiceInfo!
+    assets: [Asset]!
   }
 
   type UserAccountAggregate {
     email: String!
     isNewUser: Boolean
-    services: [UserAccountServiceInfo]!
+    assetAssignments: [AssetAssignment]!
   }
 
   type Query {
@@ -36,5 +41,6 @@ export const schema = buildSchema(`
 export const root = {
   accounts: accountsResolvers.listAccounts,
   configKeys: configResolvers.configKeys,
-  configureService: configResolvers.configureService
+  configureService: configResolvers.configureService,
+  services: configResolvers.listServices
 }
