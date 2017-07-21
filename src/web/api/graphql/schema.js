@@ -33,6 +33,7 @@ export const schema = buildSchema(`
     accounts(serviceId: String): [UserAccountAggregate]
     service(serviceId: String!): ServiceInfo
     services(isConfigured: Boolean): [ServiceInfo]
+    audit: [UserAccountAggregate]
   }
 
   type Mutation {
@@ -42,6 +43,7 @@ export const schema = buildSchema(`
 
 export const root = {
   accounts: accountsResolvers.listAccounts,
+  audit: accountsResolvers.performAudit,
   configureService: serviceResolvers.configureService,
   services: serviceResolvers.listServices,
   service: serviceResolvers.getService

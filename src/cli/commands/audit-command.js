@@ -6,10 +6,10 @@ import * as helpers from '../helpers'
 import { userStore } from '../../core/data/user-store'
 import { groupStore } from '../../core/data/group-store'
 import inquirer from 'inquirer'
-import type { UserAccountAggregate, AssetAssignment, User, AccessRule, ServiceAccessHash, ServiceInfo } from '../../core/types'
+import type { UserAccountAggregate, AssetAssignment, User, AccessRule, ServiceAccessHash, ServiceInfo, FlaggedUserAccount } from '../../core/types'
 import lodash from 'lodash'
 
-function printFlaggedAccounts (flaggedAccounts: Array<UserAccountAggregate>) {
+function printFlaggedAccounts (flaggedAccounts: Array<FlaggedUserAccount>) {
   if (flaggedAccounts.length > 0) {
     term.red('The following users have been flagged:\n\n')
     helpers.printSummaries(flaggedAccounts)

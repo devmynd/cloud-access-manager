@@ -1,5 +1,5 @@
 // @flow
-import type { UserAccountAggregate, User, AccessRule, ServiceAccessHash, Asset } from './types'
+import type { UserAccountAggregate, User, AccessRule, ServiceAccessHash, FlaggedUserAccount, Asset } from './types'
 import type { UserStore } from './data/user-store'
 import type { GroupStore } from './data/group-store'
 import lodash from 'lodash'
@@ -29,15 +29,21 @@ export class Auditor {
     return this._performAudit(accounts, userLookup, groupAccessRules)
   }
 
-  _performAudit (accounts: Array<UserAccountAggregate>, userLookup: UserLookup, groupAccessRules: GroupAccessRuleLookup) {
+  _performAudit (accounts: Array<UserAccountAggregate>, userLookup: UserLookup, groupAccessRules: GroupAccessRuleLookup): Array<FlaggedUserAccount> {
     return accounts.reduce((flaggedAccounts, account) => {
       const user = userLookup[account.email]
 
+      let flaggedAccount: FlaggedUserAccount = {
+        email: account.email,
+        assetAssignments: [],
+        isNewUser: !user,
+        groups: user ? user.groups : []
+      }
+
       if (!user) {
-        account.isNewUser = true
-        flaggedAccounts.push(account)
+        flaggedAccounts.push(flaggedAccount)
       } else {
-        account.assetAssignments = account.assetAssignments.reduce((flaggedAssignments, assetAssignment) => {
+        flaggedAccount.assetAssignments = account.assetAssignments.reduce((flaggedAssignments, assetAssignment) => {
           const accessRules = this._getAccessRules(user, assetAssignment.service.id, groupAccessRules)
           const unauthorizedAssets = this._findUnauthorizedAssets(assetAssignment.assets, accessRules)
 
@@ -50,7 +56,7 @@ export class Auditor {
         }, [])
 
         if (account.assetAssignments.length > 0) {
-          flaggedAccounts.push(account)
+          flaggedAccounts.push(flaggedAccount)
         }
       }
 

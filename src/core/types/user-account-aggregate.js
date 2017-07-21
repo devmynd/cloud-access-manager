@@ -8,6 +8,12 @@ export type AssetAssignment = {
 
 export type UserAccountAggregate = {
   email: string,
-  isNewUser?: boolean,
+  assetAssignments: Array<AssetAssignment>
+}
+
+export type FlaggedUserAccount = {
+  email: string,
+  isNewUser: boolean,
+  groups: Array<string>,
   assetAssignments: Array<AssetAssignment>
 }
