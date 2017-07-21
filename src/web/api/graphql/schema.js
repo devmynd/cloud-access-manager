@@ -34,20 +34,26 @@ export const schema = buildSchema(`
 
   type Query {
     accounts(serviceId: String): [UserAccountAggregate]
+    configKeys(serviceId: String!): [String]
   }
 
   type Mutation {
-    configureService(serviceId: String, config: [String]): String
+    configureService(serviceId: String, configJson: String): String
   }
 `)
 
 export const root = {
-  accounts: function (args: { serviceId: string }) {
+  accounts (args: { serviceId: string }) {
     return manager.download(args.serviceId || 'all')
   },
-  configureService: function (args: { serviceId: string }) {
-    configStore.save(args.serviceId, args.config)
-    const service = configStore.get(args.serviceId)
-    return `${service} configured!`
+  configKeys (args: { serviceId: string }) {
+    return manager.getConfigKeys(args.serviceId)
+  },
+  async configureService (args: { serviceId: string, configJson: string }) {
+    const config = JSON.parse(args.configJson)
+    configStore.save(args.serviceId, config)
+    let provider = manager.getProvider(args.serviceId)
+    await provider.testConnection()
+    return `${args.serviceId} configured!`
   }
 }

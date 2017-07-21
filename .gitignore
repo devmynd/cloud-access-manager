@@ -65,3 +65,5 @@ lib/
 
 # webpack build dir
 src/web/client/public/
+
+*.DS_Store
