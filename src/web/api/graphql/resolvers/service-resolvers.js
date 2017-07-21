@@ -14,8 +14,11 @@ export async function configureService (args: { serviceId: string, configJson: s
 }
 
 export function listServices (args: { isConfigured: ?boolean }) {
-  // const serviceIds = manager.listServiceIds()
-
+  const serviceInfos = manager.getServiceInfos()
+  if (typeof (args.isConfigured) === 'undefined') {
+    return serviceInfos
+  }
+  return serviceInfos.filter((info) => info.isConfigured === args.isConfigured)
 }
 
 export function getService (args: { serviceId: string }) {
