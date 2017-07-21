@@ -1,7 +1,7 @@
 // @flow
 import { modules } from './../service-providers/index'
 import { configStore } from './../data/config-store'
-import type { ServiceProvider, UserAccountAggregate, UserAccountServiceInfo } from './../types'
+import type { ServiceProvider, UserAccountAggregate, AssetAssignment } from './../types'
 
 const moduleLookup = modules.reduce((hash, module) => {
   hash[module.id] = module
@@ -48,17 +48,19 @@ export const manager: Manager = {
 
     const userSummaryLookup = serviceAccountLists.reduce((userSummaryLookup, serviceAccountList) => {
       serviceAccountList.accounts.forEach((account) => {
-        let userAccountAggregate = userSummaryLookup[account.email] || { email: account.email, services: [] }
+        let userAccountAggregate = userSummaryLookup[account.email] || { email: account.email, assetAssignments: [] }
 
         const module = moduleLookup[serviceAccountList.serviceId]
-        const serviceInfo: UserAccountServiceInfo = {
-          id: serviceAccountList.serviceId,
-          displayName: module.displayName,
-          hasRoles: module.hasRoles,
+        const assetAssignment: AssetAssignment = {
+          service: {
+            id: serviceAccountList.serviceId,
+            displayName: module.displayName,
+            hasRoles: module.hasRoles
+          },
           assets: account.assets
         }
 
-        userAccountAggregate.services.push(serviceInfo)
+        userAccountAggregate.assetAssignments.push(assetAssignment)
         userSummaryLookup[account.email] = userAccountAggregate
       })
       return userSummaryLookup

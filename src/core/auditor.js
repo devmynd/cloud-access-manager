@@ -37,19 +37,19 @@ export class Auditor {
         account.isNewUser = true
         flaggedAccounts.push(account)
       } else {
-        account.services = account.services.reduce((flaggedServices, service) => {
-          const accessRules = this._getAccessRules(user, service.id, groupAccessRules)
-          const unauthorizedAssets = this._findUnauthorizedAssets(service.assets, accessRules)
+        account.assetAssignments = account.assetAssignments.reduce((flaggedAssignments, assetAssignment) => {
+          const accessRules = this._getAccessRules(user, assetAssignment.service.id, groupAccessRules)
+          const unauthorizedAssets = this._findUnauthorizedAssets(assetAssignment.assets, accessRules)
 
           if (unauthorizedAssets.length > 0) {
-            service.assets = unauthorizedAssets
-            flaggedServices.push(service)
+            assetAssignment.assets = unauthorizedAssets
+            flaggedAssignments.push(assetAssignment)
           }
 
-          return flaggedServices
+          return flaggedAssignments
         }, [])
 
-        if (account.services.length > 0) {
+        if (account.assetAssignments.length > 0) {
           flaggedAccounts.push(account)
         }
       }

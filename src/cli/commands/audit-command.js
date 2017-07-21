@@ -6,7 +6,7 @@ import * as helpers from '../helpers'
 import { userStore } from '../../core/data/user-store'
 import { groupStore } from '../../core/data/group-store'
 import inquirer from 'inquirer'
-import type { UserAccountAggregate, UserAccountServiceInfo, User, AccessRule, ServiceAccessHash } from '../../core/types'
+import type { UserAccountAggregate, AssetAssignment, User, AccessRule, ServiceAccessHash, ServiceInfo } from '../../core/types'
 import lodash from 'lodash'
 
 function printFlaggedAccounts (flaggedAccounts: Array<UserAccountAggregate>) {
@@ -62,17 +62,17 @@ export async function interactiveAudit () {
 async function auditForUser (account: UserAccountAggregate, user: User): Promise<void> {
   term.cyan.bold(`${account.email}\n`)
 
-  const whitelistedPartition = lodash.partition(account.services, (service) => user.accessRules.hasOwnProperty(service.id))
+  const whitelistedPartition = lodash.partition(account.assetAssignments, (assetAssignment) => user.accessRules.hasOwnProperty(assetAssignment.service.id))
 
-  let auditableServices = whitelistedPartition[0]
+  let auditableAssetAssignments = whitelistedPartition[0]
   const newServices = whitelistedPartition[1]
 
   if (newServices.length > 0) {
-    const selectedServices = await selectServices(newServices)
-    auditableServices = auditableServices.concat(selectedServices)
+    const selectedAssetAssignments = await selectServices(newServices)
+    auditableAssetAssignments = auditableAssetAssignments.concat(selectedAssetAssignments)
   }
 
-  const newAccessRules = await auditServices(auditableServices)
+  const newAccessRules = await auditServices(auditableAssetAssignments)
   Object.keys(newAccessRules).forEach((serviceId) => {
     const newServiceAccessRules = newAccessRules[serviceId]
     let userServiceAccessRules = user.accessRules[serviceId]
@@ -86,18 +86,18 @@ async function auditForUser (account: UserAccountAggregate, user: User): Promise
   userStore.save(user)
 }
 
-async function auditServices (services: Array<UserAccountServiceInfo>): Promise<ServiceAccessHash> {
+async function auditServices (assetAssignments: Array<AssetAssignment>): Promise<ServiceAccessHash> {
   const serviceAccess: ServiceAccessHash = {}
 
-  // loop through new selected services and get full or partial access and if partial, ask for assets
-  for (let i = 0; i < services.length; i++) {
-    const service = services[i]
+  // loop through new selected assetAssignments and get full or partial access and if partial, ask for assets
+  for (let i = 0; i < assetAssignments.length; i++) {
+    const assetAssignment = assetAssignments[i]
     let accessRules: Array<AccessRule>
-    const fullAccess = await selectFullAccess(service)
+    const fullAccess = await selectFullAccess(assetAssignment.service)
 
     if (fullAccess) {
-      if (service.hasRoles) {
-        const selectedRoles = await selectRoles(service)
+      if (assetAssignment.service.hasRoles) {
+        const selectedRoles = await selectRoles(assetAssignment)
         accessRules = selectedRoles.map((role) => {
           return { asset: '*', role: role }
         })
@@ -105,25 +105,25 @@ async function auditServices (services: Array<UserAccountServiceInfo>): Promise<
         accessRules = [{ asset: '*', role: '*' }]
       }
     } else {
-      accessRules = await selectNewAssets(service)
+      accessRules = await selectNewAssets(assetAssignment)
     }
-    serviceAccess[service.id] = accessRules
+    serviceAccess[assetAssignment.service.id] = accessRules
   }
 
   return serviceAccess
 }
 
-async function selectNewAssets (service: UserAccountServiceInfo): Promise<Array<AccessRule>> {
+async function selectNewAssets (assetAssignment: AssetAssignment): Promise<Array<AccessRule>> {
   const question = {
     type: 'checkbox',
     name: 'selectedAssets',
-    choices: service.assets.map((asset) => {
+    choices: assetAssignment.assets.map((asset) => {
       const roleStr = asset.role ? ` (${asset.role})` : ''
       return {
         name: `${asset.name}${roleStr}`, value: { asset: asset.name, role: asset.role ? asset.role : '*' }
       }
     }),
-    message: `${service.id}: allow the following assets?`
+    message: `${assetAssignment.service.id}: allow the following assets?`
   }
   const selectedAssets = (await inquirer.prompt([question])).selectedAssets
 
@@ -146,8 +146,8 @@ async function selectGroupsForEmail (email: string, groupNames: Array<string>): 
   return selectedGroups
 }
 
-async function selectRoles (service: UserAccountServiceInfo): Promise<Array<string>> {
-  const availableRoles = lodash.uniq(service.assets.filter((asset) => !!asset.role).map((asset) => asset.role))
+async function selectRoles (assetAssignment: AssetAssignment): Promise<Array<string>> {
+  const availableRoles = lodash.uniq(assetAssignment.assets.filter((asset) => !!asset.role).map((asset) => asset.role))
   if (availableRoles.length === 0) {
     term.red.bold('Error: No role property defined for the asset by the service provider implementation.\n')
     term.red.bold('Please add roles to your service provider or update your ServiceProviderModule to have the property: hasRole: false\n')
@@ -160,13 +160,13 @@ async function selectRoles (service: UserAccountServiceInfo): Promise<Array<stri
     choices: availableRoles.map((role) => {
       return { name: role, value: role }
     }),
-    message: `${service.id}: grant full access to which roles?`
+    message: `${assetAssignment.service.id}: grant full access to which roles?`
   }
 
   return (await inquirer.prompt([question])).selectedRoles
 }
 
-async function selectFullAccess (service: UserAccountServiceInfo): Promise<boolean> {
+async function selectFullAccess (service: ServiceInfo): Promise<boolean> {
   const question = {
     type: 'list',
     name: 'fullAccess',
@@ -183,20 +183,20 @@ async function selectFullAccess (service: UserAccountServiceInfo): Promise<boole
   return (await inquirer.prompt([question])).fullAccess
 }
 
-async function selectServices (services: Array<UserAccountServiceInfo>): Promise <Array<UserAccountServiceInfo>> {
+async function selectServices (assetAssignments: Array<AssetAssignment>): Promise <Array<AssetAssignment>> {
   const question = {
     type: 'checkbox',
-    name: 'selectedServices',
+    name: 'selectedAssignments',
     // create choices for every service that isn't at least partially whitelisted yet
-    choices: services
-      .map((service) => {
+    choices: assetAssignments
+      .map((assetAssignment) => {
         return {
-          name: service.id,
-          value: service
+          name: assetAssignment.service.id,
+          value: assetAssignment
         }
       }),
     message: `Allow the following services?`
   }
 
-  return (await inquirer.prompt([question])).selectedServices
+  return (await inquirer.prompt([question])).selectedAssignments
 }

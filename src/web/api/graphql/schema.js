@@ -34,7 +34,7 @@ export const schema = buildSchema(`
 `)
 
 export const root = {
-  accounts: accountsResolvers.listAccounts ,
+  accounts: accountsResolvers.listAccounts,
   configKeys: configResolvers.configKeys,
   configureService: configResolvers.configureService
 }

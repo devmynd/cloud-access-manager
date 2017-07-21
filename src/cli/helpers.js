@@ -6,12 +6,12 @@ export function printSummaries (accounts: Array<UserAccountAggregate>, displaySe
   accounts.sort((lhs, rhs) => lhs.email < rhs.email ? 0 : 1)
   accounts.forEach((account) => {
     term.green(`${account.email}`)
-    account.services.forEach((service) => {
+    account.assetAssignments.forEach((assetAssignment) => {
       if (displayServices) {
-        term.cyan(`\n\t${service.id}`)
+        term.cyan(`\n\t${assetAssignment.service.id}`)
       }
 
-      service.assets.forEach((asset) => {
+      assetAssignment.assets.forEach((asset) => {
         term.magenta(`\n\t\t${asset.name} `)
         if (asset.role) {
           term.yellow(`(${asset.role})`)

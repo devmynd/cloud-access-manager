@@ -22,16 +22,16 @@ describe('performAudit', () => {
   beforeEach(() => {
     accounts = [{
       email: 'user@email.com',
-      services: [
+      assetAssignments: [
         {
-          id: 'test-service',
+          service: { id: 'test-service' },
           assets: [
             { name: 'Project A', role: 'member' },
             { name: 'Project B', role: 'member' }
           ]
         },
         {
-          id: 'another-test-service',
+          service: { id: 'another-test-service' },
           assets: [
             { name: 'Repo A', role: 'member' },
             { name: 'Repo B', role: 'member' }
@@ -83,9 +83,9 @@ describe('performAudit', () => {
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
       email: 'user@email.com',
-      services: [
+      assetAssignments: [
         {
-          id: 'another-test-service',
+          service: { id: 'another-test-service' },
           assets: [{ name: 'Repo B', role: 'member' }]
         }
       ]
@@ -105,9 +105,9 @@ describe('performAudit', () => {
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
       email: 'user@email.com',
-      services: [
+      assetAssignments: [
         {
-          id: 'another-test-service',
+          service: { id: 'another-test-service' },
           assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
       ]
@@ -125,13 +125,13 @@ describe('performAudit', () => {
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
       email: 'user@email.com',
-      services: [
+      assetAssignments: [
         {
-          id: 'test-service',
+          service: { id: 'test-service' },
           assets: [{ name: 'Project A', role: 'member' }, { name: 'Project B', role: 'member' }]
         },
         {
-          id: 'another-test-service',
+          service: { id: 'another-test-service' },
           assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
       ]
@@ -174,13 +174,13 @@ describe('performAudit', () => {
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
       email: 'user@email.com',
-      services: [
+      assetAssignments: [
         {
-          id: 'test-service',
+          service: { id: 'test-service' },
           assets: [{ name: 'Project A', role: 'member' }]
         },
         {
-          id: 'another-test-service',
+          service: { id: 'another-test-service' },
           assets: [{ name: 'Repo B', role: 'member' }]
         }
       ]
@@ -208,13 +208,13 @@ describe('performAudit', () => {
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
       email: 'user@email.com',
-      services: [
+      assetAssignments: [
         {
-          id: 'test-service',
+          service: { id: 'test-service' },
           assets: [{ name: 'Project A', role: 'member' }, { name: 'Project B', role: 'member' }]
         },
         {
-          id: 'another-test-service',
+          service: { id: 'another-test-service' },
           assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
       ]

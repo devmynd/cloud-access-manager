@@ -7,9 +7,12 @@
   },
   "scripts": {
     "core": "babel src/core -d lib/core",
-    "api": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
+    "express": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
+    
+    "api": "standard && flow && npm run express",
     "cli": "standard && flow && npm run core && babel src/cli -d lib/cli",
-    "web": "standard && flow && webpack -d && npm run api",
+    "web": "standard && flow && webpack -d && npm run express",
+
     "launch": "open -a \"/Applications/Google Chrome.app\" lib/web/client/index.html && webpack -d --watch",
     "fix": "standard --fix",
     "test": "npm run core && jest lib/"
