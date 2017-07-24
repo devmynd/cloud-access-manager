@@ -10,6 +10,11 @@ export const schema = buildSchema(`
     role: String
   }
 
+  type AssetAssignment {
+    service: ServiceInfo!
+    assets: [Asset]!
+  }
+
   type ServiceInfo {
     id: String!
     displayName: String!
@@ -18,9 +23,19 @@ export const schema = buildSchema(`
     configKeys: [String]
   }
 
-  type AssetAssignment {
-    service: ServiceInfo!
-    assets: [Asset]!
+  type AccessRule {
+    asset: String!
+    role: String!
+  }
+
+  type ServiceAccessRuleList {
+    service: ServiceInfo!,
+    accessRules: [AccessRule]!
+  }
+
+  type Group {
+    name: String!
+    serviceAccessRules: [ServiceAccessRuleList]!
   }
 
   type ServiceUserAccountsAggregate {
@@ -40,22 +55,24 @@ export const schema = buildSchema(`
     service(serviceId: String!): ServiceInfo
     services(isConfigured: Boolean): [ServiceInfo]
     audit: [FlaggedInfo]
+    groups: [Group]
+    group(name: String): Group
   }
 
-  input AccessRule {
+  input AccessRuleInput {
     asset: String!
     role: String!
   }
 
-  input ServiceAccessRuleList {
+  input ServiceAccessRuleListInput {
     serviceId: String!
-    accessRules: [AccessRule]!
+    accessRules: [AccessRuleInput]!
   }
 
   type Mutation {
     configureService(serviceId: String, configJson: String): String
-    setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleList]): String
-    addAccessRules(email: String, serviceAccessRules: [ServiceAccessRuleList]): String
+    setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
+    addAccessRules(email: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
   }
 `)
 
@@ -66,5 +83,7 @@ export const root = {
   services: serviceResolvers.listServices,
   service: serviceResolvers.getService,
   addAccessRules: individualsResolvers.addAccessRules,
-  setGroupAccessRules: groupsResolvers.setGroupAccessRules
+  setGroupAccessRules: groupsResolvers.setGroupAccessRules,
+  group: groupsResolvers.getGroup,
+  groups: groupsResolvers.listGroups
 }
