@@ -1,7 +1,7 @@
 // @flow
 import { manager } from '../../../../core/service-providers/manager'
 import { Auditor } from '../../../../core/auditor'
-import { userStore } from '../../../../core/data/user-store'
+import { individualStore } from '../../../../core/data/individual-store'
 import { groupStore } from '../../../../core/data/group-store'
 
 export function listAccounts (args: { serviceId: string }) {
@@ -10,5 +10,5 @@ export function listAccounts (args: { serviceId: string }) {
 
 export async function performAudit () {
   const accounts = await manager.download('all')
-  return new Auditor(userStore, groupStore).performAudit(accounts)
+  return new Auditor(individualStore, groupStore).performAudit(accounts)
 }

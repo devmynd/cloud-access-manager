@@ -1,6 +1,6 @@
 // @flow
-import type { IndividualAccountAggregate, Individual, AccessRule, ServiceAccessHash, FlaggedIndividualAccountInfo, Asset } from './types'
-import type { individualStore } from './data/individual-store'
+import type { ServiceUserAccountsAggregate, Individual, AccessRule, ServiceAccessHash, FlaggedInfo, Asset } from './types'
+import type { IndividualStore } from './data/individual-store'
 import type { GroupStore } from './data/group-store'
 import lodash from 'lodash'
 
@@ -16,7 +16,7 @@ export class Auditor {
     this.groupStore = groupStore
   }
 
-  performAudit (accounts: Array<IndividualAccountAggregate>) {
+  performAudit (accounts: Array<ServiceUserAccountsAggregate>) {
     const individuals = this.individualStore.getAll()
     const groups = this.groupStore.getAll()
 
@@ -29,11 +29,11 @@ export class Auditor {
     return this._performAudit(accounts, individualLookup, groupAccessRules)
   }
 
-  _performAudit (accounts: Array<IndividualAccountAggregate>, individualLookup: IndividualLookup, groupAccessRules: GroupAccessRuleLookup): Array<FlaggedIndividualAccountInfo> {
+  _performAudit (accounts: Array<ServiceUserAccountsAggregate>, individualLookup: IndividualLookup, groupAccessRules: GroupAccessRuleLookup): Array<FlaggedInfo> {
     return accounts.reduce((flaggedAccounts, account) => {
       const individual = individualLookup[account.email]
 
-      let flaggedAccount: FlaggedIndividualAccountInfo = {
+      let flaggedAccount: FlaggedInfo = {
         email: account.email,
         assetAssignments: account.assetAssignments,
         isNewIndividual: !individual,

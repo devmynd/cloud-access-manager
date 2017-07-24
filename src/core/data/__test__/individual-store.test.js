@@ -1,12 +1,12 @@
 /* eslint-env jest */
-import { userStore as store } from '../user-store'
+import { individualStore as store } from '../individual-store'
 import fs from 'file-system'
-process.env.USERS_PATH = './.users.test.store.json'
+process.env.INDIVIDUALS_PATH = './.individuals.test.store.json'
 
 describe('integration test', () => {
   test('inserts, updates, and reads', () => {
-    if (fs.existsSync(process.env.USERS_PATH)) {
-      fs.unlinkSync(process.env.USERS_PATH)
+    if (fs.existsSync(process.env.INDIVIDUALS_PATH)) {
+      fs.unlinkSync(process.env.INDIVIDUALS_PATH)
     }
 
     let entry1 = {

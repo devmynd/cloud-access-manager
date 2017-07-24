@@ -23,20 +23,16 @@ export const schema = buildSchema(`
     assets: [Asset]!
   }
 
-  type IndividualAccountAggregate {
+  type ServiceUserAccountsAggregate {
     email: String!
     assetAssignments: [AssetAssignment]!
   }
 
-  type FlaggedIndividualAccountInfoInfo {
-
-  }
-
   type Query {
-    accounts(serviceId: String): [IndividualAccountAggregate]
+    accounts(serviceId: String): [ServiceUserAccountsAggregate]
     service(serviceId: String!): ServiceInfo
     services(isConfigured: Boolean): [ServiceInfo]
-    audit: [IndividualAccountAggregate]
+    audit: [ServiceUserAccountsAggregate]
   }
 
   type Mutation {

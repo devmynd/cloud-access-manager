@@ -1,7 +1,7 @@
 // @flow
 import { modules } from './../service-providers/index'
 import { configStore } from './../data/config-store'
-import type { ServiceProvider, ServiceProviderModule, IndividualAccountAggregate, AssetAssignment, ServiceInfo } from './../types'
+import type { ServiceProvider, ServiceProviderModule, ServiceUserAccountsAggregate, AssetAssignment, ServiceInfo } from './../types'
 import lodash from 'lodash'
 
 const moduleLookup = modules.reduce((hash, module) => {
@@ -11,7 +11,7 @@ const moduleLookup = modules.reduce((hash, module) => {
 
 export type Manager = {
   getProvider (serviceId: string): ?ServiceProvider,
-  download (serviceId: 'all' | string): Promise<Array<IndividualAccountAggregate>>,
+  download (serviceId: 'all' | string): Promise<Array<ServiceUserAccountsAggregate>>,
   getServiceInfos (): Array<ServiceInfo>,
   getServiceInfo (serviceId: string): ?ServiceInfo
 }

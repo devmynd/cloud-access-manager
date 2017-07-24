@@ -6,12 +6,12 @@ import * as helpers from '../helpers'
 import { individualStore } from '../../core/data/individual-store'
 import { groupStore } from '../../core/data/group-store'
 import inquirer from 'inquirer'
-import type { IndividualAccountAggregate, AssetAssignment, Individual, AccessRule, ServiceAccessHash, ServiceInfo, FlaggedIndividualAccountInfo } from '../../core/types'
+import type { ServiceUserAccountsAggregate, AssetAssignment, Individual, AccessRule, ServiceAccessHash, ServiceInfo, FlaggedInfo } from '../../core/types'
 import lodash from 'lodash'
 
-function printFlaggedAccounts (flaggedAccounts: Array<FlaggedIndividualAccountInfo>) {
+function printFlaggedAccounts (flaggedAccounts: Array<FlaggedInfo>) {
   if (flaggedAccounts.length > 0) {
-    term.red('The following users have been flagged:\n\n')
+    term.red('The following individuals have been flagged:\n\n')
     helpers.printSummaries(flaggedAccounts)
   } else {
     term.green('No suspicious accounts found. Take a break. Have a 🍺\n\n')
@@ -20,7 +20,7 @@ function printFlaggedAccounts (flaggedAccounts: Array<FlaggedIndividualAccountIn
 
 export async function audit () {
   const accounts = await manager.download('all')
-  const auditor = new Auditor(userStore, groupStore)
+  const auditor = new Auditor(individualStore, groupStore)
 
   const flaggedAccounts = auditor.performAudit(accounts)
   printFlaggedAccounts(flaggedAccounts)
@@ -28,7 +28,7 @@ export async function audit () {
 
 export async function interactiveAudit () {
   const accounts = await manager.download('all')
-  const auditor = new Auditor(userStore, groupStore)
+  const auditor = new Auditor(individualStore, groupStore)
 
   let flaggedAccounts = auditor.performAudit(accounts)
 
@@ -41,7 +41,7 @@ export async function interactiveAudit () {
     for (let i = 0; i < newIndividualEmails.length; i++) {
       const email = newIndividualEmails[i]
       const selectedGroups = await selectGroupsForEmail(email, groupNames)
-      userStore.save({ email: email, groups: selectedGroups, accessRules: { } })
+      individualStore.save({ email: email, groups: selectedGroups, accessRules: { } })
     }
 
     // Perform another audit to refresh after having selected group membership
@@ -50,8 +50,8 @@ export async function interactiveAudit () {
 
   for (let i = 0; i < flaggedAccounts.length; i++) {
     const account = flaggedAccounts[i]
-    const user = userStore.getByEmail(account.email)
-    await auditForIndividual(account, user)
+    const individual = individualStore.getByEmail(account.email)
+    await auditForIndividual(account, individual)
     term('\n')
   }
 
@@ -59,7 +59,7 @@ export async function interactiveAudit () {
   printFlaggedAccounts(flaggedAccounts)
 }
 
-async function auditForIndividual (account: IndividualAccountAggregate, individual: Individual): Promise<void> {
+async function auditForIndividual (account: ServiceUserAccountsAggregate, individual: Individual): Promise<void> {
   term.cyan.bold(`${account.email}\n`)
 
   const whitelistedPartition = lodash.partition(account.assetAssignments, (assetAssignment) => individual.accessRules.hasOwnProperty(assetAssignment.service.id))
