@@ -2,7 +2,7 @@
 import {
   buildSchema
 } from 'graphql'
-import { serviceResolvers, accountsResolvers } from './resolvers'
+import { serviceResolvers, accountsResolvers, individualsResolvers } from './resolvers'
 
 export const schema = buildSchema(`
   type Asset {
@@ -28,15 +28,33 @@ export const schema = buildSchema(`
     assetAssignments: [AssetAssignment]!
   }
 
+  type FlaggedInfo {
+    email: String!
+    isNewIndividual: Boolean!
+    groups: [String]!
+    assetAssignments: [AssetAssignment]!
+  }
+
   type Query {
     accounts(serviceId: String): [ServiceUserAccountsAggregate]
     service(serviceId: String!): ServiceInfo
     services(isConfigured: Boolean): [ServiceInfo]
-    audit: [ServiceUserAccountsAggregate]
+    audit: [FlaggedInfo]
+  }
+
+  input AccessRule {
+    asset: String!
+    role: String!
+  }
+
+  input ServiceAccessRuleList {
+    serviceId: String!
+    accessRules: [AccessRule]!
   }
 
   type Mutation {
     configureService(serviceId: String, configJson: String): String
+    addAccessRules(email: String, serviceAccessRules: [ServiceAccessRuleList]): String
   }
 `)
 
@@ -45,5 +63,6 @@ export const root = {
   audit: accountsResolvers.performAudit,
   configureService: serviceResolvers.configureService,
   services: serviceResolvers.listServices,
-  service: serviceResolvers.getService
+  service: serviceResolvers.getService,
+  addAccessRules: individualsResolvers.addAccessRules
 }
