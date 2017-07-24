@@ -3,13 +3,13 @@ import { manager } from './../../core/service-providers/manager'
 import { terminal as term } from 'terminal-kit'
 import { Auditor } from './../../core/auditor'
 import * as helpers from '../helpers'
-import { userStore } from '../../core/data/user-store'
+import { individualStore } from '../../core/data/individual-store'
 import { groupStore } from '../../core/data/group-store'
 import inquirer from 'inquirer'
-import type { UserAccountAggregate, AssetAssignment, User, AccessRule, ServiceAccessHash, ServiceInfo, FlaggedUserAccount } from '../../core/types'
+import type { IndividualAccountAggregate, AssetAssignment, Individual, AccessRule, ServiceAccessHash, ServiceInfo, FlaggedIndividualAccountInfo } from '../../core/types'
 import lodash from 'lodash'
 
-function printFlaggedAccounts (flaggedAccounts: Array<FlaggedUserAccount>) {
+function printFlaggedAccounts (flaggedAccounts: Array<FlaggedIndividualAccountInfo>) {
   if (flaggedAccounts.length > 0) {
     term.red('The following users have been flagged:\n\n')
     helpers.printSummaries(flaggedAccounts)
@@ -32,14 +32,14 @@ export async function interactiveAudit () {
 
   let flaggedAccounts = auditor.performAudit(accounts)
 
-  const newUserEmails = flaggedAccounts
-    .filter((account) => account.isNewUser)
+  const newIndividualEmails = flaggedAccounts
+    .filter((account) => account.isNewIndividual)
     .map((account) => account.email)
 
-  if (newUserEmails.length > 0) {
+  if (newIndividualEmails.length > 0) {
     const groupNames = groupStore.getAll().map((group) => group.name)
-    for (let i = 0; i < newUserEmails.length; i++) {
-      const email = newUserEmails[i]
+    for (let i = 0; i < newIndividualEmails.length; i++) {
+      const email = newIndividualEmails[i]
       const selectedGroups = await selectGroupsForEmail(email, groupNames)
       userStore.save({ email: email, groups: selectedGroups, accessRules: { } })
     }
@@ -51,7 +51,7 @@ export async function interactiveAudit () {
   for (let i = 0; i < flaggedAccounts.length; i++) {
     const account = flaggedAccounts[i]
     const user = userStore.getByEmail(account.email)
-    await auditForUser(account, user)
+    await auditForIndividual(account, user)
     term('\n')
   }
 
@@ -59,10 +59,10 @@ export async function interactiveAudit () {
   printFlaggedAccounts(flaggedAccounts)
 }
 
-async function auditForUser (account: UserAccountAggregate, user: User): Promise<void> {
+async function auditForIndividual (account: IndividualAccountAggregate, individual: Individual): Promise<void> {
   term.cyan.bold(`${account.email}\n`)
 
-  const whitelistedPartition = lodash.partition(account.assetAssignments, (assetAssignment) => user.accessRules.hasOwnProperty(assetAssignment.service.id))
+  const whitelistedPartition = lodash.partition(account.assetAssignments, (assetAssignment) => individual.accessRules.hasOwnProperty(assetAssignment.service.id))
 
   let auditableAssetAssignments = whitelistedPartition[0]
   const newServices = whitelistedPartition[1]
@@ -75,15 +75,15 @@ async function auditForUser (account: UserAccountAggregate, user: User): Promise
   const newAccessRules = await auditServices(auditableAssetAssignments)
   Object.keys(newAccessRules).forEach((serviceId) => {
     const newServiceAccessRules = newAccessRules[serviceId]
-    let userServiceAccessRules = user.accessRules[serviceId]
-    if (userServiceAccessRules) {
-      user.accessRules[serviceId] = userServiceAccessRules.concat(newServiceAccessRules)
+    let individualServiceAccessRules = individual.accessRules[serviceId]
+    if (individualServiceAccessRules) {
+      individual.accessRules[serviceId] = individualServiceAccessRules.concat(newServiceAccessRules)
     } else {
-      user.accessRules[serviceId] = newServiceAccessRules
+      individual.accessRules[serviceId] = newServiceAccessRules
     }
   })
 
-  userStore.save(user)
+  individualStore.save(individual)
 }
 
 async function auditServices (assetAssignments: Array<AssetAssignment>): Promise<ServiceAccessHash> {

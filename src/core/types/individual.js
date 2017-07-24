@@ -1,7 +1,7 @@
 // @flow
 import type { ServiceAccessHash } from './'
 
-export type User = {
+export type Individual = {
   email: string,
   accessRules: ServiceAccessHash,
   groups: Array<string>

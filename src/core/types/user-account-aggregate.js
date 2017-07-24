@@ -6,14 +6,14 @@ export type AssetAssignment = {
   assets: Array<Asset>
 }
 
-export type UserAccountAggregate = {
+export type IndividualAccountAggregate = {
   email: string,
   assetAssignments: Array<AssetAssignment>
 }
 
-export type FlaggedUserAccount = {
+export type FlaggedIndividualAccountInfo = {
   email: string,
-  isNewUser: boolean,
+  isNewIndividual: boolean,
   groups: Array<string>,
   assetAssignments: Array<AssetAssignment>
 }

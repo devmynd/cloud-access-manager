@@ -13,7 +13,7 @@
     "cli": "npm run prebuild && npm run core && babel src/cli -d lib/cli",
     "web": "npm run prebuild && webpack -d && npm run express",
     "launch": "open -a \"/Applications/Google Chrome.app\" lib/web/client/index.html && webpack -d --watch",
-    "test": "npm run core && jest lib/"
+    "test": "npm run prebuild  && npm run core && jest lib/"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",

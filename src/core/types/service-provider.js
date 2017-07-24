@@ -1,8 +1,8 @@
 // @flow
-import type { UserAccount } from './user-account'
+import type { IndividualAccount } from './user-account'
 
 export interface ServiceProvider {
-  listAccounts (): Promise<Array<UserAccount>>;
+  listAccounts (): Promise<Array<IndividualAccount>>;
   testConnection (): Promise<void>;
 }
 

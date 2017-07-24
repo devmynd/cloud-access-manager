@@ -4,10 +4,10 @@ import { Auditor } from '../auditor'
 describe('performAudit', () => {
   let accounts
 
-  let users = []
-  const userStore = {
+  let individuals = []
+  const individualStore = {
     getAll () {
-      return users
+      return individuals
     }
   }
 
@@ -17,11 +17,11 @@ describe('performAudit', () => {
       return groups
     }
   }
-  const auditor = new Auditor(userStore, groupStore)
+  const auditor = new Auditor(individualStore, groupStore)
 
   beforeEach(() => {
     accounts = [{
-      email: 'user@email.com',
+      email: 'individual@email.com',
       assetAssignments: [
         {
           service: { id: 'test-service' },
@@ -41,9 +41,31 @@ describe('performAudit', () => {
     }]
   })
 
-  test('it does not flag the user when they have full access to both services', () => {
-    users = [{
-      email: 'user@email.com',
+  test('it flags a new individual', () => {
+    individuals = []
+    const results = auditor.performAudit(accounts)
+
+    expect(results.length).toBe(1)
+    expect(results[0]).toEqual({
+      email: 'individual@email.com',
+      assetAssignments: [
+        {
+          service: { id: 'test-service' },
+          assets: [{ name: 'Project A', role: 'member' }, { name: 'Project B', role: 'member' }]
+        },
+        {
+          service: { id: 'another-test-service' },
+          assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
+        }
+      ],
+      groups: [],
+      isNewIndividual: true
+    })
+  })
+
+  test('it does not flag the individual when they have full access to both services', () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: [],
       accessRules: {
         'test-service': [{ asset: '*', role: '*' }],
@@ -55,9 +77,9 @@ describe('performAudit', () => {
     expect(results.length).toBe(0)
   })
 
-  test('it does not flag the user when they are whitelisted for each asset in each service', () => {
-    users = [{
-      email: 'user@email.com',
+  test('it does not flag the individual when they are whitelisted for each asset in each service', () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: [],
       accessRules: {
         'test-service': [{ asset: 'Project A', role: '*' }, { asset: 'Project B', role: '*' }],
@@ -69,9 +91,9 @@ describe('performAudit', () => {
     expect(results.length).toBe(0)
   })
 
-  test('flags the user if there is an asset they are not whitelisted for', () => {
-    users = [{
-      email: 'user@email.com',
+  test('flags the individual if there is an asset they are not whitelisted for', () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: [],
       accessRules: {
         'test-service': [{ asset: '*', role: '*' }],
@@ -82,19 +104,21 @@ describe('performAudit', () => {
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
-      email: 'user@email.com',
+      email: 'individual@email.com',
       assetAssignments: [
         {
           service: { id: 'another-test-service' },
           assets: [{ name: 'Repo B', role: 'member' }]
         }
-      ]
+      ],
+      groups: [],
+      isNewIndividual: false
     })
   })
 
-  test("flags the user when they aren't whitelisted for one of the services", () => {
-    users = [{
-      email: 'user@email.com',
+  test("flags the individual when they aren't whitelisted for one of the services", () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: [],
       accessRules: {
         'test-service': [{ asset: '*', role: '*' }]
@@ -104,19 +128,21 @@ describe('performAudit', () => {
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
-      email: 'user@email.com',
+      email: 'individual@email.com',
       assetAssignments: [
         {
           service: { id: 'another-test-service' },
           assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
-      ]
+      ],
+      groups: [],
+      isNewIndividual: false
     })
   })
 
-  test("flags the user when they aren't whitelisted at all", () => {
-    users = [{
-      email: 'user@email.com',
+  test("flags the individual when they aren't whitelisted at all", () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: [],
       accessRules: { }
     }]
@@ -124,7 +150,7 @@ describe('performAudit', () => {
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
-      email: 'user@email.com',
+      email: 'individual@email.com',
       assetAssignments: [
         {
           service: { id: 'test-service' },
@@ -134,13 +160,15 @@ describe('performAudit', () => {
           service: { id: 'another-test-service' },
           assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
-      ]
+      ],
+      groups: [],
+      isNewIndividual: false
     })
   })
 
-  test('does not flag the user if one of their groups grants them access', () => {
-    users = [{
-      email: 'user@email.com',
+  test('does not flag the individual if one of their groups grants them access', () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: ['employee', 'admin'],
       accessRules: { }
     }]
@@ -156,9 +184,9 @@ describe('performAudit', () => {
     expect(results.length).toBe(0)
   })
 
-  test('does not flag the user for assets which are whitelisted through their group membership', () => {
-    users = [{
-      email: 'user@email.com',
+  test('does not flag the individual for assets which are whitelisted through their group membership', () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: ['employee'],
       accessRules: { }
     }]
@@ -173,7 +201,7 @@ describe('performAudit', () => {
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
-      email: 'user@email.com',
+      email: 'individual@email.com',
       assetAssignments: [
         {
           service: { id: 'test-service' },
@@ -183,13 +211,15 @@ describe('performAudit', () => {
           service: { id: 'another-test-service' },
           assets: [{ name: 'Repo B', role: 'member' }]
         }
-      ]
+      ],
+      groups: ['employee'],
+      isNewIndividual: false
     })
   })
 
-  test('flags users if they have access but for the wrong role', () => {
-    users = [{
-      email: 'user@email.com',
+  test('flags individuals if they have access but for the wrong role', () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: ['employee'],
       accessRules: {
         'test-service': [{ asset: 'Project A', role: 'not-member' }]
@@ -207,7 +237,7 @@ describe('performAudit', () => {
 
     expect(results.length).toBe(1)
     expect(results[0]).toEqual({
-      email: 'user@email.com',
+      email: 'individual@email.com',
       assetAssignments: [
         {
           service: { id: 'test-service' },
@@ -217,13 +247,15 @@ describe('performAudit', () => {
           service: { id: 'another-test-service' },
           assets: [{ name: 'Repo A', role: 'member' }, { name: 'Repo B', role: 'member' }]
         }
-      ]
+      ],
+      groups: ['employee'],
+      isNewIndividual: false
     })
   })
 
-  test('does not flag users who have access with the correct role', () => {
-    users = [{
-      email: 'user@email.com',
+  test('does not flag individuals who have access with the correct role', () => {
+    individuals = [{
+      email: 'individual@email.com',
       groups: ['employee'],
       accessRules: {
         'test-service': [{ asset: 'Project A', role: 'member' }]
