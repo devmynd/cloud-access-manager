@@ -41,6 +41,7 @@ export class Auditor {
       }
 
       if (!individual) {
+        this.individualStore.save({ email: flaggedAccount.email, accessRules: {}, groups: [] })
         flaggedAccounts.push(flaggedAccount)
       } else {
         flaggedAccount.assetAssignments = account.assetAssignments.reduce((flaggedAssignments, assetAssignment) => {

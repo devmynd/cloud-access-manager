@@ -5,21 +5,29 @@ describe('performAudit', () => {
   let accounts
 
   let individuals = []
-  const individualStore = {
-    getAll () {
-      return individuals
-    }
-  }
+  let individualStore
 
   let groups = []
-  const groupStore = {
-    getAll () {
-      return groups
-    }
-  }
-  const auditor = new Auditor(individualStore, groupStore)
+  let groupStore
+  let auditor
 
   beforeEach(() => {
+    individualStore = {
+      getAll () {
+        return individuals
+      },
+      savedIndividuals: [],
+      save (individual) {
+        this.savedIndividuals.push(individual)
+      }
+    }
+
+    groupStore = {
+      getAll () {
+        return groups
+      }
+    }
+
     accounts = [{
       email: 'individual@email.com',
       assetAssignments: [
@@ -39,6 +47,8 @@ describe('performAudit', () => {
         }
       ]
     }]
+
+    auditor = new Auditor(individualStore, groupStore)
   })
 
   test('it flags a new individual', () => {
@@ -61,6 +71,8 @@ describe('performAudit', () => {
       groups: [],
       isNewIndividual: true
     })
+    expect(individualStore.savedIndividuals.length).toBe(1)
+    expect(individualStore.savedIndividuals[0]).toEqual({ email: 'individual@email.com', groups: [], accessRules: {} })
   })
 
   test('it does not flag the individual when they have full access to both services', () => {
@@ -75,6 +87,7 @@ describe('performAudit', () => {
     const results = auditor.performAudit(accounts)
 
     expect(results.length).toBe(0)
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test('it does not flag the individual when they are whitelisted for each asset in each service', () => {
@@ -89,6 +102,7 @@ describe('performAudit', () => {
     const results = auditor.performAudit(accounts)
 
     expect(results.length).toBe(0)
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test('flags the individual if there is an asset they are not whitelisted for', () => {
@@ -114,6 +128,7 @@ describe('performAudit', () => {
       groups: [],
       isNewIndividual: false
     })
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test("flags the individual when they aren't whitelisted for one of the services", () => {
@@ -138,6 +153,7 @@ describe('performAudit', () => {
       groups: [],
       isNewIndividual: false
     })
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test("flags the individual when they aren't whitelisted at all", () => {
@@ -164,6 +180,7 @@ describe('performAudit', () => {
       groups: [],
       isNewIndividual: false
     })
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test('does not flag the individual if one of their groups grants them access', () => {
@@ -182,6 +199,7 @@ describe('performAudit', () => {
     const results = auditor.performAudit(accounts)
 
     expect(results.length).toBe(0)
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test('does not flag the individual for assets which are whitelisted through their group membership', () => {
@@ -215,6 +233,7 @@ describe('performAudit', () => {
       groups: ['employee'],
       isNewIndividual: false
     })
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test('flags individuals if they have access but for the wrong role', () => {
@@ -251,6 +270,7 @@ describe('performAudit', () => {
       groups: ['employee'],
       isNewIndividual: false
     })
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 
   test('does not flag individuals who have access with the correct role', () => {
@@ -272,5 +292,6 @@ describe('performAudit', () => {
     const results = auditor.performAudit(accounts)
 
     expect(results.length).toBe(0)
+    expect(individualStore.savedIndividuals.length).toBe(0)
   })
 })

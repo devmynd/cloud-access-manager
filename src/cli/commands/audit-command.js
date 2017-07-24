@@ -41,7 +41,9 @@ export async function interactiveAudit () {
     for (let i = 0; i < newIndividualEmails.length; i++) {
       const email = newIndividualEmails[i]
       const selectedGroups = await selectGroupsForEmail(email, groupNames)
-      individualStore.save({ email: email, groups: selectedGroups, accessRules: { } })
+      let user = individualStore.getByEmail(email)
+      user.groups = selectedGroups
+      individualStore.save(user)
     }
 
     // Perform another audit to refresh after having selected group membership

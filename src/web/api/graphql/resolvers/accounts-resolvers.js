@@ -10,5 +10,5 @@ export function listAccounts (args: { serviceId: string }) {
 
 export async function performAudit () {
   const accounts = await manager.download('all')
-  const flaggedAccounts = new Auditor(individualStore, groupStore).performAudit(accounts)
+  return new Auditor(individualStore, groupStore).performAudit(accounts)
 }
