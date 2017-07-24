@@ -30,6 +30,11 @@ export function listGroups () {
   return groups.map(mapGroup)
 }
 
+export function deleteGroup (args: { name: string }) {
+  groupStore.deleteGroup(args.name)
+  return `Group ${args.name} deleted!`
+}
+
 function mapGroup (group: Group) {
   return {
     name: group.name,

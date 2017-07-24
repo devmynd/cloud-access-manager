@@ -73,6 +73,7 @@ export const schema = buildSchema(`
     configureService(serviceId: String, configJson: String): String
     setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
     addAccessRules(email: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
+    deleteGroup(name: String): String
   }
 `)
 
@@ -85,5 +86,6 @@ export const root = {
   addAccessRules: individualsResolvers.addAccessRules,
   setGroupAccessRules: groupsResolvers.setGroupAccessRules,
   group: groupsResolvers.getGroup,
-  groups: groupsResolvers.listGroups
+  groups: groupsResolvers.listGroups,
+  deleteGroup: groupsResolvers.deleteGroup
 }
