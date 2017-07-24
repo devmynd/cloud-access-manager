@@ -2,7 +2,7 @@
 import {
   buildSchema
 } from 'graphql'
-import { serviceResolvers, accountsResolvers, individualsResolvers } from './resolvers'
+import { serviceResolvers, accountsResolvers, individualsResolvers, groupsResolvers } from './resolvers'
 
 export const schema = buildSchema(`
   type Asset {
@@ -54,6 +54,7 @@ export const schema = buildSchema(`
 
   type Mutation {
     configureService(serviceId: String, configJson: String): String
+    setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleList]): String
     addAccessRules(email: String, serviceAccessRules: [ServiceAccessRuleList]): String
   }
 `)
@@ -64,5 +65,6 @@ export const root = {
   configureService: serviceResolvers.configureService,
   services: serviceResolvers.listServices,
   service: serviceResolvers.getService,
-  addAccessRules: individualsResolvers.addAccessRules
+  addAccessRules: individualsResolvers.addAccessRules,
+  setGroupAccessRules: groupsResolvers.setGroupAccessRules
 }
