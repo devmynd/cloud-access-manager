@@ -20,3 +20,10 @@ export function addAccessRules (args: {
   individualStore.save(individual)
   return 'rules added successfully'
 }
+
+export function addGroupMembership (args: { email: string, groupName: string }) {
+  const individual = individualStore.getByEmail(args.email)
+  individual.groups.push(args.groupName)
+  individualStore.save(individual)
+  return `${args.email} added to ${args.groupName}`
+}
