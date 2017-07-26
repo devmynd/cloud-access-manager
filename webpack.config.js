@@ -9,7 +9,7 @@ var config = {
   entry: APP_DIR + '/src/index.js',
   output: {
     path: BUILD_DIR,
-    filename: 'bundle.js'
+    filename: 'scripts/bundle.js'
   },
   module: {
     loaders: [
