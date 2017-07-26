@@ -57,6 +57,9 @@
     "parser": "babel-eslint",
     "plugins": [
       "flowtype"
+    ],
+    "globals": [
+      "fetch"
     ]
   },
   "babel": {
