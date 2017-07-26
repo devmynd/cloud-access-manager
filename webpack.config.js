@@ -3,9 +3,10 @@ var path = require('path')
 
 var BUILD_DIR = path.resolve(__dirname, 'lib/web/client')
 var APP_DIR = path.resolve(__dirname, 'src/web/client')
+var NODE_MODULES_DIR = path.resolve(__dirname, 'node_modules')
 
 var config = {
-  entry: APP_DIR + '/index.js',
+  entry: APP_DIR + '/src/index.js',
   output: {
     path: BUILD_DIR,
     filename: 'bundle.js'
@@ -14,8 +15,13 @@ var config = {
     loaders: [
       {
         test: /\.js?/,
-        include: APP_DIR,
+        include: APP_DIR + '/src',
         loader: 'babel-loader'
+      },
+      {
+        test: /\.s[ac]ss?/,
+        include: [APP_DIR + '/styles', NODE_MODULES_DIR + '/bulma'],
+        loader: ['style-loader', 'css-loader', 'sass-loader']
       }
     ]
   },

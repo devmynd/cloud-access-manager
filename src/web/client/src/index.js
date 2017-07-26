@@ -2,6 +2,8 @@
 
 import React from 'react'
 import {render} from 'react-dom'
+import '../styles/index.scss'
+import 'bulma/bulma.sass'
 
 function sayHello (to: string): string {
   return `hello ${to}`
@@ -9,7 +11,7 @@ function sayHello (to: string): string {
 
 class App extends React.Component {
   render () {
-    return <p>{sayHello('Shamyle')}</p>
+    return <p className='hello-world title'>{sayHello('Shamyle')}</p>
   }
 }
 
