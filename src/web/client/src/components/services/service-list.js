@@ -60,11 +60,37 @@ export default class ServiceList extends React.Component {
     })
   }
 
-  submitConfiguration = (event) => {
+  submitConfiguration = async (event) => {
     this.closeConfiguration(event)
 
-    // make api request
-    // close modal
+    const configJson = JSON
+    .stringify(this.state.editingConfiguration)
+    .replace(/"/g, '\\"')
+
+    const response = await fetch('/graphql', {
+      method: 'post',
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      }),
+      body: JSON.stringify({
+        query: `mutation {
+          configureService(
+            serviceId: "${this.state.editingService.id}",
+            configJson: "${configJson}")
+        }`
+      })
+    })
+
+    if(response.ok) {
+      let services = this.state.services
+      const serviceIndex = lodash.findIndex(services, (service) => service.id === this.state.editingService.id)
+      services[serviceIndex].isConfigured = true
+      this.setState({
+        services
+      })
+    } else {
+      console.log("TODO: show a real error to the user")
+    }
   }
 
   render () {
