@@ -8,9 +8,10 @@ export default class ServiceList extends React.Component {
     super()
     this.state = {
       services: [],
-      selectedService: null
+      editingService: null,
+      editingConfiguration: {},
+      showModal: false
     }
-    this.removeConfigurationModal = this.removeConfigurationModal.bind(this)
   }
 
   async componentWillMount () {
@@ -31,23 +32,48 @@ export default class ServiceList extends React.Component {
     })
   }
 
-  selectConfigurationModal(service) {
+  showConfigurationModal = (service) => {
+    const config = {}
+    service.configKeys.forEach((key) => config[key] = '')
+
     this.setState({
-      selectedService: service
+      editingService: service,
+      editingConfiguration: config,
+      showModal: true
     })
   }
 
-  removeConfigurationModal() {
-    console.log('removing')
+  configValueDidChange = (event, configKey) => {
+    const value = event.target.value
+    let config = this.state.editingConfiguration
+    config[configKey] = value
     this.setState({
-      selectedService: null
+      editingConfiguration: config
     })
+  }
+
+  closeConfiguration = (event) => {
+    event.preventDefault()
+
+    this.setState({
+      showModal: false
+    })
+  }
+
+  submitConfiguration = (event) => {
+    this.closeConfiguration(event)
+
+    // make api request
+    // close modal
   }
 
   render () {
     const paritionedServices = lodash.partition(this.state.services, (s) => s.isConfigured)
     const configuredServices = paritionedServices[0]
     const unconfiguredServices = paritionedServices[1]
+    const modalTitle = this.state.editingService
+      ? this.state.editingService.displayName
+      : ""
 
     return (
       <div className='service-list'>
@@ -85,7 +111,7 @@ export default class ServiceList extends React.Component {
                 <tr key={s.id}>
                   <td>{s.displayName}</td>
                   <td>
-                    <button className="button is-primary is-small" onClick={() => this.selectConfigurationModal(s)}>Turn On</button>
+                    <button className="button is-primary is-small" onClick={() => this.showConfigurationModal(s)}>Turn On</button>
                   </td>
                 </tr>
               ))
@@ -93,22 +119,31 @@ export default class ServiceList extends React.Component {
           </tbody>
         </table>
 
-        {
-          this.state.selectedService &&
-          <Modal show={this.state.selectedService !== null} onClose={this.removeConfigurationModal}>
-            {
-              this.state.selectedService.configKeys.map((key) => {
-                return (
+        <Modal title={`Configure ${modalTitle}`} show={this.state.showModal}>
+          { this.state.showModal &&
+            <form onSubmit={this.submitConfiguration}>
+              {
+                this.state.editingService.configKeys.map((key) => (
                   <div className="field" key={key}>
                     <div className="control">
-                      <input className="input" type="text" placeholder={key} />
+                      <input className="input" type="text" placeholder={key} value={this.state.editingConfiguration[key]}
+                      onChange={(e) => this.configValueDidChange(e, key) } />
                     </div>
                   </div>
                 )
-              }
-            )}
-          </Modal>
-        }
+              )}
+              <div className="field is-grouped">
+                <div className="control">
+                  <button className="button is-success" type="submit">Configure</button>
+                </div>
+                <div className="control">
+                  <button className="button" onClick={this.closeConfiguration}>Cancel</button>
+                </div>
+              </div>
+            </form>
+          }
+        </Modal>
+
       </div>
     )
   }

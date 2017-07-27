@@ -1,26 +1,41 @@
 import React from 'react'
 
 export default class Modal extends React.Component {
-  render() {
-    if (!this.props.show) {
-      return null
+  constructor(props) {
+    super(props)
+    this.state = {
+      show: props.show
     }
+  }
+
+  componentWillReceiveProps = (props) => {
+    if (props.show !== this.state.show) {
+      this.setState({
+        show: props.show
+      })
+    }
+  }
+
+  close = (e) => {
+    this.setState({
+      show: false
+    })
+  }
+
+  render() {
+    if(!this.state.show){ return null }
 
     return (
-      <div className="is-active modal">
-        <div className="modal-background"></div>
+      <div className="modal is-active">
+        <div className="modal-background" onClick={this.close}></div>
         <div className="modal-card">
           <header className="modal-card-head">
-            <p className="modal-card-title">Modal title</p>
-            <button className="delete" onClick={this.props.onClose}></button>
+            <p className="modal-card-title">{this.props.title}</p>
+            <button className="delete" onClick={this.close}></button>
           </header>
           <section className="modal-card-body">
             {this.props.children}
           </section>
-          <footer className="modal-card-foot">
-            <a className="button is-success">Save changes</a>
-            <a className="button">Cancel</a>
-          </footer>
         </div>
       </div>
     )
