@@ -10,8 +10,8 @@ export default class ServiceList extends React.Component {
     }
   }
 
-  componentWillMount () {
-    fetch('/graphql', {
+  async componentWillMount () {
+    const response = await fetch('/graphql', {
       method: 'post',
       headers: new Headers({
         'Content-Type': 'application/json'
@@ -19,12 +19,12 @@ export default class ServiceList extends React.Component {
       body: JSON.stringify({
         query: '{ services { id, displayName, isConfigured } }'
       })
-    }).then((response) => {
-      response.json().then((body) => {
-        this.setState({
-          services: body.data.services
-        })
-      })
+    })
+
+    const body = await response.json()
+    
+    this.setState({
+      services: body.data.services
     })
   }
 
