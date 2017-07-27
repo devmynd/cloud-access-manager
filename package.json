@@ -59,7 +59,8 @@
       "flowtype"
     ],
     "globals": [
-      "fetch"
+      "fetch",
+      "Headers"
     ]
   },
   "babel": {

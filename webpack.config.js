@@ -15,12 +15,12 @@ var config = {
     loaders: [
       {
         test: /\.js?/,
-        include: APP_DIR + '/src',
+        include: APP_DIR,
         loader: 'babel-loader'
       },
       {
         test: /\.s[ac]ss?/,
-        include: [APP_DIR + '/styles', NODE_MODULES_DIR + '/bulma'],
+        include: [APP_DIR, NODE_MODULES_DIR + '/bulma'],
         loader: ['style-loader', 'css-loader', 'sass-loader']
       }
     ]
