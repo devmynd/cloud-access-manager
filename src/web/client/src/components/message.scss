@@ -1,0 +1,14 @@
+.message-component {
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+.message-component-leave {
+  opacity: 1;
+}
+
+.message-component-leave.message-component-leave-active {
+  opacity: 0.01;
+  transition: opacity 500ms ease-in;
+}
