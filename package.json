@@ -7,14 +7,15 @@
   },
   "scripts": {
     "clean": "rm -rf lib/",
-    "prebuild": "standard --fix && flow",
+    "prebuild": "flow",
     "core": "babel src/core -d lib/core",
     "api": "npm run core && babel src/web/api -d lib/web/api && node lib/web/api/app.js",
     "cli": "npm run prebuild && npm run core && babel src/cli -d lib/cli",
     "web": "npm run prebuild && webpack -d && npm run api",
     "launch": "open -a \"/Applications/Google Chrome.app\" lib/web/client/index.html",
     "watch": "webpack -d --watch",
-    "test": "npm run prebuild  && npm run core && jest lib/"
+    "test": "npm run prebuild  && npm run core && jest lib/",
+    "standard": "standard --fix"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",
