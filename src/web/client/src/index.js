@@ -5,7 +5,7 @@ import {render} from 'react-dom'
 import './index.scss'
 import 'bulma/bulma.sass'
 import { Switch, Link, Route, BrowserRouter } from 'react-router-dom'
-import ServiceList from './components/services/service-list'
+import ServiceList from './components/service-list'
 
 const NavBar = (props) => {
   return (

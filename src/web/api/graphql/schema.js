@@ -52,7 +52,6 @@ export const schema = buildSchema(`
 
   type Query {
     accounts(serviceId: String): [ServiceUserAccountsAggregate]
-    service(serviceId: String!): ServiceInfo
     services(isConfigured: Boolean): [ServiceInfo]
     audit: [FlaggedInfo]
     groups: [Group]
@@ -83,7 +82,6 @@ export const root = {
   audit: accountsResolvers.performAudit,
   configureService: serviceResolvers.configureService,
   services: serviceResolvers.listServices,
-  service: serviceResolvers.getService,
   addAccessRules: individualsResolvers.addAccessRules,
   addIndividualToGroup: individualsResolvers.addGroupMembership,
   setGroupAccessRules: groupsResolvers.setGroupAccessRules,

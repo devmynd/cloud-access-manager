@@ -1,7 +1,8 @@
 import React from 'react'
 import lodash from 'lodash'
 import './service-list.scss'
-import Modal from '../modal'
+import Modal from './modal'
+import servicesApi from '../apis/services-api'
 
 export default class ServiceList extends React.Component {
   constructor () {
@@ -15,20 +16,10 @@ export default class ServiceList extends React.Component {
   }
 
   async componentWillMount () {
-    const response = await fetch('/graphql', {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      }),
-      body: JSON.stringify({
-        query: '{ services { id, displayName, isConfigured, configKeys } }'
-      })
-    })
-
-    const body = await response.json()
+    const response = await servicesApi.getServices()
 
     this.setState({
-      services: body.data.services
+      services: response.body.data.services
     })
   }
 
@@ -64,38 +55,19 @@ export default class ServiceList extends React.Component {
 
   submitConfiguration = async (event) => {
     this.closeConfiguration(event)
+    const response = await servicesApi.configureService(this.state.editingService.id, this.state.editingConfiguration)
 
-    const configJson = JSON
-    .stringify(this.state.editingConfiguration)
-    .replace(/"/g, '\\"')
-
-    const response = await fetch('/graphql', {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      }),
-      body: JSON.stringify({
-        query: `mutation {
-          configureService(
-            serviceId: "${this.state.editingService.id}",
-            configJson: "${configJson}")
-        }`
-      })
-    })
-    let responseBody
     if (!response.ok) {
       // TODO: show error to user
       console.log(`Server error: ${response.status}`)
-    } else if ((responseBody = await response.json()).hasOwnProperty('errors')) {
+    } else if (response.body.hasOwnProperty('errors')) {
       // TODO: show error to user
-      console.log(responseBody.errors[0].message)
+      console.log(response.body.errors[0].message)
     } else {
       let services = this.state.services
       const serviceIndex = lodash.findIndex(services, (service) => service.id === this.state.editingService.id)
       services[serviceIndex].isConfigured = true
-      this.setState({
-        services
-      })
+      this.setState({ services })
     }
   }
 

@@ -25,7 +25,3 @@ export function listServices (args: { isConfigured: ?boolean }) {
   }
   return serviceInfos.filter((info) => info.isConfigured === args.isConfigured)
 }
-
-export function getService (args: { serviceId: string }) {
-  return manager.getServiceInfo(args.serviceId)
-}
