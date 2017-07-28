@@ -8,7 +8,12 @@ export async function configureService (args: { serviceId: string, configJson: s
   configStore.save(args.serviceId, config)
   let provider = manager.getProvider(args.serviceId)
   if (provider) {
-    await provider.testConnection()
+    try {
+      await provider.testConnection()
+    } catch (error) {
+      configStore.remove(args.serviceId)
+      throw error
+    }
     return `${args.serviceId} configured!`
   }
 }

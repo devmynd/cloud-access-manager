@@ -11,6 +11,12 @@ export const configStore = {
     fs.writeFileSync(process.env.CONFIG_PATH, JSON.stringify(data))
   },
 
+  remove (serviceId: string) {
+    const data = helpers.readData(process.env.CONFIG_PATH, {})
+    delete data[serviceId]
+    fs.writeFileSync(process.env.CONFIG_PATH, JSON.stringify(data))
+  },
+
   get (serviceId: string) {
     const data = helpers.readData(process.env.CONFIG_PATH, {})
     return data[serviceId]
