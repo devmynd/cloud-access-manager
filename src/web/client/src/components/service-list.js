@@ -3,7 +3,7 @@ import lodash from 'lodash'
 import './service-list.scss'
 import Modal from './modal'
 import servicesApi from '../apis/services-api'
-import MessagesContainer from './message'
+import MessagesContainer from './messages-container'
 
 export default class ServiceList extends React.Component {
   constructor () {

@@ -1,6 +1,6 @@
 import React from 'react'
 import lodash from 'lodash'
-import './message.scss'
+import './messages-container.scss'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 class Message extends React.Component {
