@@ -115,9 +115,6 @@ export default class ServiceList extends React.Component {
     const paritionedServices = lodash.partition(this.state.services, (s) => s.isConfigured)
     const configuredServices = paritionedServices[0]
     const unconfiguredServices = paritionedServices[1]
-    const modalTitle = this.state.editingService
-      ? this.state.editingService.displayName
-      : ''
 
     return (
       <div className='service-list'>
@@ -170,19 +167,19 @@ export default class ServiceList extends React.Component {
           </tbody>
         </table>
 
-        <Modal title={`Configure ${modalTitle}`} show={this.state.showModal}>
-          { this.state.showModal &&
+        { this.state.showModal &&
+          <Modal title={`Configure ${this.state.editingService.displayName}`} closeHandler={this.closeConfiguration}>
             <form onSubmit={this.submitConfiguration}>
               {
-                this.state.editingService.configKeys.map((key) => (
-                  <div className='field' key={key}>
-                    <div className='control'>
-                      <input className='input' type='text' placeholder={key} value={this.state.editingConfiguration[key]}
-                        onChange={(e) => this.configValueDidChange(e, key)} />
+                  this.state.editingService.configKeys.map((key) => (
+                    <div className='field' key={key}>
+                      <div className='control'>
+                        <input className='input' type='text' placeholder={key} value={this.state.editingConfiguration[key]}
+                          onChange={(e) => this.configValueDidChange(e, key)} />
+                      </div>
                     </div>
-                  </div>
-                )
-              )}
+                  )
+                )}
               <div className='field is-grouped'>
                 <div className='control'>
                   <button className='button is-success' type='submit'>Configure</button>
@@ -192,8 +189,8 @@ export default class ServiceList extends React.Component {
                 </div>
               </div>
             </form>
-          }
-        </Modal>
+          </Modal>
+        }
 
         <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
       </div>

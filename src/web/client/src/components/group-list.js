@@ -5,7 +5,9 @@ export default class GroupList extends React.Component {
   constructor () {
     super()
     this.state = {
-      groups: []
+      groups: [],
+      showModal: false,
+      selectedGroup: null
     }
   }
 
@@ -32,11 +34,19 @@ export default class GroupList extends React.Component {
     })
   }
 
+  showGroupModal = (group) => {
+    this.setState({
+      showModal: true,
+      selectedGroup: group
+    })
+  }
+
   render () {
     const groups = this.state.groups
 
     return (
-      <div className='group-list'>
+      <div>
+        <button className='button is-primary is-pulled-right' onClick={() => this.showGroupModal({ name: '', accessRules: [] })}>Add New Group</button>
         <h1 className='title'>Groups</h1>
         <table className='table'>
           <thead>
@@ -52,7 +62,7 @@ export default class GroupList extends React.Component {
                   <td>{ group.name }</td>
                   <td className='field is-grouped is-grouped-right'>
                     <div className='control'>
-                      <button className='button is-primary is-small'>Edit</button>
+                      <button className='button is-primary is-small' onClick={() => this.showGroupModal(group)}>Edit</button>
                     </div>
                     <div className='control'>
                       <button className='button is-danger is-small'>Delete</button>
@@ -63,6 +73,10 @@ export default class GroupList extends React.Component {
             }
           </tbody>
         </table>
+
+        {/* { this.state.showModal &&
+          <Modal title={`Configure Group: ${this.state.selectedGroup.name}`} />
+        } */}
       </div>
     )
   }
