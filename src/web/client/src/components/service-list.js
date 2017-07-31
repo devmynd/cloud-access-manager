@@ -1,6 +1,5 @@
 import React from 'react'
 import lodash from 'lodash'
-import './service-list.scss'
 import Modal from './modal'
 import servicesApi from '../apis/services-api'
 import MessagesContainer from './messages-container'

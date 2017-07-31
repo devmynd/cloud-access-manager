@@ -2,10 +2,10 @@
 
 import React from 'react'
 import {render} from 'react-dom'
-import './index.scss'
 import 'bulma/bulma.sass'
 import { Switch, Link, Route, BrowserRouter } from 'react-router-dom'
 import ServiceList from './components/service-list'
+import GroupList from './components/group-list'
 
 const NavBar = (props) => {
   return (
@@ -39,6 +39,7 @@ class App extends React.Component {
             <Switch>
               <Route exact path='/' component={() => <h1>Welcome to CAM</h1>} />
               <Route exact path='/services' component={ServiceList} />)} />
+              <Route exact path='/groups' component={GroupList} />)} />
               <Route component={() => <p>not found</p>} />
             </Switch>
           </div>
