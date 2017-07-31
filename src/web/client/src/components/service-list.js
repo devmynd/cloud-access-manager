@@ -64,18 +64,21 @@ export default class ServiceList extends React.Component {
         title: "Configuration Failed",
         body: `Server responded with: ${response.status}`
       })
-    } else if (response.body.hasOwnProperty('errors')) {
-      this.messagesContainer.push({
-        title: "Invalid Configuration",
-        body: (<div>
-                <p>{this.state.editingService.displayName} configuration failed.</p>
-                <p>Service test responded with: {response.body.errors[0].message}</p>
-              </div>)
-      })
     } else {
+      const hasErrors = response.body.hasOwnProperty('errors')
+      if (hasErrors) {
+        this.messagesContainer.push({
+          title: "Invalid Configuration",
+          body: (<div>
+                  <p>{this.state.editingService.displayName} configuration failed.</p>
+                  <p>Service test responded with: {response.body.errors[0].message}</p>
+                </div>)
+        })
+      }
+
       let services = this.state.services
       const serviceIndex = lodash.findIndex(services, (service) => service.id === this.state.editingService.id)
-      services[serviceIndex].isConfigured = true
+      services[serviceIndex].isConfigured = !hasErrors
       this.setState({ services })
     }
   }
@@ -103,7 +106,9 @@ export default class ServiceList extends React.Component {
               configuredServices.map((s) => (
                 <tr key={s.id}>
                   <td>{s.displayName}</td>
-                  <td>Add options</td>
+                  <td>
+                    <button className='button is-primary is-small' onClick={() => this.showConfigurationModal(s)}>Edit</button>
+                  </td>
                 </tr>
               ))
             }
