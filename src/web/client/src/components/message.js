@@ -1,76 +1,67 @@
 import React from 'react'
+import lodash from 'lodash'
 import './message.scss'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
-export default class Message extends React.Component {
+class Message extends React.Component {
+  componentDidMount() {
+    setTimeout(this.props.closeHandler, 10000)
+  }
 
-  constructor(props) {
-    super(props)
+  render() {
+    return (
+      <div className={`message ${ this.props.type === "error" ? "is-danger" : "is-info"}`}>
+        <div className="message-header">
+          <p><strong>{this.props.title}</strong></p>
+          <button className="delete" onClick={this.props.closeHandler}></button>
+        </div>
+        <div className="message-body">
+          {this.props.children}
+        </div>
+      </div>
+    )
+  }
+}
+
+export default class MessagesContainer extends React.Component {
+  constructor() {
+    super()
     this.state = {
-      show: true
+      messages: []
     }
   }
 
-  shouldComponentUpdate = (nextProps, nextState) => {
-    // only allow going from visible to hidden
-    if (this.state.show === true && nextState.show === false) {
-      return true
-    }
-    // otherwise decide based on if the properties themselves have actually changed
-    return nextProps.title !== this.props.title || nextProps.children !== this.props.children
-  }
-
-  componentDidMount = () => {
-    this.setFadeOut()
-  }
-
-  componentWillUpdate = () => {
+  push = (message) => {
+    const messages = this.state.messages
+    message.key = Math.random()
+    message.type = message.type || "error"
+    messages.push(message)
     this.setState({
-      show: true
+      messages: messages
     })
   }
 
-  componentDidUpdate = () => {
-    this.setFadeOut()
-  }
-
-  setFadeOut = () => {
-    if(this.state.show) {
-      setTimeout(() => {
-        this.setState({
-          show: false
-        })
-      }, 10000)
-    }
-  }
-
-  close = (e) => {
-    this.setState({
-      show: false
+  close = (messageKey) => {
+    const messages = this.state.messages
+    lodash.remove(messages, (m) => {
+      return m.key === messageKey
     })
+    this.setState({ messages })
   }
 
   render() {
     return (
       <ReactCSSTransitionGroup
-        transitionName="message-component"
+        transitionName="message"
         transitionEnterTimeout={500}
-        transitionLeaveTimeout={500}>
-        { this.state.show &&
-          <div key="message" className="column is-one-third message-component">
-            <div className="message is-danger">
-              <div className="message-header">
-                <p><strong>{this.props.title}</strong></p>
-                <button className="delete" onClick={this.close}></button>
-              </div>
-              <div className="message-body">
-                {this.props.children}
-              </div>
-            </div>
-          </div>
-        }
+        transitionLeaveTimeout={500}
+        className="messages-container">
+        {this.state.messages.map((m) =>
+          <Message title={m.title} type={m.type} key={m.key} closeHandler={() => this.close(m.key)}>
+            {m.body}
+          </Message>
+        )}
       </ReactCSSTransitionGroup>
-
     )
   }
 }

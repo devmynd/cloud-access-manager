@@ -6,7 +6,7 @@ import './index.scss'
 import 'bulma/bulma.sass'
 import { Switch, Link, Route, BrowserRouter } from 'react-router-dom'
 import ServiceList from './components/service-list'
-import Message from './components/message'
+import MessagesContainer from './components/message'
 
 const NavBar = (props) => {
   return (
@@ -27,6 +27,8 @@ const NavBarLink = (props) => {
 
 class App extends React.Component {
   render () {
+    const messagesContainer = <MessagesContainer />
+
     return (
         <BrowserRouter>
           <div className='container'>
@@ -39,7 +41,7 @@ class App extends React.Component {
             </NavBar>
             <Switch>
               <Route exact path='/' component={() => <h1>Welcome to CAM</h1>} />
-              <Route exact path='/services' component={ServiceList} />
+              <Route exact path='/services' component={ServiceList} />)} />
               <Route component={() => <p>not found</p>} />
             </Switch>
           </div>

@@ -3,7 +3,7 @@ import lodash from 'lodash'
 import './service-list.scss'
 import Modal from './modal'
 import servicesApi from '../apis/services-api'
-import Message from './message'
+import MessagesContainer from './message'
 
 export default class ServiceList extends React.Component {
   constructor () {
@@ -60,26 +60,18 @@ export default class ServiceList extends React.Component {
     const response = await servicesApi.configureService(this.state.editingService.id, this.state.editingConfiguration)
 
     if (!response.ok) {
-      this.setState(
-        {
-          message: {
-            title: "Configuration Failed",
-            body: `Server responded with: ${response.status}`
-          }
-        }
-      )
+      this.messagesContainer.push({
+        title: "Configuration Failed",
+        body: `Server responded with: ${response.status}`
+      })
     } else if (response.body.hasOwnProperty('errors')) {
-      this.setState(
-        {
-          message: {
-            title: "Invalid Configuration",
-            body: (<div>
-                    <p>{this.state.editingService.displayName} configuration failed.</p>
-                    <p>Service test responded with: {response.body.errors[0].message}</p>
-                  </div>)
-          }
-        }
-      )
+      this.messagesContainer.push({
+        title: "Invalid Configuration",
+        body: (<div>
+                <p>{this.state.editingService.displayName} configuration failed.</p>
+                <p>Service test responded with: {response.body.errors[0].message}</p>
+              </div>)
+      })
     } else {
       let services = this.state.services
       const serviceIndex = lodash.findIndex(services, (service) => service.id === this.state.editingService.id)
@@ -164,11 +156,8 @@ export default class ServiceList extends React.Component {
             </form>
           }
         </Modal>
-        { this.state.message &&
-          <Message title={this.state.message.title} >
-            {this.state.message.body}
-          </Message>
-        }
+
+        <MessagesContainer ref={(container) => this.messagesContainer = container}/>
       </div>
     )
   }
