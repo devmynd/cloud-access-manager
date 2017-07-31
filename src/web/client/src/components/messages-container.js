@@ -41,6 +41,13 @@ export default class MessagesContainer extends React.Component {
     })
   }
 
+  pushServerError= (status) => {
+    this.push({
+      title: "Server Error",
+      body: `Server responded with: ${status}`
+    })
+  }
+
   close = (messageKey) => {
     const messages = this.state.messages
     lodash.remove(messages, (m) => {

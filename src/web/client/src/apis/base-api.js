@@ -3,7 +3,8 @@
 export type ApiResponse = {
   status: number,
   ok: boolean,
-  body: Object
+  data: Object,
+  error: Object
 }
 
 export class BaseApi {
@@ -18,10 +19,23 @@ export class BaseApi {
       })
     })
 
-    return {
-      status: response.status,
-      ok: response.ok,
-      body: await response.json()
+    if (response.ok) {
+      const body = await response.json()
+      return {
+        status: 200,
+        ok: true,
+        data: body.data,
+        error: (body.errors && body.errors.length > 0) ? body.errors[0] : null
+      }
+    } else {
+      return {
+        status: response.status,
+        ok: response.ok,
+        data: null,
+        error: { message: `Server responded with status: ${response.status}` }
+      }
     }
+
+
   }
 }

@@ -18,6 +18,11 @@ export async function configureService (args: { serviceId: string, configJson: s
   }
 }
 
+export function disableService (args: { serviceId: string }) {
+  configStore.remove(args.serviceId)
+  return `${args.serviceId} disabled!`
+}
+
 export function listServices (args: { isConfigured: ?boolean }) {
   const serviceInfos = manager.getServiceInfos()
   if (typeof (args.isConfigured) === 'undefined') {

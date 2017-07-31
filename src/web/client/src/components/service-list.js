@@ -17,12 +17,28 @@ export default class ServiceList extends React.Component {
     }
   }
 
-  async componentWillMount () {
+  componentWillMount = async () => {
     const response = await servicesApi.getServices()
 
     this.setState({
-      services: response.body.data.services
+      services: response.data.services
     })
+  }
+
+   disableService = async (serviceId) => {
+    const response = await servicesApi.disableService(serviceId)
+    if(response.error) {
+      this.messagesContainer.push({
+        title: "Failed to Disable Service",
+        body: response.error.message
+      })
+    }
+    else {
+      let services = this.state.services
+      const serviceIndex = lodash.findIndex(services, (service) => service.id === serviceId)
+      services[serviceIndex].isConfigured = false
+      this.setState({ services })
+    }
   }
 
   showConfigurationModal = (service) => {
@@ -62,23 +78,22 @@ export default class ServiceList extends React.Component {
     if (!response.ok) {
       this.messagesContainer.push({
         title: "Configuration Failed",
-        body: `Server responded with: ${response.status}`
+        body: response.error.message
       })
     } else {
-      const hasErrors = response.body.hasOwnProperty('errors')
-      if (hasErrors) {
+      if (response.error) {
         this.messagesContainer.push({
           title: "Invalid Configuration",
           body: (<div>
                   <p>{this.state.editingService.displayName} configuration failed.</p>
-                  <p>Service test responded with: {response.body.errors[0].message}</p>
+                  <p>Service test responded with: {response.error.message}</p>
                 </div>)
         })
       }
 
       let services = this.state.services
       const serviceIndex = lodash.findIndex(services, (service) => service.id === this.state.editingService.id)
-      services[serviceIndex].isConfigured = !hasErrors
+      services[serviceIndex].isConfigured = !response.error
       this.setState({ services })
     }
   }
@@ -98,7 +113,7 @@ export default class ServiceList extends React.Component {
           <thead>
             <tr>
               <th>Name</th>
-              <th className='options-column'>Options</th>
+              <th className='options-column has-text-right'>Options</th>
             </tr>
           </thead>
           <tbody>
@@ -106,8 +121,13 @@ export default class ServiceList extends React.Component {
               configuredServices.map((s) => (
                 <tr key={s.id}>
                   <td>{s.displayName}</td>
-                  <td>
-                    <button className='button is-primary is-small' onClick={() => this.showConfigurationModal(s)}>Edit</button>
+                  <td className="field is-grouped is-grouped-right">
+                    <div className="control">
+                      <button className='button is-primary is-small' onClick={() => this.showConfigurationModal(s)}>Edit</button>
+                    </div>
+                    <div className="control">
+                      <button className='button is-danger is-small' onClick={() => this.disableService(s.id)}>Turn Off</button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -120,7 +140,7 @@ export default class ServiceList extends React.Component {
           <thead>
             <tr>
               <th>Name</th>
-              <th className='options-column'>Options</th>
+              <th className='options-column has-text-right'>Options</th>
             </tr>
           </thead>
           <tbody>
@@ -129,7 +149,7 @@ export default class ServiceList extends React.Component {
                 <tr key={s.id}>
                   <td>{s.displayName}</td>
                   <td>
-                    <button className='button is-primary is-small' onClick={() => this.showConfigurationModal(s)}>Turn On</button>
+                    <button className='button is-primary is-small is-pulled-right' onClick={() => this.showConfigurationModal(s)}>Turn On</button>
                   </td>
                 </tr>
               ))

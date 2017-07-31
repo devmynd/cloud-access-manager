@@ -70,6 +70,7 @@ export const schema = buildSchema(`
 
   type Mutation {
     configureService(serviceId: String, configJson: String): String
+    disableService(serviceId: String): String
     setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
     addAccessRules(email: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
     deleteGroup(name: String): String
@@ -81,6 +82,7 @@ export const root = {
   accounts: accountsResolvers.listAccounts,
   audit: accountsResolvers.performAudit,
   configureService: serviceResolvers.configureService,
+  disableService: serviceResolvers.disableService,
   services: serviceResolvers.listServices,
   addAccessRules: individualsResolvers.addAccessRules,
   addIndividualToGroup: individualsResolvers.addGroupMembership,

@@ -20,6 +20,13 @@ class ServicesApi extends BaseApi {
     }`
     return this.request(query)
   }
+
+  disableService (serviceId: string): Promise<ApiResponse> {
+     const query = `mutation {
+      disableService(serviceId: "${serviceId}")
+    }`
+    return this.request(query)
+  }
 }
 
 export default new ServicesApi()
