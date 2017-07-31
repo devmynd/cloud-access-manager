@@ -1,8 +1,8 @@
 import React from 'react'
 import lodash from 'lodash'
 import Modal from './modal'
-import servicesApi from '../apis/services-api'
 import MessagesContainer from './messages-container'
+import { graphqlApi } from '../graphql-api'
 
 export default class ServiceList extends React.Component {
   constructor () {
@@ -17,22 +17,26 @@ export default class ServiceList extends React.Component {
   }
 
   componentWillMount = async () => {
-    const response = await servicesApi.getServices()
+    const query = '{ services { id, displayName, isConfigured, configKeys } }'
+    const response = await graphqlApi.request(query)
 
     this.setState({
       services: response.data.services
     })
   }
 
-   disableService = async (serviceId) => {
-    const response = await servicesApi.disableService(serviceId)
-    if(response.error) {
+  disableService = async (serviceId) => {
+    const query = `mutation {
+      disableService(serviceId: "${serviceId}")
+    }`
+    const response = await graphqlApi.request(query)
+
+    if (response.error) {
       this.messagesContainer.push({
-        title: "Failed to Disable Service",
+        title: 'Failed to Disable Service',
         body: response.error.message
       })
-    }
-    else {
+    } else {
       let services = this.state.services
       const serviceIndex = lodash.findIndex(services, (service) => service.id === serviceId)
       services[serviceIndex].isConfigured = false
@@ -72,21 +76,31 @@ export default class ServiceList extends React.Component {
 
   submitConfiguration = async (event) => {
     this.closeConfiguration(event)
-    const response = await servicesApi.configureService(this.state.editingService.id, this.state.editingConfiguration)
+    const configJson = JSON
+      .stringify(this.state.editingConfiguration)
+      .replace(/"/g, '\\"')
+
+    const query = `mutation {
+      configureService(
+        serviceId: "${this.state.editingService.id}",
+        configJson: "${configJson}")
+    }`
+
+    const response = await graphqlApi.request(query)
 
     if (!response.ok) {
       this.messagesContainer.push({
-        title: "Configuration Failed",
+        title: 'Configuration Failed',
         body: response.error.message
       })
     } else {
       if (response.error) {
         this.messagesContainer.push({
-          title: "Invalid Configuration",
+          title: 'Invalid Configuration',
           body: (<div>
-                  <p>{this.state.editingService.displayName} configuration failed.</p>
-                  <p>Service test responded with: {response.error.message}</p>
-                </div>)
+            <p>{this.state.editingService.displayName} configuration failed.</p>
+            <p>Service test responded with: {response.error.message}</p>
+          </div>)
         })
       }
 
@@ -120,11 +134,11 @@ export default class ServiceList extends React.Component {
               configuredServices.map((s) => (
                 <tr key={s.id}>
                   <td>{s.displayName}</td>
-                  <td className="field is-grouped is-grouped-right">
-                    <div className="control">
+                  <td className='field is-grouped is-grouped-right'>
+                    <div className='control'>
                       <button className='button is-primary is-small' onClick={() => this.showConfigurationModal(s)}>Edit</button>
                     </div>
-                    <div className="control">
+                    <div className='control'>
                       <button className='button is-danger is-small' onClick={() => this.disableService(s.id)}>Turn Off</button>
                     </div>
                   </td>
@@ -181,7 +195,7 @@ export default class ServiceList extends React.Component {
           }
         </Modal>
 
-        <MessagesContainer ref={(container) => this.messagesContainer = container}/>
+        <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
       </div>
     )
   }

@@ -3,11 +3,11 @@
 export type ApiResponse = {
   status: number,
   ok: boolean,
-  data: Object,
-  error: Object
+  data: ?Object,
+  error: ?Object
 }
 
-export class BaseApi {
+class GraphqlApi {
   async request (query: string): Promise<ApiResponse> {
     const response = await fetch('/graphql', {
       method: 'post',
@@ -35,7 +35,7 @@ export class BaseApi {
         error: { message: `Server responded with status: ${response.status}` }
       }
     }
-
-
   }
 }
+
+export const graphqlApi = new GraphqlApi()

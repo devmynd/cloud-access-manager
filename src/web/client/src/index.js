@@ -27,23 +27,23 @@ const NavBarLink = (props) => {
 class App extends React.Component {
   render () {
     return (
-        <BrowserRouter>
-          <div className='container'>
-            <NavBar>
-              <NavBarLink to='/'>Home</NavBarLink>
-              <NavBarLink to='/audit'>Audit</NavBarLink>
-              <NavBarLink to='/groups'>Groups</NavBarLink>
-              <NavBarLink to='/individuals'>Individuals</NavBarLink>
-              <NavBarLink to='/services'>Services</NavBarLink>
-            </NavBar>
-            <Switch>
-              <Route exact path='/' component={() => <h1>Welcome to CAM</h1>} />
-              <Route exact path='/services' component={ServiceList} />)} />
+      <BrowserRouter>
+        <div className='container'>
+          <NavBar>
+            <NavBarLink to='/'>Home</NavBarLink>
+            <NavBarLink to='/audit'>Audit</NavBarLink>
+            <NavBarLink to='/groups'>Groups</NavBarLink>
+            <NavBarLink to='/individuals'>Individuals</NavBarLink>
+            <NavBarLink to='/services'>Services</NavBarLink>
+          </NavBar>
+          <Switch>
+            <Route exact path='/' component={() => <h1>Welcome to CAM</h1>} />
+            <Route exact path='/services' component={ServiceList} />)} />
               <Route exact path='/groups' component={GroupList} />)} />
               <Route component={() => <p>not found</p>} />
-            </Switch>
-          </div>
-        </BrowserRouter>
+          </Switch>
+        </div>
+      </BrowserRouter>
     )
   }
 }
