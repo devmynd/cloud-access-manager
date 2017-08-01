@@ -2,6 +2,7 @@ import React from 'react'
 import graphqlApi from '../graphql-api'
 import lodash from 'lodash'
 import MessagesContainer from './messages-container'
+import Dropdown from './dropdown'
 
 export default class Group extends React.Component {
   state = {
@@ -97,6 +98,7 @@ export default class Group extends React.Component {
       <h1 className='title'>{this.props.name}</h1>
       { this.state.group &&
         <div>
+          <Dropdown />
           <h2 className='subtitle'>Access Rules</h2>
           <table className='table'>
             <thead>
