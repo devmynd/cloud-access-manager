@@ -1,6 +1,10 @@
 import React from 'react'
 
 export default class Modal extends React.Component {
+  componentDidMount = () => {
+    this.props.onMounted && this.props.onMounted()
+  }
+
   render () {
     return (
       <div className='modal is-active'>

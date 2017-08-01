@@ -5,15 +5,12 @@ import MessagesContainer from './messages-container'
 import { graphqlApi } from '../graphql-api'
 
 export default class ServiceList extends React.Component {
-  constructor () {
-    super()
-    this.state = {
-      services: [],
-      editingService: null,
-      editingConfiguration: {},
-      showModal: false,
-      message: null
-    }
+  state = {
+    services: [],
+    editingService: null,
+    editingConfiguration: {},
+    showModal: false,
+    message: null
   }
 
   componentWillMount = async () => {
@@ -182,7 +179,7 @@ export default class ServiceList extends React.Component {
                 )}
               <div className='field is-grouped'>
                 <div className='control'>
-                  <button className='button is-success' type='submit'>Configure</button>
+                  <button className='button is-success' type='submit'>Save</button>
                 </div>
                 <div className='control'>
                   <button className='button' onClick={this.closeConfiguration}>Cancel</button>
