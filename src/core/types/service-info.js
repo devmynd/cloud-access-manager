@@ -3,7 +3,7 @@
 export type ServiceInfo = {
   id: string,
   displayName: string,
-  hasRoles: boolean,
+  roles: Array<string>,
   isConfigured: boolean,
   configKeys: Array<string>
 }

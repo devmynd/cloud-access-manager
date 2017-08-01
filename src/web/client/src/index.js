@@ -6,6 +6,7 @@ import 'bulma/bulma.sass'
 import { Switch, Link, Route, BrowserRouter } from 'react-router-dom'
 import ServiceList from './components/service-list'
 import GroupList from './components/group-list'
+import Group from './components/group'
 
 const NavBar = (props) => {
   return (
@@ -25,7 +26,7 @@ const NavBarLink = (props) => {
 }
 
 const GroupMatcher = ({ match }) => {
-  return <h1>Group {match.params.groupName}</h1>
+  return <Group name={match.params.groupName}/>
 }
 
 class App extends React.Component {

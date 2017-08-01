@@ -98,7 +98,7 @@ async function auditServices (assetAssignments: Array<AssetAssignment>): Promise
     const fullAccess = await selectFullAccess(assetAssignment.service)
 
     if (fullAccess) {
-      if (assetAssignment.service.hasRoles) {
+      if (assetAssignment.service.roles.length > 0) {
         const selectedRoles = await selectRoles(assetAssignment)
         accessRules = selectedRoles.map((role) => {
           return { asset: '*', role: role }

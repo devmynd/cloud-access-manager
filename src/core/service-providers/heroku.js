@@ -41,7 +41,7 @@ class HerokuProvider implements ServiceProvider {
 export const herokuProviderModule: ServiceProviderModule = {
   id: 'heroku',
   displayName: 'Heroku',
-  hasRoles: true,
+  roles: ['collaborator', 'owner'],
   configKeys: configKeys,
   providerFactory (config) {
     return new HerokuProvider(config)

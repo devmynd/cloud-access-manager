@@ -9,7 +9,7 @@ export interface ServiceProvider {
 export type ServiceProviderModule = {
   id: string,
   displayName: string,
-  hasRoles: boolean,
+  roles: Array<string>,
   configKeys: Array<string>,
   providerFactory: Object => ServiceProvider
 }

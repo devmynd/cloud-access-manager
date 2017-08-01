@@ -18,7 +18,7 @@ export const schema = buildSchema(`
   type ServiceInfo {
     id: String!
     displayName: String!
-    hasRoles: Boolean!
+    roles: [String]!
     isConfigured: Boolean!
     configKeys: [String]
   }

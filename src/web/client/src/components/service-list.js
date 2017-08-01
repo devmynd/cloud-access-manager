@@ -2,7 +2,7 @@ import React from 'react'
 import lodash from 'lodash'
 import Modal from './modal'
 import MessagesContainer from './messages-container'
-import { graphqlApi } from '../graphql-api'
+import graphqlApi from '../graphql-api'
 
 export default class ServiceList extends React.Component {
   state = {
@@ -118,13 +118,13 @@ export default class ServiceList extends React.Component {
     const unconfiguredServices = paritionedServices[1]
 
     return (
-      <div className='service-list'>
+      <div>
         <h1 className='title'>Configured Services</h1>
         <table className='table'>
           <thead>
             <tr>
               <th>Name</th>
-              <th className='options-column has-text-right'>Options</th>
+              <th className='has-text-right'>Options</th>
             </tr>
           </thead>
           <tbody>
@@ -151,7 +151,7 @@ export default class ServiceList extends React.Component {
           <thead>
             <tr>
               <th>Name</th>
-              <th className='options-column has-text-right'>Options</th>
+              <th className='has-text-right'>Options</th>
             </tr>
           </thead>
           <tbody>

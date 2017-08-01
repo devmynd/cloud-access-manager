@@ -1,5 +1,5 @@
 import React from 'react'
-import { graphqlApi } from '../graphql-api'
+import graphqlApi from '../graphql-api'
 import Modal from './modal'
 import MessagesContainer from './messages-container'
 import lodash from 'lodash'
@@ -105,7 +105,7 @@ export default class GroupList extends React.Component {
           <thead>
             <tr>
               <th>Name</th>
-              <th className='options-column has-text-right'>Options</th>
+              <th className='has-text-right'>Options</th>
             </tr>
           </thead>
           <tbody>

@@ -82,7 +82,7 @@ export const manager: Manager = {
     return {
       id: module.id,
       displayName: module.displayName,
-      hasRoles: module.hasRoles,
+      roles: module.roles,
       isConfigured: configured,
       configKeys: module.configKeys
     }

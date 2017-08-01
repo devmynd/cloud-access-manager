@@ -1,6 +1,6 @@
 // @flow
 
-export type ApiResponse = {
+type ApiResponse = {
   status: number,
   ok: boolean,
   data: ?Object,
@@ -38,4 +38,4 @@ class GraphqlApi {
   }
 }
 
-export const graphqlApi = new GraphqlApi()
+export default new GraphqlApi()

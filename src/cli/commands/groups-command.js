@@ -52,7 +52,7 @@ export async function configureServiceForGroup (serviceId: string, groupName: st
       .filter((rule) => rule.asset === '*')
       .map((rule) => rule.role)
 
-    if (serviceInfo.hasRoles) {
+    if (serviceInfo.roles.length > 0) {
       const question = {
         type: 'input',
         name: 'roles',
@@ -143,7 +143,7 @@ export async function configureGroup (groupName: string) {
   for (let i = 0; i < selectedServiceInfos.length; i++) {
     let serviceInfo = selectedServiceInfos[i]
     let allowedRoles = []
-    if (serviceInfo.hasRoles) {
+    if (serviceInfo.roles.length > 0) {
       const question = {
         type: 'input',
         name: 'roles',
