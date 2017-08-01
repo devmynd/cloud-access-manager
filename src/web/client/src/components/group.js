@@ -1,7 +1,7 @@
 import React from 'react'
 import graphqlApi from '../graphql-api'
 import lodash from 'lodash'
-
+import MessagesContainer from './messages-container'
 
 export default class Group extends React.Component {
   state = {
@@ -37,7 +37,58 @@ export default class Group extends React.Component {
   }
 
   isRoleEnabled = (role, accessRules) => {
-    return !!lodash.find(accessRules, (rule) => rule.asset === "*" && (rule.role === "*" || rule.role === role))
+    return !!lodash.find(accessRules, (rule) => rule.asset === "*" && (rule.role === role))
+  }
+
+  onRoleClicked = (event, role, serviceId) => {
+    event.target.blur()
+    const group = this.state.group
+    const serviceAccessRule = lodash.find(group.serviceAccessRules, (sar) => sar.service.id === serviceId)
+    const accessRules = serviceAccessRule.accessRules
+
+    if (this.isRoleEnabled(role, accessRules)) {
+      lodash.remove(accessRules, (rule) => rule.role === role)
+    } else {
+      accessRules.push({asset: "*", role: role})
+    }
+
+    this.save(group)
+  }
+
+  mapGroupToMutation = (group) => {
+    return `mutation { setGroupAccessRules(
+        name:"${group.name}",
+        serviceAccessRules:[${group.serviceAccessRules.map(this.mapServiceAccessRuleToMutation).join(',')}]
+      )
+    }`
+  }
+
+  mapServiceAccessRuleToMutation = (serviceAccessRule) => {
+    return `{
+      serviceId:"${serviceAccessRule.service.id}",
+      accessRules: [${serviceAccessRule.accessRules.map(this.mapAccessRuleToMutation).join(',')}]
+    }`
+  }
+
+  mapAccessRuleToMutation = (accessRule) => {
+    return `{
+      asset: "${accessRule.asset}",
+      role: "${accessRule.role}"
+    }`
+  }
+
+  save = async (group) => {
+    const query = this.mapGroupToMutation(group)
+    let response = await graphqlApi.request(query)
+
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Error Saving Group",
+        body: response.error.message
+      })
+    } else {
+      this.setState({ group: group })
+    }
   }
 
   render() {
@@ -64,7 +115,11 @@ export default class Group extends React.Component {
                       <div className='field is-grouped'>
                         {serviceAccessRule.service.roles.map((role) => (
                           <div key={role} className='control'>
-                            <button className={`button is-primary ${this.isRoleEnabled(role, serviceAccessRule.accessRules) ? '' : 'is-outlined'}`}>{role}</button>
+                            <button
+                              className={`button is-primary ${this.isRoleEnabled(role, serviceAccessRule.accessRules) ? '' : 'is-outlined'}`}
+                              onClick={(e) => this.onRoleClicked(e, role, serviceAccessRule.service.id)}>
+                              {role}
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -72,7 +127,8 @@ export default class Group extends React.Component {
                     <td>
                       <div className='field is-grouped is-grouped-right'>
                         <div className='control'>
-                          <button className='button is-danger is-small' onClick={() => this.removeService(serviceAccessRule.service.id)}>Remove Service</button>
+                          <button className='button is-danger is-small'
+                            onClick={() => this.removeService(serviceAccessRule.service.id)}>Remove Service</button>
                         </div>
                       </div>
                     </td>
@@ -83,6 +139,7 @@ export default class Group extends React.Component {
           </table>
         </div>
       }
+      <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
     </div>)
   }
 }
