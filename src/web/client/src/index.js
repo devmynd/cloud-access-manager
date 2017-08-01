@@ -24,6 +24,10 @@ const NavBarLink = (props) => {
   return <Link className={`navbar-item ${isActive ? 'is-active' : ''}`} to={props.to}>{props.children}</Link>
 }
 
+const GroupMatcher = ({ match }) => {
+  return <h1>Group {match.params.groupName}</h1>
+}
+
 class App extends React.Component {
   render () {
     return (
@@ -38,9 +42,10 @@ class App extends React.Component {
           </NavBar>
           <Switch>
             <Route exact path='/' component={() => <h1>Welcome to CAM</h1>} />
-            <Route exact path='/services' component={ServiceList} />)} />
-              <Route exact path='/groups' component={GroupList} />)} />
-              <Route component={() => <p>not found</p>} />
+            <Route exact path='/services' component={ServiceList} />
+            <Route exact path='/groups' component={GroupList} />
+            <Route path='/groups/:groupName' component={GroupMatcher} />
+            <Route component={() => <p>not found</p>} />
           </Switch>
         </div>
       </BrowserRouter>

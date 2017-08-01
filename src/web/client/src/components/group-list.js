@@ -3,32 +3,18 @@ import { graphqlApi } from '../graphql-api'
 import Modal from './modal'
 import MessagesContainer from './messages-container'
 import lodash from 'lodash'
+import { Link } from 'react-router-dom'
 
 export default class GroupList extends React.Component {
 
   state = {
     groups: [],
     showModal: false,
-    editMode: false,
-    selectedGroup: null
+    newGroupName: null
   }
 
   componentWillMount = async () => {
-    const query = `
-      { groups {
-          name
-          serviceAccessRules {
-            service {
-              id
-              displayName
-            }
-            accessRules {
-              asset
-              role
-            }
-          }
-        }
-      }`
+    const query = `{ groups { name } }`
     const response = await graphqlApi.request(query)
 
     this.setState({
@@ -36,11 +22,10 @@ export default class GroupList extends React.Component {
     })
   }
 
-  showGroupModal = (group, editMode = true) => {
+  showGroupModal = () => {
     this.setState({
       showModal: true,
-      editMode: editMode,
-      selectedGroup: group
+      newGroupName: ""
     })
   }
 
@@ -51,9 +36,8 @@ export default class GroupList extends React.Component {
   }
 
   nameDidChange = (event) => {
-    const selectedGroup = this.state.selectedGroup
-    selectedGroup.name = event.target.value
-    this.setState({ selectedGroup })
+    const newGroupName = event.target.value
+    this.setState({ newGroupName })
   }
 
   onModalMounted = () => {
@@ -64,13 +48,11 @@ export default class GroupList extends React.Component {
 
   submitGroup = async (event) => {
     event.preventDefault()
-
-
     const groups = [...this.state.groups]
-    const selectedGroup = this.state.selectedGroup
-    const foundIndex = lodash.findIndex(groups, (group) => group.name === selectedGroup.name)
+    const newGroupName = this.state.newGroupName
+    const foundIndex = lodash.findIndex(groups, (group) => group.name === newGroupName)
 
-    if (!this.state.editMode && foundIndex !== -1) {
+    if (foundIndex !== -1) {
       this.messagesContainer.push({
         title: "Group Name Already in Use",
         body: (<p>The group name you entered already exists.<br/>Please change the name or edit the existing group instead.</p>)
@@ -81,7 +63,7 @@ export default class GroupList extends React.Component {
 
     this.closeGroupModal()
     const query = `mutation {
-                    setGroupAccessRules(name: "${this.state.selectedGroup.name}", serviceAccessRules: [])
+                    setGroupAccessRules(name: "${newGroupName}", serviceAccessRules: [])
                   }`
     const response = await graphqlApi.request(query)
     if (response.error) {
@@ -90,13 +72,9 @@ export default class GroupList extends React.Component {
         body: response.error.message
       })
     } else {
-
-      if (foundIndex === -1) {
-        groups.push(selectedGroup)
-      } else {
-        groups[foundIndex] = selectedGroup
-      }
+      groups.push({ name: newGroupName })
       this.setState({ groups })
+      this.props.history.push(`/groups/${newGroupName}`)
     }
   }
 
@@ -121,7 +99,7 @@ export default class GroupList extends React.Component {
 
     return (
       <div>
-        <button className='button is-primary is-pulled-right' onClick={() => this.showGroupModal({ name: '', accessRules: [] }, false)}>Add New Group</button>
+        <button className='button is-primary is-pulled-right' onClick={this.showGroupModal}>Add New Group</button>
         <h1 className='title'>Groups</h1>
         <table className='table'>
           <thead>
@@ -137,7 +115,7 @@ export default class GroupList extends React.Component {
                   <td>{ group.name }</td>
                   <td className='field is-grouped is-grouped-right'>
                     <div className='control'>
-                      <button className='button is-primary is-small' onClick={() => this.showGroupModal(group)}>Edit</button>
+                      <Link className="button is-primary is-small" to={`/groups/${group.name}`}>Edit</Link>
                     </div>
                     <div className='control'>
                       <button className='button is-danger is-small' onClick={() => this.deleteGroup(group.name)} >Delete</button>
@@ -150,11 +128,11 @@ export default class GroupList extends React.Component {
         </table>
 
         { this.state.showModal &&
-          <Modal title={`Configure Group: ${this.state.selectedGroup.name}`} closeHandler={this.closeGroupModal} onMounted={this.onModalMounted} >
+          <Modal title="Name New Group" closeHandler={this.closeGroupModal} onMounted={this.onModalMounted} >
             <form onSubmit={this.submitGroup}>
               <div className="field">
                 <div className="control">
-                  <input disabled={this.state.editMode} ref="groupName" className="input" type="text" placeholder="Group Name" value={this.state.selectedGroup.name} onChange={this.nameDidChange} />
+                  <input ref="groupName" className="input" type="text" placeholder="Group Name" value={this.state.newGroupName} onChange={this.nameDidChange} />
                 </div>
               </div>
               <div className='field is-grouped'>
