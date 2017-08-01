@@ -57,11 +57,28 @@ export default class GroupList extends React.Component {
   }
 
   onModalMounted = () => {
-    this.refs.groupName.focus()
+    if (!this.state.editMode) {
+      this.refs.groupName.focus()
+    }
   }
 
   submitGroup = async (event) => {
     event.preventDefault()
+
+
+    const groups = [...this.state.groups]
+    const selectedGroup = this.state.selectedGroup
+    const foundIndex = lodash.findIndex(groups, (group) => group.name === selectedGroup.name)
+
+    if (!this.state.editMode && foundIndex !== -1) {
+      this.messagesContainer.push({
+        title: "Group Name Already in Use",
+        body: (<p>The group name you entered already exists.<br/>Please change the name or edit the existing group instead.</p>)
+      })
+      this.refs.groupName.select()
+      return
+    }
+
     this.closeGroupModal()
     const query = `mutation {
                     setGroupAccessRules(name: "${this.state.selectedGroup.name}", serviceAccessRules: [])
@@ -73,14 +90,28 @@ export default class GroupList extends React.Component {
         body: response.error.message
       })
     } else {
-      const groups = [...this.state.groups]
-      const selectedGroup = this.state.selectedGroup
-      const foundIndex = lodash.findIndex(groups, (group) => group.name === selectedGroup.name)
+
       if (foundIndex === -1) {
         groups.push(selectedGroup)
       } else {
         groups[foundIndex] = selectedGroup
       }
+      this.setState({ groups })
+    }
+  }
+
+  deleteGroup = async (name) => {
+    const query = `mutation { deleteGroup(name: "${name}") }`
+    const response = await graphqlApi.request(query)
+
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Failed to Delete Group",
+        body: response.error.message
+      })
+    } else {
+      const groups = this.state.groups
+      lodash.remove(groups, (group) => group.name === name)
       this.setState({ groups })
     }
   }
@@ -109,7 +140,7 @@ export default class GroupList extends React.Component {
                       <button className='button is-primary is-small' onClick={() => this.showGroupModal(group)}>Edit</button>
                     </div>
                     <div className='control'>
-                      <button className='button is-danger is-small'>Delete</button>
+                      <button className='button is-danger is-small' onClick={() => this.deleteGroup(group.name)} >Delete</button>
                     </div>
                   </td>
                 </tr>

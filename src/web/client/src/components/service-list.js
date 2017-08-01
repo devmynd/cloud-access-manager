@@ -54,6 +54,10 @@ export default class ServiceList extends React.Component {
     })
   }
 
+  onModalMounted = () => {
+    this.refs.config0 && this.refs.config0.focus()
+  }
+
   configValueDidChange = (event, configKey) => {
     const value = event.target.value
     let config = this.state.editingConfiguration
@@ -165,18 +169,17 @@ export default class ServiceList extends React.Component {
         </table>
 
         { this.state.showModal &&
-          <Modal title={`Configure ${this.state.editingService.displayName}`} closeHandler={this.closeConfiguration}>
+          <Modal title={`Configure ${this.state.editingService.displayName}`} closeHandler={this.closeConfiguration} onMounted={this.onModalMounted}>
             <form onSubmit={this.submitConfiguration}>
               {
-                  this.state.editingService.configKeys.map((key) => (
-                    <div className='field' key={key}>
-                      <div className='control'>
-                        <input className='input' type='text' placeholder={key} value={this.state.editingConfiguration[key]}
-                          onChange={(e) => this.configValueDidChange(e, key)} />
-                      </div>
+                this.state.editingService.configKeys.map((key, index) => (
+                  <div className='field' key={key}>
+                    <div className='control'>
+                      <input ref={"config" + index} className='input' type='text' placeholder={key} value={this.state.editingConfiguration[key]}
+                        onChange={(e) => this.configValueDidChange(e, key)} />
                     </div>
-                  )
-                )}
+                  </div>))
+              }
               <div className='field is-grouped'>
                 <div className='control'>
                   <button className='button is-success' type='submit'>Save</button>
