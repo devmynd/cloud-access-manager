@@ -3,6 +3,7 @@
 import React from 'react'
 import {render} from 'react-dom'
 import 'bulma/bulma.sass'
+import 'font-awesome/scss/font-awesome.scss'
 import { Switch, Link, Route, BrowserRouter } from 'react-router-dom'
 import ServiceList from './components/service-list'
 import GroupList from './components/group-list'
@@ -26,7 +27,7 @@ const NavBarLink = (props) => {
 }
 
 const GroupMatcher = ({ match }) => {
-  return <Group name={match.params.groupName}/>
+  return <Group name={match.params.groupName} />
 }
 
 class App extends React.Component {

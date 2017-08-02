@@ -20,8 +20,18 @@ var config = {
       },
       {
         test: /\.s[ac]ss?/,
-        include: [APP_DIR, NODE_MODULES_DIR + '/bulma'],
+        include: [APP_DIR, NODE_MODULES_DIR + '/bulma', NODE_MODULES_DIR + '/font-awesome'],
         loader: ['style-loader', 'css-loader', 'sass-loader']
+      },
+      {
+        test: /\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        include: NODE_MODULES_DIR + '/font-awesome',
+        loader: 'url-loader'
+      },
+      {
+        test: /\.(ttf|eot|svg)(\?[\s\S]+)?$/,
+        include: NODE_MODULES_DIR + '/font-awesome',
+        loader: 'file-loader'
       }
     ]
   },

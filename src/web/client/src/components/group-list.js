@@ -6,7 +6,6 @@ import lodash from 'lodash'
 import { Link } from 'react-router-dom'
 
 export default class GroupList extends React.Component {
-
   state = {
     groups: [],
     showModal: false,
@@ -25,7 +24,7 @@ export default class GroupList extends React.Component {
   showGroupModal = () => {
     this.setState({
       showModal: true,
-      newGroupName: ""
+      newGroupName: ''
     })
   }
 
@@ -54,8 +53,8 @@ export default class GroupList extends React.Component {
 
     if (foundIndex !== -1) {
       this.messagesContainer.push({
-        title: "Group Name Already in Use",
-        body: (<p>The group name you entered already exists.<br/>Please change the name or edit the existing group instead.</p>)
+        title: 'Group Name Already in Use',
+        body: (<p>The group name you entered already exists.<br />Please change the name or edit the existing group instead.</p>)
       })
       this.refs.groupName.select()
       return
@@ -84,7 +83,7 @@ export default class GroupList extends React.Component {
 
     if (response.error) {
       this.messagesContainer.push({
-        title: "Failed to Delete Group",
+        title: 'Failed to Delete Group',
         body: response.error.message
       })
     } else {
@@ -115,7 +114,7 @@ export default class GroupList extends React.Component {
                   <td>{ group.name }</td>
                   <td className='field is-grouped is-grouped-right'>
                     <div className='control'>
-                      <Link className="button is-primary is-small" to={`/groups/${group.name}`}>Edit</Link>
+                      <Link className='button is-primary is-small' to={`/groups/${group.name}`}>Edit</Link>
                     </div>
                     <div className='control'>
                       <button className='button is-danger is-small' onClick={() => this.deleteGroup(group.name)} >Delete</button>
@@ -128,11 +127,11 @@ export default class GroupList extends React.Component {
         </table>
 
         { this.state.showModal &&
-          <Modal title="Name New Group" closeHandler={this.closeGroupModal} onMounted={this.onModalMounted} >
+          <Modal title='Name New Group' closeHandler={this.closeGroupModal} onMounted={this.onModalMounted} >
             <form onSubmit={this.submitGroup}>
-              <div className="field">
-                <div className="control">
-                  <input ref="groupName" className="input" type="text" placeholder="Group Name" value={this.state.newGroupName} onChange={this.nameDidChange} />
+              <div className='field'>
+                <div className='control'>
+                  <input ref='groupName' className='input' type='text' placeholder='Group Name' value={this.state.newGroupName} onChange={this.nameDidChange} />
                 </div>
               </div>
               <div className='field is-grouped'>

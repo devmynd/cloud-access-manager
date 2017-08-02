@@ -12,10 +12,11 @@ export function setGroupAccessRules (args: {
   }]
 }) {
   const group = groupStore.get(args.name) || { name: args.name, accessRules: {} }
+  const newAccessRules = {}
   args.serviceAccessRules.forEach((serviceAccessRuleList) => {
-    group.accessRules[serviceAccessRuleList.serviceId] = serviceAccessRuleList.accessRules
+    newAccessRules[serviceAccessRuleList.serviceId] = serviceAccessRuleList.accessRules
   })
-
+  group.accessRules = newAccessRules
   groupStore.save(group)
   return `Group ${group.name} saved successfully!`
 }

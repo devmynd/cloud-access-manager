@@ -175,7 +175,7 @@ export default class ServiceList extends React.Component {
                 this.state.editingService.configKeys.map((key, index) => (
                   <div className='field' key={key}>
                     <div className='control'>
-                      <input ref={"config" + index} className='input' type='text' placeholder={key} value={this.state.editingConfiguration[key]}
+                      <input ref={'config' + index} className='input' type='text' placeholder={key} value={this.state.editingConfiguration[key]}
                         onChange={(e) => this.configValueDidChange(e, key)} />
                     </div>
                   </div>))
