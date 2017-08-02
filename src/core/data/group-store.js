@@ -7,7 +7,7 @@ process.env.GROUPS_PATH = process.env.GROUPS_PATH || './.groups.store.json'
 
 type GroupDataModel = { [string]: ServiceAccessHash }
 
-const defaultData: GroupDataModel = { 'employee': {} }
+const defaultData: GroupDataModel = { 'Employees': {} }
 function loadData (): GroupDataModel {
   return helpers.readData(process.env.GROUPS_PATH, defaultData)
 }
