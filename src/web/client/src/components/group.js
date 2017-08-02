@@ -25,7 +25,7 @@ export default class Group extends React.Component {
           }
         }
       }
-      services {
+      services(isConfigured: true) {
         id
         displayName
         roles
