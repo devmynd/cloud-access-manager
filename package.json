@@ -65,7 +65,11 @@
     ],
     "globals": [
       "fetch",
-      "Headers"
+      "Headers",
+      "describe",
+      "test",
+      "beforeEach",
+      "expect"
     ]
   },
   "babel": {

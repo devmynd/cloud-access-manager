@@ -1,5 +1,5 @@
 // @flow
-// import type { ServiceUserAccountsAggregate, Individual, AccessRule, ServiceAccessHash, FlaggedInfo, Asset } from './types'
+import type { ServiceUserAccount, FlaggedInfo } from './types'
 import type { IndividualStore } from './data/individual-store'
 import type { GroupStore } from './data/group-store'
 // import lodash from 'lodash'
@@ -14,6 +14,10 @@ export class Auditor {
   constructor (individualStore: IndividualStore, groupStore: GroupStore) {
     this.individualStore = individualStore
     this.groupStore = groupStore
+  }
+
+  auditAccount (account: ServiceUserAccount): ?FlaggedInfo {
+    
   }
 
   // performAudit (accounts: Array<ServiceUserAccountsAggregate>) {
