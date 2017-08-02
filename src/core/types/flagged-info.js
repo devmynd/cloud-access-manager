@@ -1,9 +1,7 @@
 // @flow
-import type { AssetAssignment } from './'
+import type { Individual, ServiceUserAccount } from './'
 
 export type FlaggedInfo = {
-  email: string,
-  isNewIndividual: boolean,
-  groups: Array<string>,
-  assetAssignments: Array<AssetAssignment>
+  individual: ?Individual,
+  account: ServiceUserAccount
 }
