@@ -25,42 +25,44 @@ export const manager: Manager = {
   },
 
   async download (serviceId: 'all' | string) {
-    const serviceIds = serviceId === 'all' ? Object.keys(moduleLookup) : [serviceId]
-
-    const services: Array<{ serviceId: string, provider: ServiceProvider }> = serviceIds.reduce((providers, id) => {
-      const provider = this.getProvider(id)
-      if (provider) {
-        providers.push({ serviceId: id, provider: provider })
-      }
-      return providers
-    }, [])
-
-    const promises = services.map(async (service) => {
-      const accounts = await service.provider.listAccounts()
-      return {
-        serviceId: service.serviceId,
-        accounts: accounts }
-    })
-
-    const serviceAccountLists = await Promise.all(promises)
-
-    const userSummaryLookup = serviceAccountLists.reduce((userSummaryLookup, serviceAccountList) => {
-      serviceAccountList.accounts.forEach((account) => {
-        let userAccountAggregate = userSummaryLookup[account.email] || { email: account.email, assetAssignments: [] }
-
-        const module = moduleLookup[serviceAccountList.serviceId]
-        const assetAssignment: AssetAssignment = {
-          service: this._mapToServiceInfo(module, true),
-          assets: account.assets
-        }
-
-        userAccountAggregate.assetAssignments.push(assetAssignment)
-        userSummaryLookup[account.email] = userAccountAggregate
-      })
-      return userSummaryLookup
-    }, {})
-
-    return Object.keys(userSummaryLookup).map((key) => userSummaryLookup[key])
+    // const serviceIds = serviceId === 'all' ? Object.keys(moduleLookup) : [serviceId]
+    //
+    // const services: Array<{ serviceId: string, provider: ServiceProvider }> = serviceIds.reduce((providers, id) => {
+    //   const provider = this.getProvider(id)
+    //   if (provider) {
+    //     providers.push({ serviceId: id, provider: provider })
+    //   }
+    //   return providers
+    // }, [])
+    //
+    // const promises = services.map(async (service) => {
+    //   const accounts = await service.provider.listAccounts()
+    //   return {
+    //     serviceId: service.serviceId,
+    //     accounts: accounts }
+    // })
+    //
+    // const serviceAccountLists = await Promise.all(promises)
+    //
+    // const userSummaryLookup = serviceAccountLists.reduce((userSummaryLookup, serviceAccountList) => {
+    //   serviceAccountList.accounts.forEach((account) => {
+    //     let userAccountAggregate = userSummaryLookup[account.email] || { email: account.email, assetAssignments: [] }
+    //
+    //     const module = moduleLookup[serviceAccountList.serviceId]
+    //     const assetAssignment: AssetAssignment = {
+    //       service: this._mapToServiceInfo(module, true),
+    //       assets: account.assets
+    //     }
+    //
+    //     userAccountAggregate.assetAssignments.push(assetAssignment)
+    //     userSummaryLookup[account.email] = userAccountAggregate
+    //   })
+    //   return userSummaryLookup
+    // }, {})
+    //
+    // return Object.keys(userSummaryLookup).map((key) => userSummaryLookup[key])
+    console.log('todo: refactor download in manager')
+    return []
   },
 
   getServiceInfo (serviceId: string): ?ServiceInfo {

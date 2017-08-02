@@ -6,6 +6,8 @@ export type Asset = {
 }
 
 export type ServiceUserAccount = {
-  email: string,
+  email?: string,
+  userId?: string,
+  fullname?: string,
   assets: Array<Asset>
 }

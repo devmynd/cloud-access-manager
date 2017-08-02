@@ -2,19 +2,9 @@
 import {
   buildSchema
 } from 'graphql'
-import { serviceResolvers, accountsResolvers, individualsResolvers, groupsResolvers } from './resolvers'
+import { serviceResolvers, individualsResolvers, groupsResolvers } from './resolvers'
 
 export const schema = buildSchema(`
-  type Asset {
-    name: String!
-    role: String
-  }
-
-  type AssetAssignment {
-    service: ServiceInfo!
-    assets: [Asset]!
-  }
-
   type ServiceInfo {
     id: String!
     displayName: String!
@@ -38,22 +28,8 @@ export const schema = buildSchema(`
     serviceAccessRules: [ServiceAccessRuleList]!
   }
 
-  type ServiceUserAccountsAggregate {
-    email: String!
-    assetAssignments: [AssetAssignment]!
-  }
-
-  type FlaggedInfo {
-    email: String!
-    isNewIndividual: Boolean!
-    groups: [String]!
-    assetAssignments: [AssetAssignment]!
-  }
-
   type Query {
-    accounts(serviceId: String): [ServiceUserAccountsAggregate]
     services(isConfigured: Boolean): [ServiceInfo]
-    audit: [FlaggedInfo]
     groups: [Group]
     group(name: String): Group
   }
@@ -79,8 +55,6 @@ export const schema = buildSchema(`
 `)
 
 export const root = {
-  accounts: accountsResolvers.listAccounts,
-  audit: accountsResolvers.performAudit,
   configureService: serviceResolvers.configureService,
   disableService: serviceResolvers.disableService,
   services: serviceResolvers.listServices,
