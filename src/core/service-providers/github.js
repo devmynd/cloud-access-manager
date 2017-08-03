@@ -14,8 +14,10 @@ class GitHubProvider implements ServiceProvider {
     return new Promise((resolve, reject) => {
       resolve([
         {
-          userId: 'shamwow',
-          fullname: 'Shamyle Ghazali',
+          identity: {
+            userId: 'shamwow',
+            fullname: 'Shamyle Ghazali'
+          },
           assets: [{
             name: 'repo a',
             role: 'read'
@@ -25,8 +27,10 @@ class GitHubProvider implements ServiceProvider {
           }]
         },
         {
-          userId: 'evansmd01',
-          fullname: 'Michael',
+          identity: {
+            userId: 'evansmd01',
+            fullname: 'Michael'
+          },
           assets: [{
             name: 'repo a',
             role: 'admin'
@@ -36,7 +40,9 @@ class GitHubProvider implements ServiceProvider {
           }]
         },
         {
-          email: 'ty@devmynd.com',
+          identity: {
+            email: 'ty@devmynd.com'
+          },
           assets: [{
             name: 'repo a',
             role: 'admin'

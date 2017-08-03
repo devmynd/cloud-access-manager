@@ -1,5 +1,5 @@
 /* eslint-env jest */
-// @flow
+
 import { Auditor } from '../auditor'
 import type { ServiceUserAccount, FlaggedInfo } from '../types'
 

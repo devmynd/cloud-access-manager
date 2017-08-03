@@ -23,7 +23,7 @@ class HerokuProvider implements ServiceProvider {
       collaborators.forEach((collaborator) => {
         const email = collaborator.user.email
 
-        let userAccount = userLookup[email] || { email: email, assets: [] }
+        let userAccount = userLookup[email] || { identity: { email: email }, assets: [] }
         const role = collaborator.role || 'collaborator'
         userAccount.assets.push({name: collaborator.app.name, role: role})
         userLookup[email] = userAccount

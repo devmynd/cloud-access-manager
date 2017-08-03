@@ -16,7 +16,9 @@ class DummyProvider implements ServiceProvider {
     return new Promise((resolve, reject) => {
       resolve([
         {
-          email: 'shamyle@devmynd.com',
+          identity: {
+            email: 'shamyle@devmynd.com'
+          },
           assets: [{
             name: 'repo a',
             role: 'owner'
@@ -26,7 +28,9 @@ class DummyProvider implements ServiceProvider {
           }]
         },
         {
-          email: 'ty@devmynd.com',
+          identity: {
+            email: 'ty@devmynd.com'
+          },
           assets: [{
             name: 'repo a',
             role: 'member'
@@ -36,7 +40,9 @@ class DummyProvider implements ServiceProvider {
           }]
         },
         {
-          email: 'mevans@devmynd.com',
+          identity: {
+            email: 'mevans@devmynd.com'
+          },
           assets: [{
             name: 'repo a',
             role: 'member'

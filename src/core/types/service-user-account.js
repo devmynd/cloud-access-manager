@@ -5,10 +5,14 @@ export type Asset = {
   role?: string
 }
 
-export type UserAccount = {
+export type Identity = {
   email?: string,
   userId?: string,
   fullname?: string,
+}
+
+export type UserAccount = {
+  identity: Identity,
   assets: Array<Asset>
 }
 
