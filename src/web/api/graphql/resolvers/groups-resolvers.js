@@ -32,7 +32,7 @@ export function listGroups () {
 }
 
 export function deleteGroup (args: { name: string }) {
-  groupStore.deleteGroup(args.name)
+  groupStore.delete(args.name)
   return `Group ${args.name} deleted!`
 }
 

@@ -172,7 +172,7 @@ export async function configureGroup (groupName: string) {
   groupStore.save(group)
 }
 
-export async function deleteGroup (groupName: string) {
+export async function deleteGroup(groupName: string) {
   const question = {
     type: 'confirm',
     name: 'confirmed',
@@ -182,6 +182,6 @@ export async function deleteGroup (groupName: string) {
   const confirmed = (await inquirer.prompt([question])).confirmed
 
   if (confirmed) {
-    groupStore.deleteGroup(groupName)
+    groupStore.delete(groupName)
   }
 }

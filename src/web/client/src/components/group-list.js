@@ -77,8 +77,8 @@ export default class GroupList extends React.Component {
     }
   }
 
-  deleteGroup = async (name) => {
-    const query = `mutation { deleteGroup(name: "${name}") }`
+  delete = async (name) => {
+    const query = `mutation { delete(name: "${name}") }`
     const response = await graphqlApi.request(query)
 
     if (response.error) {
@@ -117,7 +117,7 @@ export default class GroupList extends React.Component {
                       <Link className='button is-primary is-small' to={`/groups/${group.name}`}>Edit</Link>
                     </div>
                     <div className='control'>
-                      <button className='button is-danger is-small' onClick={() => this.deleteGroup(group.name)} >Delete</button>
+                      <button className='button is-danger is-small' onClick={() => this.delete(group.name)} >Delete</button>
                     </div>
                   </td>
                 </tr>

@@ -1,8 +1,8 @@
 // @flow
-import type { ServiceUserAccount, FlaggedInfo, UserIdentity, Individual} from './types'
+import type { ServiceUserAccount, FlaggedInfo, UserIdentity, Individual, Asset, AccessRule} from './types'
 import type { IndividualStore } from './data/individual-store'
 import type { GroupStore } from './data/group-store'
-// import lodash from 'lodash'
+import lodash from 'lodash'
 
 // type IndividualLookup = { [string]: Individual }
 // type GroupAccessRuleLookup = { [string]: ServiceAccessHash }
@@ -35,6 +35,9 @@ export class Auditor {
     throw "not implemented"
   }
 
+  _getAccessRules(individual: Individual, serviceId: string) {
+
+  }
   // performAudit (accounts: Array<ServiceUserAccountsAggregate>) {
   //   const individuals = this.individualStore.getAll()
   //   const groups = this.groupStore.getAll()
@@ -86,41 +89,35 @@ export class Auditor {
 
   // Private
 
-  // _findUnauthorizedAssets (assets: Array<Asset>, accessRules: Array<AccessRule>) {
-  //   return assets.reduce((unauthorizedAssets, asset) => {
-  //     const isAuthorized = lodash.find(accessRules, (rule) => {
-  //       const assetsMatch = rule.asset === '*' || rule.asset === asset.name
-  //       const rolesMatch = rule.role === '*' || rule.role === asset.role
-  //       return assetsMatch && rolesMatch
-  //     })
-  //
-  //     if (!isAuthorized) {
-  //       unauthorizedAssets.push(asset)
-  //     }
-  //
-  //     return unauthorizedAssets
-  //   }, [])
-  // }
-  //
+  _findUnauthorizedAssets (assets: Array<Asset>, accessRules: Array<AccessRule>) {
+    return assets.reduce((unauthorizedAssets, asset) => {
+      const isAuthorized = lodash.find(accessRules, (rule) => {
+        const assetsMatch = rule.asset === '*' || rule.asset === asset.name
+        const rolesMatch = rule.role === '*' || rule.role === asset.role
+        return assetsMatch && rolesMatch
+      })
 
-  // _getAccessRules (individual: Individual, serviceId: string, groupAccessRules: GroupAccessRuleLookup) {
-  //   let allAccessRules: Array<Array<AccessRule>> = []
-  //
-  //   if (individual.accessRules.hasOwnProperty(serviceId)) {
-  //     allAccessRules.push(individual.accessRules[serviceId])
-  //   }
-  //
-  //   individual.groups.forEach((group) => {
-  //     const accessRules = groupAccessRules[group]
-  //     if (accessRules && accessRules.hasOwnProperty(serviceId)) {
-  //       allAccessRules.push(accessRules[serviceId])
-  //     }
-  //   })
-  //
-  //   let flattened: Array<AccessRule> = []
-  //   allAccessRules.forEach((accessRule) => {
-  //     flattened = flattened.concat(accessRule)
-  //   })
-  //   return flattened
-  // }
+      if (!isAuthorized) {
+        unauthorizedAssets.push(asset)
+      }
+
+      return unauthorizedAssets
+    }, [])
+  }
+
+
+  _getAccessRules (individual: Individual, serviceId: string) {
+    let allAccessRules: Array<AccessRule> = []
+
+    if (individual.accessRules.hasOwnProperty(serviceId)) {
+      allAccessRules = individual.accessRules[serviceId]
+    }
+
+    individual.groups.forEach((group) => {
+      const groupAccessRules = this.groupStore.getAccessRules(group, serviceId)
+      allAccessRules = allAccessRules.concat(groupAccessRules)
+    })
+
+    return allAccessRules
+  }
 }

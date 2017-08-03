@@ -3,23 +3,66 @@ import { groupStore as store } from '../group-store'
 import fs from 'file-system'
 process.env.GROUPS_PATH = './.groups.test.store.json'
 
-beforeEach(() => {
+
+function deleteFile() {
   if (fs.existsSync(process.env.GROUPS_PATH)) {
     fs.unlinkSync(process.env.GROUPS_PATH)
   }
-})
+}
 
-test('it has a default employee group', () => {
-  const employeeGroup = store.get('employee')
-  expect(employeeGroup).not.toBeNull()
-})
+describe('crud', () => {
+  beforeEach(() => {
+    deleteFile()
+    store.save({ name: 'some group', accessRules: { 'someService': [{ asset: "*", role: "*" }] } })
+    store.save({ name: 'some other group', accessRules: { 'a different service': [{ asset: "a", role: "b" }] } })
+  })
 
-test('persists groups', () => {
-  store.save({ name: 'some group', accessRules: { 'someService': 'full' } })
-  store.save({ name: 'some other group', accessRules: { 'a different service': 'full' } })
+  test('it has a default employee group', () => {
+    const employeeGroup = store.get('Employees')
+    expect(employeeGroup).not.toBeNull()
+  })
 
-  let retrieved = store.get('some group')
+  test('get(groupName)', () => {
+    let retrieved = store.get('some group')
 
-  expect(retrieved.name).toBe('some group')
-  expect(retrieved.accessRules).toEqual({ 'someService': 'full' })
+    expect(retrieved.name).toBe('some group')
+    expect(retrieved.accessRules).toEqual({ 'someService': [{ asset: "*", role: "*" }] })
+  })
+
+  test.only('getAll()', () => {
+    let retrieved = store.getAll()
+    console.log(retrieved)
+
+    expect(retrieved.length).toBe(3)
+    expect(retrieved).toEqual([
+      { name: "Employees", accessRules: {} },
+      { name: 'some group', accessRules: { 'someService': [{ asset: "*", role: "*" }] } },
+      { name: 'some other group', accessRules: { 'a different service': [{ asset: "a", role: "b" }] } }
+     ])
+  })
+
+  test('getAccessRules(groupName, serviceId)', () => {
+    let accessRules = store.getAccessRules('some group', 'someService')
+
+    expect(accessRules).toEqual([{ asset: "*", role: "*" }])
+  })
+
+  test('exists(groupName)', () => {
+    expect(store.exists('some group')).toBeTrue()
+    expect(store.exists('unknown group')).toBeFalse()
+  })
+
+  test('save(group)', () => {
+    store.save({ name: 'some group', accessRules: {} })
+    let retrieved = store.get('some group')
+
+    expect(retrieved).toEqual({ name: 'some group', accessRules: {} })
+  })
+
+  test('delete(groupName)', () => {
+    store.delete('some group')
+    let retrieved = store.get('some group')
+
+    expect(retrieved).toBeNull()
+  })
 })

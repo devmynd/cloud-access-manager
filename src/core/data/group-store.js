@@ -1,5 +1,5 @@
 // @flow
-import type { Group, ServiceAccessHash } from './../types'
+import type { Group, ServiceAccessHash, AccessRule } from './../types'
 import fs from 'file-system'
 import * as helpers from './helpers'
 
@@ -17,7 +17,8 @@ export type GroupStore = {
   exists (groupName: string): boolean,
   get (groupName: string): Group,
   getAll (): Array<Group>,
-  deleteGroup (groupName: string): void
+  delete (groupName: string): void,
+  getAccessRules(groupName: string, serviceId: string): Array<AccessRule>
 }
 
 export const groupStore: GroupStore = {
@@ -44,9 +45,18 @@ export const groupStore: GroupStore = {
     })
   },
 
-  deleteGroup (groupName: string) {
+  delete (groupName: string) {
     const data = loadData()
     delete data[groupName]
     fs.writeFileSync(process.env.GROUPS_PATH, JSON.stringify(data))
+  },
+
+  getAccessRules(groupName: string, serviceId: string) {
+    const group = this.get(groupName)
+    if (group) {
+      return group.accessRules[serviceId] || []
+    }
+    return []
   }
+
 }
