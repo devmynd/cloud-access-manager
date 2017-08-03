@@ -1,7 +1,9 @@
 // @flow
-import type { Individual, ServiceUserAccount } from './'
+import type { Individual, UserIdentity, Asset } from './'
 
 export type FlaggedInfo = {
   individual: ?Individual,
-  account: ServiceUserAccount
+  serviceId: string,
+  userIdentity: UserIdentity,
+  flaggedAssets: Array<Asset>
 }

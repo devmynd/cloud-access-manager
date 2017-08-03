@@ -1,11 +1,11 @@
 // @flow
-import type { ServiceAccessHash, Identity } from './'
+import type { ServiceAccessHash, UserIdentity } from './'
 
 export type Individual = {
   id: String,
   fullname: string,
   primaryEmail: ?string,
-  serviceIdentities: { [string]: Identity },
+  serviceUserIdentities: { [string]: UserIdentity },
   accessRules: ServiceAccessHash,
   groups: Array<string>
 }
