@@ -9,14 +9,14 @@ process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.s
 export type IndividualStore = {
   save (user: Individual): void,
   getAll (): Array<Individual>,
-  getByEmail (email: string): Individual
+  getByEmail (email: string): ?Individual
 }
 
 export const individualStore: IndividualStore = {
   save (individual: Individual) {
     let individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     let existingIndex = lodash.findIndex(individuals, (entry) => {
-      return entry.email === individual.email
+      return entry.primaryEmail === individual.primaryEmail
     })
     if (existingIndex >= 0) {
       individuals[existingIndex] = individual
@@ -34,6 +34,6 @@ export const individualStore: IndividualStore = {
 
   getByEmail (email: string) {
     const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
-    return lodash.find(individuals, (u) => u.email === email)
+    return lodash.find(individuals, (u) => u.primaryEmail === email)
   }
 }

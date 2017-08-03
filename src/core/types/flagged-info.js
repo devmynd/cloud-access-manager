@@ -2,8 +2,8 @@
 import type { Individual, UserIdentity, Asset } from './'
 
 export type FlaggedInfo = {
-  individual: ?Individual,
+  individualId: ?string,
   serviceId: string,
   userIdentity: UserIdentity,
-  flaggedAssets: Array<Asset>
+  assets: Array<Asset>
 }
