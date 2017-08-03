@@ -1,7 +1,7 @@
 // @flow
 import fs from 'file-system'
 import * as helpers from './helpers'
-import type { Individual } from '../types'
+import type { Individual, UserIdentity } from '../types'
 import lodash from 'lodash'
 
 process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.store.json'
@@ -9,7 +9,7 @@ process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.s
 export type IndividualStore = {
   save (user: Individual): void,
   getAll (): Array<Individual>,
-  getByPrimaryEmail (email: string): ?Individual
+  getByServiceUserIdentity(serviceId: string, userIdentity: UserIdentity): ?Individual
 }
 
 export const individualStore: IndividualStore = {
@@ -32,8 +32,19 @@ export const individualStore: IndividualStore = {
     return individuals
   },
 
-  getByPrimaryEmail (email: string) {
+  getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity) {
     const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
-    return lodash.find(individuals, (u) => u.primaryEmail === email)
+
+    if (userIdentity.email) {
+      return lodash.find(individuals, (u) => u.primaryEmail === userIdentity.email)
+    } else if (userIdentity.userId) {
+      return lodash.find(individuals, (u) => {
+        const identity = u.serviceUserIdentities[serviceId]
+        return identity
+          ? identity.userId === userIdentity.userId
+          : false
+      })
+    }
+    throw new Error("Cannot match a service account that has no email or userId")
   }
 }

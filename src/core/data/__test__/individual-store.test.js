@@ -32,8 +32,17 @@ describe('integration test', () => {
     // Insert new record
     store.save(entry)
 
-    // Retrieve and test the new record
-    let retrieved = store.getByPrimaryEmail("test-1@test.com")
+    // Find the user based on a matching email for a new service the individual doesn't have yet.
+    let retrieved = store.getByServiceUserIdentity("non-existing-service", {
+      email: "test-1@test.com"
+    })
+    expect(retrieved).not.toBeUndefined()
+    expect(retrieved).not.toBeNull()
+
+    // Find the user by an existing service user identity
+    retrieved = store.getByServiceUserIdentity("some-service", {
+      userId: "user-1"
+    })
 
     expect(retrieved).toEqual({
       id: "user1",

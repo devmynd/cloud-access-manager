@@ -1,5 +1,5 @@
 // @flow
-import type { ServiceUserAccount, FlaggedInfo } from './types'
+import type { ServiceUserAccount, FlaggedInfo, UserIdentity, Individual} from './types'
 import type { IndividualStore } from './data/individual-store'
 import type { GroupStore } from './data/group-store'
 // import lodash from 'lodash'
@@ -17,7 +17,22 @@ export class Auditor {
   }
 
   auditAccount (account: ServiceUserAccount): ?FlaggedInfo {
-    
+    const individual = this.individualStore.getByServiceUserIdentity(account.serviceId, account.userAccount.identity)
+
+    if (individual) {
+      return this.auditIndividual(individual, account)
+    } else {
+      return {
+        individualId: null,
+        serviceId: account.serviceId,
+        userIdentity: account.userAccount.identity,
+        assets: account.userAccount.assets
+      }
+    }
+  }
+
+  auditIndividual(individual: Individual, account: ServiceUserAccount): ?FlaggedInfo {
+    throw "not implemented"
   }
 
   // performAudit (accounts: Array<ServiceUserAccountsAggregate>) {
@@ -87,6 +102,7 @@ export class Auditor {
   //   }, [])
   // }
   //
+
   // _getAccessRules (individual: Individual, serviceId: string, groupAccessRules: GroupAccessRuleLookup) {
   //   let allAccessRules: Array<Array<AccessRule>> = []
   //

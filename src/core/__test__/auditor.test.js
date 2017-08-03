@@ -4,7 +4,9 @@ import { Auditor } from '../auditor'
 import type { ServiceUserAccount, FlaggedInfo } from '../types'
 
 let individualStore = {
-
+  getByPrimaryEmail (email) {
+    return individual
+  }
 }
 
 let groupStore = {
