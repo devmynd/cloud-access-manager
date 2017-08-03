@@ -15,7 +15,7 @@ function loadData (): GroupDataModel {
 export type GroupStore = {
   save (group: Group): void,
   exists (groupName: string): boolean,
-  get (groupName: string): Group,
+  get (groupName: string): ?Group,
   getAll (): Array<Group>,
   delete (groupName: string): void,
   getAccessRules(groupName: string, serviceId: string): Array<AccessRule>
@@ -35,7 +35,10 @@ export const groupStore: GroupStore = {
 
   get (groupName: string) {
     const data = loadData()
-    return { name: groupName, accessRules: data[groupName] || {} }
+    if (data.hasOwnProperty(groupName)) {
+      return { name: groupName, accessRules: data[groupName] }
+    }
+    return null
   },
 
   getAll () {

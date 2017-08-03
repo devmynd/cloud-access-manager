@@ -1,23 +1,23 @@
 /* eslint-env jest */
-
 import { Auditor } from '../auditor'
 import type { ServiceUserAccount, FlaggedInfo } from '../types'
+import { groupStore } from '../data/group-store'
+import { individualStore } from '../data/individual-store'
+import fs from 'file-system'
 
-let individualStore = {
-  getByPrimaryEmail (email) {
-    return individual
-  }
-}
-
-let groupStore = {
-  groups: []
-}
+process.env.INDIVIDUALS_PATH = './.individuals.test.store.json'
+process.env.GROUPS_PATH = './.groups.test.store.json'
 
 let individual, auditor
 
-
-
 beforeEach(() => {
+  if (fs.existsSync(process.env.INDIVIDUALS_PATH)) {
+    fs.unlinkSync(process.env.INDIVIDUALS_PATH)
+  }
+  if (fs.existsSync(process.env.GROUPS_PATH)) {
+    fs.unlinkSync(process.env.GROUPS_PATH)
+  }
+
   individual = {
     id: "123",
     fullname:"test individual",
@@ -26,7 +26,7 @@ beforeEach(() => {
     accessRules: {},
     groups: []
   }
-  groupStore.groups = []
+
   auditor = new Auditor(individualStore, groupStore)
 })
 
@@ -55,6 +55,7 @@ describe("without a matching individual record", () => {
       }
     }
     individual.serviceUserIdentities["a different service"] = identity
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -62,7 +63,7 @@ describe("without a matching individual record", () => {
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individualId).toBeNull()
-      expect(flaggedInfo.identity).toEqual({ userId: "test123" })
+      expect(flaggedInfo.userIdentity).toEqual({ userId: "test123" })
       expect(flaggedInfo.assets).toEqual([{ name: "project a", role: "member" }])
     })
   })
@@ -87,6 +88,7 @@ describe("without a matching individual record", () => {
       fullname: "test individual",
       email: "test@test.com"
     }
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -94,7 +96,7 @@ describe("without a matching individual record", () => {
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individualId).toBeNull()
-      expect(flaggedInfo.identity).toEqual({ fullname: "test individual", userId: "some user id" })
+      expect(flaggedInfo.userIdentity).toEqual({ fullname: "test individual", userId: "some user id" })
       expect(flaggedInfo.assets).toEqual([{ name: "project a", role: "member" }])
     })
   })
@@ -104,6 +106,7 @@ const matchingIndividualTests = (account) => {
   test("it flags if they have no service access rule at all", () => {
     // arrange
     individual.accessRules = {}
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -123,6 +126,7 @@ const matchingIndividualTests = (account) => {
   test("it flags if they have a service access rule, with full access, for different roles", () => {
     // arrange
     individual.accessRules["test service"] = [{ asset: "*", role: "member" }]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -141,6 +145,7 @@ const matchingIndividualTests = (account) => {
   test("it flags if they have per asset access for the wrong assets", () => {
     // arrange
     individual.accessRules["test service"] = [{ asset: "project b", role: "owner" }]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -162,6 +167,7 @@ const matchingIndividualTests = (account) => {
       { asset: "project b", role: "admin" },
       { asset: "project a", role: "admin" }
     ]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -182,12 +188,13 @@ const matchingIndividualTests = (account) => {
     // arrange
     individual.accessRules = {}
     individual.groups = ["employee"]
-    groupStore.groups = [{
+    groupStore.save({
       name: "employee",
       accessRules: {
         "test service": [{ asset: "*", role: "member"}]
       }
-    }]
+    })
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -209,6 +216,7 @@ const matchingIndividualTests = (account) => {
       { asset: "*", role: "member" },
       { asset: "*", role: "owner" }
     ]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -221,7 +229,7 @@ const matchingIndividualTests = (account) => {
     // arrange
     individual.accessRules = {}
     individual.groups = ["employee"]
-    groupStore.groups = [{
+    groupStore.save({
       name: "employee",
       accessRules: {
         "test service": [
@@ -229,7 +237,8 @@ const matchingIndividualTests = (account) => {
           { asset: "*", role: "owner"}
         ]
       }
-    }]
+    })
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -244,6 +253,7 @@ const matchingIndividualTests = (account) => {
       { asset: "project b", role: "owner" },
       { asset: "project a", role: "member" }
     ]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -308,6 +318,7 @@ describe("with matching individual, when the service doesn't have roles", () => 
   test("it does not flag, if they have full access", () => {
     // arrange
     individual.accessRules["test service"] = [{ asset: "*", role: "*" }]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -320,14 +331,15 @@ describe("with matching individual, when the service doesn't have roles", () => 
     // arrange
     individual.accessRules = {}
     individual.groups = ["employee"]
-    groupStore.groups = [{
+    groupStore.save({
       name: "employee",
       accessRules: {
         "test service": [
           { asset: "*", role: "*"}
         ]
       }
-    }]
+    })
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -342,6 +354,7 @@ describe("with matching individual, when the service doesn't have roles", () => 
       { asset: "project b", role: "*" },
       { asset: "project a", role: "*" }
     ]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)
@@ -355,6 +368,7 @@ describe("with matching individual, when the service doesn't have roles", () => 
     individual.accessRules["test service"] = [
       { asset: "project b", role: "*" }
     ]
+    individualStore.save(individual)
 
     // act
     let flaggedInfo = auditor.auditAccount(account)

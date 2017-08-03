@@ -9,7 +9,7 @@ process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.s
 export type IndividualStore = {
   save (user: Individual): void,
   getAll (): Array<Individual>,
-  getByServiceUserIdentity(serviceId: string, userIdentity: UserIdentity): ?Individual
+  getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity): ?Individual
 }
 
 export const individualStore: IndividualStore = {

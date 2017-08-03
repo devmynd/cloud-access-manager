@@ -29,9 +29,8 @@ describe('crud', () => {
     expect(retrieved.accessRules).toEqual({ 'someService': [{ asset: "*", role: "*" }] })
   })
 
-  test.only('getAll()', () => {
+  test('getAll()', () => {
     let retrieved = store.getAll()
-    console.log(retrieved)
 
     expect(retrieved.length).toBe(3)
     expect(retrieved).toEqual([
@@ -48,8 +47,8 @@ describe('crud', () => {
   })
 
   test('exists(groupName)', () => {
-    expect(store.exists('some group')).toBeTrue()
-    expect(store.exists('unknown group')).toBeFalse()
+    expect(store.exists('some group')).toBe(true)
+    expect(store.exists('unknown group')).toBe(false)
   })
 
   test('save(group)', () => {

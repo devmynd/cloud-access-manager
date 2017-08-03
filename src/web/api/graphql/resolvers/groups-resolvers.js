@@ -23,7 +23,7 @@ export function setGroupAccessRules (args: {
 
 export function getGroup (args: {name: string}) {
   const group = groupStore.get(args.name)
-  return mapGroup(group)
+  if (group) { return mapGroup(group) }
 }
 
 export function listGroups () {
