@@ -9,68 +9,99 @@ describe('integration test', () => {
       fs.unlinkSync(process.env.INDIVIDUALS_PATH)
     }
 
-    let entry1 = {
-      email: 'test-1@test.com',
-      services: [
-        {
-          id: 'some-service',
-          access: 'full'
+    let entry = {
+      id: "user1",
+      fullname: "User 1",
+      primaryEmail: 'test-1@test.com',
+      serviceUserIdentities: {
+        "some-service": {
+          userId: "user-1"
+        },
+        "another-service": {
+          email: "user-1@email.com",
+          fullname: "User One"
         }
-      ]
-    }
-    let entry2 = {
-      email: 'test-2@test.com',
-      services: [
-        {
-          id: 'some-service',
-          access: 'full'
-        }
-      ]
+      },
+      accessRules: {
+        "some-service": [{ asset: "*", role: "member" }],
+        "another-service": [{ asset: "a", role: "owner" }]
+      },
+      groups: ["employees", "admins"]
     }
 
     // Insert new record
-    store.save(entry1)
+    store.save(entry)
 
     // Retrieve and test the new record
-    let retrieved = store.getAll()
+    let retrieved = store.getByPrimaryEmail("test-1@test.com")
 
-    expect(retrieved.length).toBe(1)
-    expect(retrieved[0]).toEqual({
-      email: 'test-1@test.com',
-      services: [
-        {
-          id: 'some-service',
-          access: 'full'
+    expect(retrieved).toEqual({
+      id: "user1",
+      fullname: "User 1",
+      primaryEmail: 'test-1@test.com',
+      serviceUserIdentities: {
+        "some-service": {
+          userId: "user-1"
+        },
+        "another-service": {
+          email: "user-1@email.com",
+          fullname: "User One"
         }
-      ]
+      } ,
+      accessRules: {
+        "some-service": [{ asset: "*", role: "member" }],
+        "another-service": [{ asset: "a", role: "owner" }]
+      },
+      groups: ["employees", "admins"]
     })
 
     // Update the record
-    entry1.services[0].access = ['asset a', 'asset b']
-    entry1.services.push({ id: 'another-service', access: 'full' })
+    entry.fullname = "User One"
+    entry.primaryEmail = "testOne@test.com"
+    entry.serviceUserIdentities["new-service"] = {
+      userId: "testOne"
+    }
+    entry.accessRules["some-service"].push({ asset: "project", role: "*" })
+    entry.groups.push("management")
 
-    store.save(entry1)
+    store.save(entry)
 
     // Retrieve and test the updated record
     retrieved = store.getAll()
 
     expect(retrieved.length).toBe(1)
     expect(retrieved[0]).toEqual({
-      email: 'test-1@test.com',
-      services: [
-        {
-          id: 'some-service',
-          access: ['asset a', 'asset b']
+      id: "user1",
+      fullname: "User One",
+      primaryEmail: 'testOne@test.com',
+      serviceUserIdentities: {
+        "some-service": {
+          userId: "user-1"
         },
-        {
-          id: 'another-service',
-          access: 'full'
+        "another-service": {
+          email: "user-1@email.com",
+          fullname: "User One"
+        },
+        "new-service": {
+          userId: "testOne"
         }
-      ]
+      } ,
+      accessRules: {
+        "some-service": [{ asset: "*", role: "member" }, { asset: "project", role: "*" }],
+        "another-service": [{ asset: "a", role: "owner" }]
+      },
+      groups: ["employees", "admins", "management"]
     })
 
     // Insert a second record
-    store.save(entry2)
+    store.save({
+      id: "user2",
+      fullname: "User 2",
+      primaryEmail: 'test-2@test.com',
+      serviceUserIdentities: {},
+      accessRules: {},
+      groups: []
+    })
 
     // Check that a second entry was inserted instead of overwriting the other entry
     // Retrieve and test the new record
