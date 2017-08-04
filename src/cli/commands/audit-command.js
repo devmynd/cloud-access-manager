@@ -9,58 +9,6 @@ import { groupStore } from '../../core/data/group-store'
 import type { ServiceUserAccount, FlaggedInfo } from '../../core/types'
 // import lodash from 'lodash'
 
-
-
-function selectSortField (flag: FlaggedInfo): string {
-  if (flag.individual) {
-    if (flag.individual.primaryEmail) {
-      return flag.individual.primaryEmail
-    }
-    if (flag.individual.fullName) {
-      return flag.individual.fullName
-    }
-  }
-  if (flag.userIdentity.email) {
-    return flag.userIdentity.email
-  }
-  if (flag.userIdentity.userId) {
-    return flag.userIdentity.userId
-  }
-  if (flag.userIdentity.fullName) {
-    return flag.userIdentity.fullName
-  }
-  return ""
-}
-
-function printFlaggedAccounts (flags: Array<FlaggedInfo>) {
-  if (flags.length > 0) {
-    term.red('The following individuals have been flagged:\n\n')
-
-    flags.sort((lhs, rhs) => {
-      const left = selectSortField(lhs)
-      const right = selectSortField(rhs)
-      return left > right ? 0 : 1
-    })
-    flags.forEach((flag) => {
-      if (flag.individual) {
-        term.green(`Known Individual => name: '${flag.individual.fullName}', primaryEmail: '${flag.individual.primaryEmail || ""}'`)
-      } else {
-        term.green(`Unknown Individual => name: '${flag.userIdentity.fullName || ''}', email: '${flag.userIdentity.email || ''}', userId: '${flag.userIdentity.userId || ''}'`)
-      }
-      term.cyan(`\n\t${flag.serviceId}`)
-      flag.assets.forEach((asset) => {
-        term.magenta(`\n\t\t${asset.name} `)
-        if (asset.role) {
-          term.yellow(`(${asset.role})`)
-        }
-        term('\n')
-      })
-    })
-  } else {
-    term.green('No suspicious accounts found. Take a break. Have a 🍺\n\n')
-  }
-}
-
 export async function audit () {
   const accounts: Array<ServiceUserAccount> = await manager.download('all')
   const auditor = new Auditor(individualStore, groupStore)
@@ -253,3 +201,54 @@ export async function interactiveAudit () {
 //
 //   return (await inquirer.prompt([question])).selectedAssignments
 // }
+
+
+function selectSortField (flag: FlaggedInfo): string {
+  if (flag.individual) {
+    if (flag.individual.primaryEmail) {
+      return flag.individual.primaryEmail
+    }
+    if (flag.individual.fullName) {
+      return flag.individual.fullName
+    }
+  }
+  if (flag.userIdentity.email) {
+    return flag.userIdentity.email
+  }
+  if (flag.userIdentity.userId) {
+    return flag.userIdentity.userId
+  }
+  if (flag.userIdentity.fullName) {
+    return flag.userIdentity.fullName
+  }
+  return ""
+}
+
+function printFlaggedAccounts (flags: Array<FlaggedInfo>) {
+  if (flags.length > 0) {
+    term.red('The following individuals have been flagged:\n\n')
+
+    flags.sort((lhs, rhs) => {
+      const left = selectSortField(lhs)
+      const right = selectSortField(rhs)
+      return left > right ? 0 : 1
+    })
+    flags.forEach((flag) => {
+      if (flag.individual) {
+        term.green(`Known Individual => name: '${flag.individual.fullName}', primaryEmail: '${flag.individual.primaryEmail || ""}'`)
+      } else {
+        term.green(`Unknown Individual => name: '${flag.userIdentity.fullName || ''}', email: '${flag.userIdentity.email || ''}', userId: '${flag.userIdentity.userId || ''}'`)
+      }
+      term.cyan(`\n\t${flag.serviceId}`)
+      flag.assets.forEach((asset) => {
+        term.magenta(`\n\t\t${asset.name} `)
+        if (asset.role) {
+          term.yellow(`(${asset.role})`)
+        }
+        term('\n')
+      })
+    })
+  } else {
+    term.green('No suspicious accounts found. Take a break. Have a 🍺\n\n')
+  }
+}
