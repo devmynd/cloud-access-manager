@@ -37,6 +37,7 @@ export async function interactiveAudit () {
         auditForIndividual(flag.individual, flag.serviceId, flag.assets)
       } else {
         // prompt to ask about creating individual or adding to existing individual
+        // for now, maybe just only create individuals, as we will have to think about how to design the CLI for searching and matching existing individuals. 
         // then call:
         // auditForIndividual(createdOrUpdatedIndividual, flag.serviceId, flag.assets)
       }
