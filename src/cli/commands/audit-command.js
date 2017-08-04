@@ -5,9 +5,9 @@ import { Auditor } from './../../core/auditor'
 // import * as helpers from '../helpers'
 import { individualStore } from '../../core/data/individual-store'
 import { groupStore } from '../../core/data/group-store'
-// import inquirer from 'inquirer'
-import type { ServiceUserAccount, FlaggedInfo } from '../../core/types'
-// import lodash from 'lodash'
+import inquirer from 'inquirer'
+import type { ServiceUserAccount, FlaggedInfo, Asset, Individual, AccessRule } from '../../core/types'
+import lodash from 'lodash'
 
 export async function audit () {
   const accounts: Array<ServiceUserAccount> = await manager.download('all')
@@ -21,7 +21,7 @@ export async function audit () {
     }
   })
 
-  printFlaggedAccounts(flags)
+   printFlaggedAccounts(flags)
 }
 
 export async function interactiveAudit () {
@@ -34,10 +34,17 @@ export async function interactiveAudit () {
     const flag = auditor.auditAccount(account)
     if (flag) {
       if (flag.individual) {
-        auditForIndividual(flag.individual, flag.serviceId, flag.assets)
+        await auditForIndividual(flag.individual, flag.serviceId, flag.assets)
       } else {
+        const shouldCreateIndividual = await(handleUnknownUser(flag))
+        if (shouldCreateIndividual) {
+          const newIndividual = await(createNewIndividual(flag))
+          await auditForIndividual(newIndividual, flag.serviceId, flag.assets)
+        } else {
+          console.log("todo: add to an existing individual")
+        }
         // prompt to ask about creating individual or adding to existing individual
-        // for now, maybe just only create individuals, as we will have to think about how to design the CLI for searching and matching existing individuals. 
+        // for now, maybe just only create individuals, as we will have to think about how to design the CLI for searching and matching existing individuals.
         // then call:
         // auditForIndividual(createdOrUpdatedIndividual, flag.serviceId, flag.assets)
       }
@@ -48,10 +55,51 @@ export async function interactiveAudit () {
   audit()
 }
 
+async function handleUnknownUser(flag: FlaggedInfo) {
+ let userIdentity =  flag.userIdentity.email !== "" ? flag.userIdentity.email : flag.userIdentity.userId
+
+ if(userIdentity) {
+   term.cyan(`${userIdentity} is an unknown user.\n`)
+   const question = {
+       type: 'list',
+       name: 'shouldCreateIndividual',
+       choices: [{
+             name: 'Create a New Individual',
+             value: true
+           }, {
+             name: 'Link to an Existing Individual',
+             value: false
+           }],
+       message: `How would you like to proceed with this user?`
+     }
+
+     return (await inquirer.prompt([question])).shouldCreateIndividual
+ }
+}
+
+async function createNewIndividual(flag: FlaggedInfo) : Promise<Individual> {
+  const groupNames = groupStore.getAll().map((group) => group.name)
+  const newIndividual = {
+    id: generateUUID(),
+    fullName: flag.userIdentity.fullName || "",
+    primaryEmail: flag.userIdentity.email || "",
+    serviceUserIdentities: {},
+    accessRules: {},
+    groups: []
+  }
+  newIndividual.serviceUserIdentities[flag.serviceId] = flag.userIdentity
+  newIndividual.groups = await(selectGroups(newIndividual.primaryEmail, groupNames))
+  individualStore.save(newIndividual)
+
+  return newIndividual
+}
+
 async function auditForIndividual (individual: Individual, serviceId: string, assets: Array<Asset>): Promise<void> {
-  // term.cyan.bold(`${account.email}\n`)
   //
-  // const whitelistedPartition = lodash.partition(account.assetAssignments, (assetAssignment) => individual.accessRules.hasOwnProperty(assetAssignment.service.id))
+
+  const selectedAssets = await(selectNewAssets(assets, serviceId))
+
+  // const whitelistedPartition = lodash.partition(individual.accessRules[serviceId], (assetAssignment) => individual.accessRules.hasOwnProperty(assetAssignment.service.id))
   //
   // let auditableAssetAssignments = whitelistedPartition[0]
   // const newServices = whitelistedPartition[1]
@@ -102,38 +150,38 @@ async function auditForIndividual (individual: Individual, serviceId: string, as
 //   return serviceAccess
 // }
 //
-// async function selectNewAssets (assetAssignment: AssetAssignment): Promise<Array<AccessRule>> {
-//   const question = {
-//     type: 'checkbox',
-//     name: 'selectedAssets',
-//     choices: assetAssignment.assets.map((asset) => {
-//       const roleStr = asset.role ? ` (${asset.role})` : ''
-//       return {
-//         name: `${asset.name}${roleStr}`, value: { asset: asset.name, role: asset.role ? asset.role : '*' }
-//       }
-//     }),
-//     message: `${assetAssignment.service.id}: allow the following assets?`
-//   }
-//   const selectedAssets = (await inquirer.prompt([question])).selectedAssets
+async function selectNewAssets (assets: Array<Asset>, serviceId: string): Promise<Array<AccessRule>> {
+  const question = {
+    type: 'checkbox',
+    name: 'selectedAssets',
+    choices: assets.map((asset) => {
+      const roleStr = asset.role ? ` (${asset.role})` : ''
+      return {
+        name: `${asset.name}${roleStr}`, value: { asset: asset.name, role: asset.role ? asset.role : '*' }
+      }
+    }),
+    message: `${serviceId}: allow the following assets?`
+  }
+  const selectedAssets = (await inquirer.prompt([question])).selectedAssets
+
+  return selectedAssets
+}
 //
-//   return selectedAssets
-// }
-//
-// async function selectGroupsForEmail (email: string, groupNames: Array<string>): Promise<Array<string>> {
-//   const question = {
-//     type: 'checkbox',
-//     name: 'selectedGroups',
-//     choices: groupNames.map((groupName) => {
-//       return {
-//         name: groupName, value: groupName
-//       }
-//     }),
-//     message: `${email}: Select group membership`
-//   }
-//   const selectedGroups = (await inquirer.prompt([question])).selectedGroups
-//
-//   return selectedGroups
-// }
+async function selectGroups (email: string, groupNames: Array<string>): Promise<Array<string>> {
+  const question = {
+    type: 'checkbox',
+    name: 'selectedGroups',
+    choices: groupNames.map((groupName) => {
+      return {
+        name: groupName, value: groupName
+      }
+    }),
+    message: `Select group membership for ${email}`
+  }
+  const selectedGroups = (await inquirer.prompt([question])).selectedGroups
+
+  return selectedGroups
+}
 //
 // async function selectRoles (assetAssignment: AssetAssignment): Promise<Array<string>> {
 //   const availableRoles = lodash.uniq(assetAssignment.assets.filter((asset) => !!asset.role).map((asset) => asset.role))
@@ -210,6 +258,13 @@ function selectSortField (flag: FlaggedInfo): string {
     return flag.userIdentity.fullName
   }
   return ""
+}
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 function printFlaggedAccounts (flags: Array<FlaggedInfo>) {
