@@ -39,7 +39,8 @@ export async function interactiveAudit () {
         const shouldCreateIndividual = await(handleUnknownUser(flag))
         if (shouldCreateIndividual) {
           const newIndividual = await(createNewIndividual(flag))
-          await auditForIndividual(newIndividual, flag.serviceId, flag.assets)
+          let updatedFlaggedAssets = newIndividual.groups.length > 0 ? lodash.difference(newIndividual.accessRules[flag.serviceId], flag.assets) : flag.assets
+          await auditForIndividual(newIndividual, flag.serviceId, updatedFlaggedAssets)
         } else {
           console.log("todo: add to an existing individual")
         }
@@ -50,8 +51,6 @@ export async function interactiveAudit () {
       }
     }
   }
-
-  // re-run the audit with the non-interactive version.
   audit()
 }
 
@@ -95,62 +94,20 @@ async function createNewIndividual(flag: FlaggedInfo) : Promise<Individual> {
 }
 
 async function auditForIndividual (individual: Individual, serviceId: string, assets: Array<Asset>): Promise<void> {
-  //
-
-  const selectedAssets = await(selectNewAssets(assets, serviceId))
-
-  // const whitelistedPartition = lodash.partition(individual.accessRules[serviceId], (assetAssignment) => individual.accessRules.hasOwnProperty(assetAssignment.service.id))
-  //
-  // let auditableAssetAssignments = whitelistedPartition[0]
-  // const newServices = whitelistedPartition[1]
-  //
-  // if (newServices.length > 0) {
-  //   const selectedAssetAssignments = await selectServices(newServices)
-  //   auditableAssetAssignments = auditableAssetAssignments.concat(selectedAssetAssignments)
-  // }
-  //
-  // const newAccessRules = await auditServices(auditableAssetAssignments)
-  // Object.keys(newAccessRules).forEach((serviceId) => {
-  //   const newServiceAccessRules = newAccessRules[serviceId]
-  //   let individualServiceAccessRules = individual.accessRules[serviceId]
-  //   if (individualServiceAccessRules) {
-  //     individual.accessRules[serviceId] = individualServiceAccessRules.concat(newServiceAccessRules)
-  //   } else {
-  //     individual.accessRules[serviceId] = newServiceAccessRules
-  //   }
-  // })
-  //
-  // individualStore.save(individual)
+  if (assets.length === 0) {
+    return
+  }
+  const selectedAccessRules = await(selectNewAssets(assets, serviceId, individual.primaryEmail))
+  const individualServiceAccessRules = individual.accessRules[serviceId]
+  if (individualServiceAccessRules) {
+      individual.accessRules[serviceId] = individualServiceAccessRules.concat(selectedAccessRules)
+    } else {
+      individual.accessRules[serviceId] = selectedAccessRules
+    }
+  individualStore.save(individual)
 }
-//
-// async function auditServices (assetAssignments: Array<AssetAssignment>): Promise<ServiceAccessHash> {
-//   const serviceAccess: ServiceAccessHash = {}
-//
-//   // loop through new selected assetAssignments and get full or partial access and if partial, ask for assets
-//   for (let i = 0; i < assetAssignments.length; i++) {
-//     const assetAssignment = assetAssignments[i]
-//     let accessRules: Array<AccessRule>
-//     const fullAccess = await selectFullAccess(assetAssignment.service)
-//
-//     if (fullAccess) {
-//       if (assetAssignment.service.roles.length > 0) {
-//         const selectedRoles = await selectRoles(assetAssignment)
-//         accessRules = selectedRoles.map((role) => {
-//           return { asset: '*', role: role }
-//         })
-//       } else {
-//         accessRules = [{ asset: '*', role: '*' }]
-//       }
-//     } else {
-//       accessRules = await selectNewAssets(assetAssignment)
-//     }
-//     serviceAccess[assetAssignment.service.id] = accessRules
-//   }
-//
-//   return serviceAccess
-// }
-//
-async function selectNewAssets (assets: Array<Asset>, serviceId: string): Promise<Array<AccessRule>> {
+
+async function selectNewAssets (assets: Array<Asset>, serviceId: string, primaryUserEmail: string): Promise<Array<AccessRule>> {
   const question = {
     type: 'checkbox',
     name: 'selectedAssets',
@@ -160,13 +117,13 @@ async function selectNewAssets (assets: Array<Asset>, serviceId: string): Promis
         name: `${asset.name}${roleStr}`, value: { asset: asset.name, role: asset.role ? asset.role : '*' }
       }
     }),
-    message: `${serviceId}: allow the following assets?`
+    message: `${serviceId}: allow the following assets for ${primaryUserEmail}?`
   }
   const selectedAssets = (await inquirer.prompt([question])).selectedAssets
 
   return selectedAssets
 }
-//
+
 async function selectGroups (email: string, groupNames: Array<string>): Promise<Array<string>> {
   const question = {
     type: 'checkbox',
