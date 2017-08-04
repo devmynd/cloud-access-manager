@@ -8,7 +8,7 @@ export type Asset = {
 export type UserIdentity = {
   email?: string,
   userId?: string,
-  fullname?: string,
+  fullName?: string,
 }
 
 export type UserAccount = {

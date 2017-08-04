@@ -16,7 +16,7 @@ class GitHubProvider implements ServiceProvider {
         {
           identity: {
             userId: 'shamwow',
-            fullname: 'Shamyle Ghazali'
+            fullName: 'Shamyle Ghazali'
           },
           assets: [{
             name: 'repo a',
@@ -29,7 +29,7 @@ class GitHubProvider implements ServiceProvider {
         {
           identity: {
             userId: 'evansmd01',
-            fullname: 'Michael'
+            fullName: 'Michael'
           },
           assets: [{
             name: 'repo a',

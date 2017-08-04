@@ -9,6 +9,7 @@ process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.s
 export type IndividualStore = {
   save (user: Individual): void,
   getAll (): Array<Individual>,
+  getById (id: string): Individual,
   getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity): ?Individual
 }
 
@@ -30,6 +31,15 @@ export const individualStore: IndividualStore = {
   getAll () {
     const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     return individuals
+  },
+
+  getById (id: string) {
+    const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+    const individual = lodash.find(individuals, (i) => i.id === id)
+    if(individual) {
+      return individual
+    }
+    throw new Error(`No individual exists with id: '${id}'`)
   },
 
   getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity) {

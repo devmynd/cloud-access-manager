@@ -1,30 +1,79 @@
 // @flow
-// import { manager } from './../../core/service-providers/manager'
-// import { terminal as term } from 'terminal-kit'
-// import { Auditor } from './../../core/auditor'
+import { manager } from './../../core/service-providers/manager'
+import { terminal as term } from 'terminal-kit'
+import { Auditor } from './../../core/auditor'
 // import * as helpers from '../helpers'
-// import { individualStore } from '../../core/data/individual-store'
-// import { groupStore } from '../../core/data/group-store'
+import { individualStore } from '../../core/data/individual-store'
+import { groupStore } from '../../core/data/group-store'
 // import inquirer from 'inquirer'
-// import type { ServiceUserAccountsAggregate, AssetAssignment, Individual, AccessRule, ServiceAccessHash, ServiceInfo, FlaggedInfo } from '../../core/types'
+import type { ServiceUserAccount, FlaggedInfo } from '../../core/types'
 // import lodash from 'lodash'
-//
-// function printFlaggedAccounts (flaggedAccounts: Array<FlaggedInfo>) {
-//   if (flaggedAccounts.length > 0) {
-//     term.red('The following individuals have been flagged:\n\n')
-//     helpers.printSummaries(flaggedAccounts)
-//   } else {
-//     term.green('No suspicious accounts found. Take a break. Have a 🍺\n\n')
-//   }
-// }
+
+
+
+function selectSortField (flag: FlaggedInfo): string {
+  if (flag.individual) {
+    if (flag.individual.primaryEmail) {
+      return flag.individual.primaryEmail
+    }
+    if (flag.individual.fullName) {
+      return flag.individual.fullName
+    }
+  }
+  if (flag.userIdentity.email) {
+    return flag.userIdentity.email
+  }
+  if (flag.userIdentity.userId) {
+    return flag.userIdentity.userId
+  }
+  if (flag.userIdentity.fullName) {
+    return flag.userIdentity.fullName
+  }
+  return ""
+}
+
+function printFlaggedAccounts (flags: Array<FlaggedInfo>) {
+  if (flags.length > 0) {
+    term.red('The following individuals have been flagged:\n\n')
+
+    flags.sort((lhs, rhs) => {
+      const left = selectSortField(lhs)
+      const right = selectSortField(rhs)
+      return left > right ? 0 : 1
+    })
+    flags.forEach((flag) => {
+      if (flag.individual) {
+        term.green(`Known Individual => name: '${flag.individual.fullName}', primaryEmail: '${flag.individual.primaryEmail || ""}'`)
+      } else {
+        term.green(`Unknown Individual => name: '${flag.userIdentity.fullName || ''}', email: '${flag.userIdentity.email || ''}', userId: '${flag.userIdentity.userId || ''}'`)
+      }
+      term.cyan(`\n\t${flag.serviceId}`)
+      flag.assets.forEach((asset) => {
+        term.magenta(`\n\t\t${asset.name} `)
+        if (asset.role) {
+          term.yellow(`(${asset.role})`)
+        }
+        term('\n')
+      })
+    })
+  } else {
+    term.green('No suspicious accounts found. Take a break. Have a 🍺\n\n')
+  }
+}
 
 export async function audit () {
-  // const accounts = await manager.download('all')
-  // const auditor = new Auditor(individualStore, groupStore)
-  //
-  // const flaggedAccounts = auditor.performAudit(accounts)
-  // printFlaggedAccounts(flaggedAccounts)
-  console.log('todo: refactor audit command')
+  const accounts: Array<ServiceUserAccount> = await manager.download('all')
+  const auditor = new Auditor(individualStore, groupStore)
+
+  const flags = []
+  accounts.forEach((account) => {
+    const flag = auditor.auditAccount(account)
+    if (flag) {
+      flags.push(flag)
+    }
+  })
+
+  printFlaggedAccounts(flags)
 }
 
 export async function interactiveAudit () {

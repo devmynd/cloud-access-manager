@@ -11,7 +11,7 @@ describe('integration test', () => {
 
     let entry = {
       id: "user1",
-      fullname: "User 1",
+      fullName: "User 1",
       primaryEmail: 'test-1@test.com',
       serviceUserIdentities: {
         "some-service": {
@@ -19,7 +19,7 @@ describe('integration test', () => {
         },
         "another-service": {
           email: "user-1@email.com",
-          fullname: "User One"
+          fullName: "User One"
         }
       },
       accessRules: {
@@ -46,7 +46,7 @@ describe('integration test', () => {
 
     expect(retrieved).toEqual({
       id: "user1",
-      fullname: "User 1",
+      fullName: "User 1",
       primaryEmail: 'test-1@test.com',
       serviceUserIdentities: {
         "some-service": {
@@ -54,7 +54,7 @@ describe('integration test', () => {
         },
         "another-service": {
           email: "user-1@email.com",
-          fullname: "User One"
+          fullName: "User One"
         }
       } ,
       accessRules: {
@@ -65,7 +65,7 @@ describe('integration test', () => {
     })
 
     // Update the record
-    entry.fullname = "User One"
+    entry.fullName = "User One"
     entry.primaryEmail = "testOne@test.com"
     entry.serviceUserIdentities["new-service"] = {
       userId: "testOne"
@@ -81,7 +81,7 @@ describe('integration test', () => {
     expect(retrieved.length).toBe(1)
     expect(retrieved[0]).toEqual({
       id: "user1",
-      fullname: "User One",
+      fullName: "User One",
       primaryEmail: 'testOne@test.com',
       serviceUserIdentities: {
         "some-service": {
@@ -89,7 +89,7 @@ describe('integration test', () => {
         },
         "another-service": {
           email: "user-1@email.com",
-          fullname: "User One"
+          fullName: "User One"
         },
         "new-service": {
           userId: "testOne"
@@ -105,7 +105,7 @@ describe('integration test', () => {
     // Insert a second record
     store.save({
       id: "user2",
-      fullname: "User 2",
+      fullName: "User 2",
       primaryEmail: 'test-2@test.com',
       serviceUserIdentities: {},
       accessRules: {},

@@ -3,7 +3,7 @@ import type { ServiceAccessHash, UserIdentity } from './'
 
 export type Individual = {
   id: string,
-  fullname: string,
+  fullName: string,
   primaryEmail: ?string,
   serviceUserIdentities: { [string]: UserIdentity },
   accessRules: ServiceAccessHash,

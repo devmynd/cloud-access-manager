@@ -20,7 +20,7 @@ beforeEach(() => {
 
   individual = {
     id: "123",
-    fullname:"test individual",
+    fullName:"test individual",
     primaryEmail: "test@test.com",
     serviceUserIdentities: {},
     accessRules: {},
@@ -62,7 +62,7 @@ describe("without a matching individual record", () => {
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBeNull()
+      expect(flaggedInfo.individual).toBeNull()
       expect(flaggedInfo.userIdentity).toEqual({ userId: "test123" })
       expect(flaggedInfo.assets).toEqual([{ name: "project a", role: "member" }])
     })
@@ -71,7 +71,7 @@ describe("without a matching individual record", () => {
   test("it should not match based on full name", () => {
     // arrange
     let identity = {
-      fullname: "test individual",
+      fullName: "test individual",
       userId: "some user id"
     }
 
@@ -85,7 +85,7 @@ describe("without a matching individual record", () => {
       }
     }
     individual.serviceUserIdentities["some other service"] = {
-      fullname: "test individual",
+      fullName: "test individual",
       email: "test@test.com"
     }
     individualStore.save(individual)
@@ -95,8 +95,8 @@ describe("without a matching individual record", () => {
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBeNull()
-      expect(flaggedInfo.userIdentity).toEqual({ fullname: "test individual", userId: "some user id" })
+      expect(flaggedInfo.individual).toBeNull()
+      expect(flaggedInfo.userIdentity).toEqual({ fullName: "test individual", userId: "some user id" })
       expect(flaggedInfo.assets).toEqual([{ name: "project a", role: "member" }])
     })
   })
@@ -113,7 +113,7 @@ const matchingIndividualTests = (account) => {
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBe("123")
+      expect(flaggedInfo.individual.id).toBe("123")
       expect(flaggedInfo.serviceId).toBe("test service")
       expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
       expect(flaggedInfo.assets).toEqual([
@@ -133,7 +133,7 @@ const matchingIndividualTests = (account) => {
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBe("123")
+      expect(flaggedInfo.individual.id).toBe("123")
       expect(flaggedInfo.serviceId).toBe("test service")
       expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
       expect(flaggedInfo.assets).toEqual([
@@ -152,7 +152,7 @@ const matchingIndividualTests = (account) => {
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBe("123")
+      expect(flaggedInfo.individual.id).toBe("123")
       expect(flaggedInfo.serviceId).toBe("test service")
       expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
       expect(flaggedInfo.assets).toEqual([
@@ -174,7 +174,7 @@ const matchingIndividualTests = (account) => {
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBe("123")
+      expect(flaggedInfo.individual.id).toBe("123")
       expect(flaggedInfo.serviceId).toBe("test service")
       expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
       expect(flaggedInfo.assets).toEqual([
@@ -201,7 +201,7 @@ const matchingIndividualTests = (account) => {
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBe("123")
+      expect(flaggedInfo.individual.id).toBe("123")
       expect(flaggedInfo.serviceId).toBe("test service")
       expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
       expect(flaggedInfo.assets).toEqual([
@@ -375,7 +375,7 @@ describe("with matching individual, when the service doesn't have roles", () => 
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
-      expect(flaggedInfo.individualId).toBe("123")
+      expect(flaggedInfo.individual.id).toBe("123")
       expect(flaggedInfo.serviceId).toBe("test service")
       expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
       expect(flaggedInfo.assets).toEqual([

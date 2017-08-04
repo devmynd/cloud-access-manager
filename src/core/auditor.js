@@ -20,7 +20,7 @@ export class Auditor {
       return this.auditIndividual(individual, account)
     } else {
       return {
-        individualId: null,
+        individual: null,
         serviceId: account.serviceId,
         userIdentity: account.userAccount.identity,
         assets: account.userAccount.assets
@@ -33,7 +33,7 @@ export class Auditor {
     const unauthorizedAssets = this._findUnauthorizedAssets(account.userAccount.assets, accessRules)
     if (unauthorizedAssets.length > 0) {
       return {
-        individualId: individual.id,
+        individual: individual,
         serviceId: account.serviceId,
         userIdentity: account.userAccount.identity,
         assets: unauthorizedAssets
