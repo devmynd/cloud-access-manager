@@ -234,19 +234,20 @@ function printFlaggedAccounts (flags: Array<FlaggedInfo>) {
       return left > right ? 0 : 1
     })
     flags.forEach((flag) => {
+      term.cyan(`Flag for: ${flag.serviceId}\n`)
       if (flag.individual) {
         term.green(`Known Individual => name: '${flag.individual.fullName}', primaryEmail: '${flag.individual.primaryEmail || ""}'`)
       } else {
         term.green(`Unknown Individual => name: '${flag.userIdentity.fullName || ''}', email: '${flag.userIdentity.email || ''}', userId: '${flag.userIdentity.userId || ''}'`)
       }
-      term.cyan(`\n\t${flag.serviceId}`)
+
       flag.assets.forEach((asset) => {
-        term.magenta(`\n\t\t${asset.name} `)
+        term.magenta(`\n\t${asset.name} `)
         if (asset.role) {
           term.yellow(`(${asset.role})`)
         }
-        term('\n')
       })
+      term('\n\n')
     })
   } else {
     term.green('No suspicious accounts found. Take a break. Have a 🍺\n\n')
