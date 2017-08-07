@@ -6,7 +6,7 @@ import { Auditor } from './../../core/auditor'
 import { individualStore } from '../../core/data/individual-store'
 import { groupStore } from '../../core/data/group-store'
 import inquirer from 'inquirer'
-import type { ServiceUserAccount, FlaggedInfo, Asset, Individual, AccessRule } from '../../core/types'
+import type { ServiceUserAccount, FlaggedInfo, Asset, Individual, AccessRule, UserIdentity } from '../../core/types'
 import lodash from 'lodash'
 
 export async function audit () {
@@ -39,8 +39,7 @@ export async function interactiveAudit () {
         // since create method will save the new individual, we don't need it returned to us
         await createNewIndividual(flag)
       } else {
-        throw new Error("Link to existing individual not yet implemented")
-        // TODO: link to existing individual (and save the individual record)
+          // const existingIndividual = await linkIndividual(flag)
       }
 
       // recheck the account to see if it is still flagged after creating or linking to an individual who may have groups or access rules.
@@ -86,6 +85,46 @@ async function shouldCreateNewIndividual(flag: FlaggedInfo) {
    return (await inquirer.prompt([question])).shouldCreateIndividual
 }
 
+async function linkIndividual(flag: FlaggedInfo) {
+  const existingIndividual = await(selectExistingIndividual(flag))
+  const existingServiceIdentity = existingIndividual.serviceUserIdentities[flag.serviceId]
+
+  let shouldOverwrite
+  if (existingServiceIdentity) {
+    shouldOverwrite = await confirmOverwriteServiceIdentity(existingServiceIdentity)
+  }
+
+  if (!existingServiceIdentity || shouldOverwrite) {
+    existingIndividual.serviceUserIdentities[flag.serviceId] = flag.userIdentity
+    individualStore.save(existingIndividual)
+  }
+}
+
+async function selectExistingIndividual(flag: FlaggedInfo) {
+  const individuals = individualStore.getAll()
+
+  term.cyan('Link this unknown user to an existing individual:\n')
+  const question = {
+    type: 'list',
+    name: 'selectedIndividualEmail',
+    choices: individuals.map((individual) => individual.primaryEmail),
+    message: 'Selected individual:'
+  }
+
+  const email = (await inquirer.prompt([question])).selectedIndividualEmail
+  return lodash.find(individuals, (individual) => individual.primaryEmail === email)
+}
+
+async function confirmOverwriteServiceIdentity(serviceUserIdentity: { [string]: UserIdentity }): Promise<boolean> {
+  const question = {
+    type: 'confirm',
+    name: 'shouldOverwriteServiceIdentity',
+    message: 'This user already has stuff. Do you want to overwrite?'
+  }
+
+  return (await inquirer.prompt([question])).shouldOverwriteServiceIdentity
+}
+
 async function createNewIndividual(flag: FlaggedInfo) {
   const groupNames = groupStore.getAll().map((group) => group.name)
   const newIndividual = {
@@ -101,27 +140,31 @@ async function createNewIndividual(flag: FlaggedInfo) {
   individualStore.save(newIndividual)
 }
 
-async function auditForIndividual (individual: Individual, serviceId: string, assets: Array<Asset>): Promise<void> {
+async function auditForIndividual (individual: Individual, serviceId: string, assets: Array<Asset>) {
   assets = [...assets]
 
   const allowFullAccess = await selectFullAccess(serviceId)
   if(allowFullAccess) {
     const selectedRoles = await selectRoles(serviceId, assets)
+    selectedRoles.forEach((role) => {
+      const individualServiceAccessRules = individual.accessRules[serviceId] || []
+      individual.accessRules[serviceId] = individualServiceAccessRules.concat([{ asset: "*", role: role }])
+    })
     // filter out assets that have one of the selected roles
     assets = lodash.filter(assets, (asset) => !lodash.find(selectedRoles, (role) => asset.role === role))
   }
 
   // select per asset access for any remaning assets that were not filtered out by full access roles.
-  if (assets.length === 0) {
-    return
-  }
-  const selectedAccessRules = await selectNewAssets(assets, serviceId, individual.primaryEmail)
-  const individualServiceAccessRules = individual.accessRules[serviceId]
-  if (individualServiceAccessRules) {
+  if (assets.length !== 0) {
+    const selectedAccessRules = await selectNewAssets(assets, serviceId, individual.primaryEmail)
+    const individualServiceAccessRules = individual.accessRules[serviceId]
+    if (individualServiceAccessRules) {
       individual.accessRules[serviceId] = individualServiceAccessRules.concat(selectedAccessRules)
     } else {
       individual.accessRules[serviceId] = selectedAccessRules
     }
+  }
+
   individualStore.save(individual)
 }
 
