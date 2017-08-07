@@ -31,49 +31,59 @@ export async function interactiveAudit () {
   for (let accountIndex = 0; accountIndex < accounts.length; accountIndex++) {
     const account = accounts[accountIndex]
 
-    const flag = auditor.auditAccount(account)
-    if (flag) {
-      if (flag.individual) {
-        await auditForIndividual(flag.individual, flag.serviceId, flag.assets)
+    let flag = auditor.auditAccount(account)
+
+    if (flag && !flag.individual) {
+      const shouldCreateIndividual = await shouldCreateNewIndividual(flag)
+      if (shouldCreateIndividual) {
+        // since create method will save the new individual, we don't need it returned to us
+        await createNewIndividual(flag)
       } else {
-        const shouldCreateIndividual = await(handleUnknownUser(flag))
-        if (shouldCreateIndividual) {
-          const newIndividual = await(createNewIndividual(flag))
-          let updatedFlaggedAssets = newIndividual.groups.length > 0 ? lodash.difference(newIndividual.accessRules[flag.serviceId], flag.assets) : flag.assets
-          await auditForIndividual(newIndividual, flag.serviceId, updatedFlaggedAssets)
-        } else {
-          console.log("todo: add to an existing individual")
-        }
-        // prompt to ask about creating individual or adding to existing individual
-        // for now, maybe just only create individuals, as we will have to think about how to design the CLI for searching and matching existing individuals.
-        // then call:
-        // auditForIndividual(createdOrUpdatedIndividual, flag.serviceId, flag.assets)
+        throw new Error("Link to existing individual not yet implemented")
+        // TODO: link to existing individual (and save the individual record)
       }
+
+      // recheck the account to see if it is still flagged after creating or linking to an individual who may have groups or access rules.
+      flag = auditor.auditAccount(account)
     }
+
+    if (flag && flag.individual) {
+      await auditForIndividual(flag.individual, flag.serviceId, flag.assets)
+    }
+    term('\n\n')
   }
   audit()
 }
 
-async function handleUnknownUser(flag: FlaggedInfo) {
- let userIdentity =  flag.userIdentity.email !== "" ? flag.userIdentity.email : flag.userIdentity.userId
-
- if(userIdentity) {
-   term.cyan(`${userIdentity} is an unknown user.\n`)
-   const question = {
-       type: 'list',
-       name: 'shouldCreateIndividual',
-       choices: [{
-             name: 'Create a New Individual',
-             value: true
-           }, {
-             name: 'Link to an Existing Individual',
-             value: false
-           }],
-       message: `How would you like to proceed with this user?`
-     }
-
-     return (await inquirer.prompt([question])).shouldCreateIndividual
+async function shouldCreateNewIndividual(flag: FlaggedInfo) {
+ let name
+ if (flag.userIdentity.email) {
+   name = flag.userIdentity.email
  }
+ else if (flag.userIdentity.userId) {
+   name = flag.userIdentity.userId
+ }
+ else {
+   // throw error instead of returning early,
+   // because if we return early the code in audit will fall through to link to an existing individual and we'll have this problem again.
+   throw new Error(`Account does not have a valid user identity (email or userId). Check ${flag.serviceId} implementation. It should not return invalid accounts.`)
+ }
+
+ term.cyan(`${name} is an unknown user.\n`)
+ const question = {
+     type: 'list',
+     name: 'shouldCreateIndividual',
+     choices: [{
+           name: 'Create a New Individual',
+           value: true
+         }, {
+           name: 'Link to an Existing Individual',
+           value: false
+         }],
+     message: `How would you like to proceed with this user?`
+   }
+
+   return (await inquirer.prompt([question])).shouldCreateIndividual
 }
 
 async function createNewIndividual(flag: FlaggedInfo) : Promise<Individual> {
@@ -89,8 +99,6 @@ async function createNewIndividual(flag: FlaggedInfo) : Promise<Individual> {
   newIndividual.serviceUserIdentities[flag.serviceId] = flag.userIdentity
   newIndividual.groups = await(selectGroups(newIndividual.primaryEmail, groupNames))
   individualStore.save(newIndividual)
-
-  return newIndividual
 }
 
 async function auditForIndividual (individual: Individual, serviceId: string, assets: Array<Asset>): Promise<void> {

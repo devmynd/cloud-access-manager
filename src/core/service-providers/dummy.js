@@ -65,7 +65,7 @@ class DummyProvider implements ServiceProvider {
 export const dummyProviderModule: ServiceProviderModule = {
   id: 'dummy',
   displayName: 'Dummy Service',
-  roles: [],
+  roles: ['member', 'owner'],
   configKeys: configKeys,
   providerFactory (config) {
     return new DummyProvider(config)
