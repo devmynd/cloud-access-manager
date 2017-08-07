@@ -86,7 +86,7 @@ async function shouldCreateNewIndividual(flag: FlaggedInfo) {
    return (await inquirer.prompt([question])).shouldCreateIndividual
 }
 
-async function createNewIndividual(flag: FlaggedInfo) : Promise<Individual> {
+async function createNewIndividual(flag: FlaggedInfo) {
   const groupNames = groupStore.getAll().map((group) => group.name)
   const newIndividual = {
     id: generateUUID(),
@@ -102,10 +102,20 @@ async function createNewIndividual(flag: FlaggedInfo) : Promise<Individual> {
 }
 
 async function auditForIndividual (individual: Individual, serviceId: string, assets: Array<Asset>): Promise<void> {
+  assets = [...assets]
+ 
+  const allowFullAccess = await selectFullAccess(serviceId)
+  if(allowFullAccess) {
+    const selectedRoles = await selectRoles(serviceId, assets)
+    // filter out assets that have one of the selected roles
+    assets = lodash.filter(assets, (asset) => !lodash.find(selectedRoles, (role) => asset.role === role))
+  }
+
+  // select per asset access for any remaning assets that were not filtered out by full access roles.
   if (assets.length === 0) {
     return
   }
-  const selectedAccessRules = await(selectNewAssets(assets, serviceId, individual.primaryEmail))
+  const selectedAccessRules = await selectNewAssets(assets, serviceId, individual.primaryEmail)
   const individualServiceAccessRules = individual.accessRules[serviceId]
   if (individualServiceAccessRules) {
       individual.accessRules[serviceId] = individualServiceAccessRules.concat(selectedAccessRules)
@@ -147,43 +157,43 @@ async function selectGroups (email: string, groupNames: Array<string>): Promise<
 
   return selectedGroups
 }
-//
-// async function selectRoles (assetAssignment: AssetAssignment): Promise<Array<string>> {
-//   const availableRoles = lodash.uniq(assetAssignment.assets.filter((asset) => !!asset.role).map((asset) => asset.role))
-//   if (availableRoles.length === 0) {
-//     term.red.bold('Error: No role property defined for the asset by the service provider implementation.\n')
-//     term.red.bold('Please add roles to your service provider or update your ServiceProviderModule to have the property: hasRole: false\n')
-//     return []
-//   }
-//
-//   const question = {
-//     type: 'checkbox',
-//     name: 'selectedRoles',
-//     choices: availableRoles.map((role) => {
-//       return { name: role, value: role }
-//     }),
-//     message: `${assetAssignment.service.id}: grant full access to which roles?`
-//   }
-//
-//   return (await inquirer.prompt([question])).selectedRoles
-// }
-//
-// async function selectFullAccess (service: ServiceInfo): Promise<boolean> {
-//   const question = {
-//     type: 'list',
-//     name: 'fullAccess',
-//     choices: [{
-//       name: 'Full',
-//       value: true
-//     }, {
-//       name: 'Per Asset',
-//       value: false
-//     }],
-//     message: `${service.id}: grant which access level?`
-//   }
-//
-//   return (await inquirer.prompt([question])).fullAccess
-// }
+
+async function selectRoles (serviceId: string, assets: Array<Asset>): Promise<Array<string>> {
+  const availableRoles = lodash.uniq(assets.filter((asset) => !!asset.role).map((asset) => asset.role))
+  if (availableRoles.length === 0) {
+    term.red.bold('Error: No role property defined for the asset by the service provider implementation.\n')
+    term.red.bold('Please add roles to your service provider or update your ServiceProviderModule to have the property: hasRole: false\n')
+    return []
+  }
+
+  const question = {
+    type: 'checkbox',
+    name: 'selectedRoles',
+    choices: availableRoles.map((role) => {
+      return { name: role, value: role }
+    }),
+    message: `${serviceId}: grant full access to which roles?`
+  }
+
+  return (await inquirer.prompt([question])).selectedRoles
+}
+
+async function selectFullAccess (serviceId: string): Promise<boolean> {
+  const question = {
+    type: 'list',
+    name: 'fullAccess',
+    choices: [{
+      name: 'Full',
+      value: true
+    }, {
+      name: 'Per Asset',
+      value: false
+    }],
+    message: `${serviceId}: grant which access level?`
+  }
+
+  return (await inquirer.prompt([question])).fullAccess
+}
 //
 // async function selectServices (assetAssignments: Array<AssetAssignment>): Promise <Array<AssetAssignment>> {
 //   const question = {
