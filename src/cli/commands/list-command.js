@@ -1,46 +1,48 @@
 // @flow
-// import { manager } from './../../core/service-providers/manager'
-// import { terminal as term } from 'terminal-kit'
-// import * as helpers from '../helpers'
+import { manager } from './../../core/service-providers/manager'
+import { terminal as term } from 'terminal-kit'
+import type { ServiceUserAccount } from '../../core/types'
 
-// function printSummaries (accounts: Array<ServiceUserAccount>, displayServices: bool = true) {
-//   accounts.sort((lhs, rhs) => lhs.email < rhs.email ? 0 : 1)
-//   accounts.forEach((account) => {
-//     term.green(`${account.email}`)
-//     account.assetAssignments.forEach((assetAssignment) => {
-//       if (displayServices) {
-//         term.cyan(`\n\t${assetAssignment.service.id}`)
-//       }
-//
-//       assetAssignment.assets.forEach((asset) => {
-//         term.magenta(`\n\t\t${asset.name} `)
-//         if (asset.role) {
-//           term.yellow(`(${asset.role})`)
-//         }
-//       })
-//       term('\n')
-//     })
-//   })
-// }
+function printSummaries (accounts: Array<ServiceUserAccount>) {
+  accounts.sort((lhs, rhs) => lhs.serviceId < rhs.serviceId ? 0 : 1)
+
+  let accountLookup = accounts.reduce((accountLookup, account) => {
+    accountLookup[account.serviceId] = (accountLookup[account.serviceId] || []).concat(account)
+    return accountLookup
+  }, {})
+
+  Object.keys(accountLookup).forEach((serviceId) => {
+    term.cyan(`\n${serviceId}\n`)
+    accountLookup[serviceId].forEach((account) => {
+      const userAccount = account.userAccount
+      const userIdentity = userAccount.identity.email ? userAccount.identity.email : userAccount.identity.userId
+      term.green(`\t${userIdentity}\n`)
+      userAccount.assets.forEach((asset) => {
+        term.magenta(`\t\t${asset.name}\t`)
+        if (asset.role) {
+          term.yellow(`${asset.role}\n`)
+        }
+      })
+    })
+    term(`\n\n`)
+  })
+}
 
 export async function listAll () {
-  // const summaries = await manager.download('all')
-  // printSummaries(summaries)
-  console.log('todo: refactor listAll')
+  const summaries = await manager.download('all')
+  printSummaries(summaries)
 }
 
 export async function listByService (serviceId: string) {
-  // const serviceInfo = manager.getServiceInfo(serviceId)
-  // if (serviceInfo) {
-  //   if (!serviceInfo.isConfigured) {
-  //     term.red(`Service '${serviceId}' is not configured. Run 'cam config ${serviceId}'\n`)
-  //     return
-  //   }
-  //
-  //   const summaries = await manager.download(serviceId)
-  //   printSummaries(summaries, false)
-  // } else {
-  //   term.red(`Invalid service id`)
-  // }
-  console.log('todo: refactor listByService')
+  const serviceInfo = manager.getServiceInfo(serviceId)
+  if (serviceInfo) {
+    if (!serviceInfo.isConfigured) {
+      term.red(`Service '${serviceId}' is not configured. Run 'cam config ${serviceId}'\n`)
+      return
+    }
+    const summaries = await manager.download(serviceId)
+    printSummaries(summaries)
+  } else {
+    term.red(`Invalid service id\n`)
+  }
 }

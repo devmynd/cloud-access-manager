@@ -46,7 +46,7 @@ export async function configureServiceForGroup (serviceId: string, groupName: st
     }
 
     const group = groupStore.get(groupName)
-    if(group) {
+    if (group) {
       group.accessRules[serviceId] = group.accessRules[serviceId] || [{ asset: '*', role: '*' }]
       const existingRoles = group.accessRules[serviceId]
         .filter((rule) => rule.asset === '*')
@@ -179,7 +179,7 @@ export async function configureGroup (groupName: string) {
   }
 }
 
-export async function deleteGroup(groupName: string) {
+export async function deleteGroup (groupName: string) {
   const question = {
     type: 'confirm',
     name: 'confirmed',

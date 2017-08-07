@@ -1,5 +1,5 @@
 // @flow
-import type { ServiceUserAccount, FlaggedInfo, UserIdentity, Individual, Asset, AccessRule} from './types'
+import type { ServiceUserAccount, FlaggedInfo, Individual, Asset, AccessRule } from './types'
 import type { IndividualStore } from './data/individual-store'
 import type { GroupStore } from './data/group-store'
 import lodash from 'lodash'
@@ -28,7 +28,7 @@ export class Auditor {
     }
   }
 
-  auditIndividual(individual: Individual, account: ServiceUserAccount): ?FlaggedInfo {
+  auditIndividual (individual: Individual, account: ServiceUserAccount): ?FlaggedInfo {
     const accessRules = this._getAccessRules(individual, account.serviceId)
     const unauthorizedAssets = this._findUnauthorizedAssets(account.userAccount.assets, accessRules)
     if (unauthorizedAssets.length > 0) {
@@ -58,7 +58,6 @@ export class Auditor {
       return unauthorizedAssets
     }, [])
   }
-
 
   _getAccessRules (individual: Individual, serviceId: string): Array<AccessRule> {
     let allAccessRules: Array<AccessRule> = []

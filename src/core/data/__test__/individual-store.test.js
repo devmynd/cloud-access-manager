@@ -10,68 +10,68 @@ describe('integration test', () => {
     }
 
     let entry = {
-      id: "user1",
-      fullName: "User 1",
+      id: 'user1',
+      fullName: 'User 1',
       primaryEmail: 'test-1@test.com',
       serviceUserIdentities: {
-        "some-service": {
-          userId: "user-1"
+        'some-service': {
+          userId: 'user-1'
         },
-        "another-service": {
-          email: "user-1@email.com",
-          fullName: "User One"
+        'another-service': {
+          email: 'user-1@email.com',
+          fullName: 'User One'
         }
       },
       accessRules: {
-        "some-service": [{ asset: "*", role: "member" }],
-        "another-service": [{ asset: "a", role: "owner" }]
+        'some-service': [{ asset: '*', role: 'member' }],
+        'another-service': [{ asset: 'a', role: 'owner' }]
       },
-      groups: ["employees", "admins"]
+      groups: ['employees', 'admins']
     }
 
     // Insert new record
     store.save(entry)
 
     // Find the user based on a matching email for a new service the individual doesn't have yet.
-    let retrieved = store.getByServiceUserIdentity("non-existing-service", {
-      email: "test-1@test.com"
+    let retrieved = store.getByServiceUserIdentity('non-existing-service', {
+      email: 'test-1@test.com'
     })
     expect(retrieved).not.toBeUndefined()
     expect(retrieved).not.toBeNull()
 
     // Find the user by an existing service user identity
-    retrieved = store.getByServiceUserIdentity("some-service", {
-      userId: "user-1"
+    retrieved = store.getByServiceUserIdentity('some-service', {
+      userId: 'user-1'
     })
 
     expect(retrieved).toEqual({
-      id: "user1",
-      fullName: "User 1",
+      id: 'user1',
+      fullName: 'User 1',
       primaryEmail: 'test-1@test.com',
       serviceUserIdentities: {
-        "some-service": {
-          userId: "user-1"
+        'some-service': {
+          userId: 'user-1'
         },
-        "another-service": {
-          email: "user-1@email.com",
-          fullName: "User One"
+        'another-service': {
+          email: 'user-1@email.com',
+          fullName: 'User One'
         }
-      } ,
-      accessRules: {
-        "some-service": [{ asset: "*", role: "member" }],
-        "another-service": [{ asset: "a", role: "owner" }]
       },
-      groups: ["employees", "admins"]
+      accessRules: {
+        'some-service': [{ asset: '*', role: 'member' }],
+        'another-service': [{ asset: 'a', role: 'owner' }]
+      },
+      groups: ['employees', 'admins']
     })
 
     // Update the record
-    entry.fullName = "User One"
-    entry.primaryEmail = "testOne@test.com"
-    entry.serviceUserIdentities["new-service"] = {
-      userId: "testOne"
+    entry.fullName = 'User One'
+    entry.primaryEmail = 'testOne@test.com'
+    entry.serviceUserIdentities['new-service'] = {
+      userId: 'testOne'
     }
-    entry.accessRules["some-service"].push({ asset: "project", role: "*" })
-    entry.groups.push("management")
+    entry.accessRules['some-service'].push({ asset: 'project', role: '*' })
+    entry.groups.push('management')
 
     store.save(entry)
 
@@ -80,32 +80,32 @@ describe('integration test', () => {
 
     expect(retrieved.length).toBe(1)
     expect(retrieved[0]).toEqual({
-      id: "user1",
-      fullName: "User One",
+      id: 'user1',
+      fullName: 'User One',
       primaryEmail: 'testOne@test.com',
       serviceUserIdentities: {
-        "some-service": {
-          userId: "user-1"
+        'some-service': {
+          userId: 'user-1'
         },
-        "another-service": {
-          email: "user-1@email.com",
-          fullName: "User One"
+        'another-service': {
+          email: 'user-1@email.com',
+          fullName: 'User One'
         },
-        "new-service": {
-          userId: "testOne"
+        'new-service': {
+          userId: 'testOne'
         }
-      } ,
-      accessRules: {
-        "some-service": [{ asset: "*", role: "member" }, { asset: "project", role: "*" }],
-        "another-service": [{ asset: "a", role: "owner" }]
       },
-      groups: ["employees", "admins", "management"]
+      accessRules: {
+        'some-service': [{ asset: '*', role: 'member' }, { asset: 'project', role: '*' }],
+        'another-service': [{ asset: 'a', role: 'owner' }]
+      },
+      groups: ['employees', 'admins', 'management']
     })
 
     // Insert a second record
     store.save({
-      id: "user2",
-      fullName: "User 2",
+      id: 'user2',
+      fullName: 'User 2',
       primaryEmail: 'test-2@test.com',
       serviceUserIdentities: {},
       accessRules: {},

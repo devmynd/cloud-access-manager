@@ -16,7 +16,7 @@ program
 
 program
   .command('list [service]')
-  .description('lists all user email addresses by service')
+  .description('lists all user identities by service')
   .action((service) => {
     if (service) {
       commands.listByService(service)

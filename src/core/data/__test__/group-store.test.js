@@ -3,8 +3,7 @@ import { groupStore as store } from '../group-store'
 import fs from 'file-system'
 process.env.GROUPS_PATH = './.groups.test.store.json'
 
-
-function deleteFile() {
+function deleteFile () {
   if (fs.existsSync(process.env.GROUPS_PATH)) {
     fs.unlinkSync(process.env.GROUPS_PATH)
   }
@@ -13,8 +12,8 @@ function deleteFile() {
 describe('crud', () => {
   beforeEach(() => {
     deleteFile()
-    store.save({ name: 'some group', accessRules: { 'someService': [{ asset: "*", role: "*" }] } })
-    store.save({ name: 'some other group', accessRules: { 'a different service': [{ asset: "a", role: "b" }] } })
+    store.save({ name: 'some group', accessRules: { 'someService': [{ asset: '*', role: '*' }] } })
+    store.save({ name: 'some other group', accessRules: { 'a different service': [{ asset: 'a', role: 'b' }] } })
   })
 
   test('it has a default employee group', () => {
@@ -26,7 +25,7 @@ describe('crud', () => {
     let retrieved = store.get('some group')
 
     expect(retrieved.name).toBe('some group')
-    expect(retrieved.accessRules).toEqual({ 'someService': [{ asset: "*", role: "*" }] })
+    expect(retrieved.accessRules).toEqual({ 'someService': [{ asset: '*', role: '*' }] })
   })
 
   test('getAll()', () => {
@@ -34,16 +33,16 @@ describe('crud', () => {
 
     expect(retrieved.length).toBe(3)
     expect(retrieved).toEqual([
-      { name: "Employees", accessRules: {} },
-      { name: 'some group', accessRules: { 'someService': [{ asset: "*", role: "*" }] } },
-      { name: 'some other group', accessRules: { 'a different service': [{ asset: "a", role: "b" }] } }
-     ])
+      { name: 'Employees', accessRules: {} },
+      { name: 'some group', accessRules: { 'someService': [{ asset: '*', role: '*' }] } },
+      { name: 'some other group', accessRules: { 'a different service': [{ asset: 'a', role: 'b' }] } }
+    ])
   })
 
   test('getAccessRules(groupName, serviceId)', () => {
     let accessRules = store.getAccessRules('some group', 'someService')
 
-    expect(accessRules).toEqual([{ asset: "*", role: "*" }])
+    expect(accessRules).toEqual([{ asset: '*', role: '*' }])
   })
 
   test('exists(groupName)', () => {

@@ -36,7 +36,7 @@ export const individualStore: IndividualStore = {
   getById (id: string) {
     const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     const individual = lodash.find(individuals, (i) => i.id === id)
-    if(individual) {
+    if (individual) {
       return individual
     }
     throw new Error(`No individual exists with id: '${id}'`)
@@ -55,6 +55,6 @@ export const individualStore: IndividualStore = {
           : false
       })
     }
-    throw new Error("Cannot match a service account that has no email or userId")
+    throw new Error('Cannot match a service account that has no email or userId')
   }
 }

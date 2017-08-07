@@ -54,7 +54,7 @@ export const groupStore: GroupStore = {
     fs.writeFileSync(process.env.GROUPS_PATH, JSON.stringify(data))
   },
 
-  getAccessRules(groupName: string, serviceId: string) {
+  getAccessRules (groupName: string, serviceId: string) {
     const group = this.get(groupName)
     if (group) {
       return group.accessRules[serviceId] || []
