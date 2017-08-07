@@ -33,13 +33,17 @@ export async function interactiveAudit () {
 
     let flag = auditor.auditAccount(account)
 
+    if (flag) {
+      printAuditedUser(flag)
+    }
+
     if (flag && !flag.individual) {
       const shouldCreateIndividual = await shouldCreateNewIndividual(flag)
       if (shouldCreateIndividual) {
         // since create method will save the new individual, we don't need it returned to us
         await createNewIndividual(flag)
       } else {
-          // const existingIndividual = await linkIndividual(flag)
+        await linkIndividual(flag)
       }
 
       // recheck the account to see if it is still flagged after creating or linking to an individual who may have groups or access rules.
@@ -54,21 +58,32 @@ export async function interactiveAudit () {
   audit()
 }
 
-async function shouldCreateNewIndividual(flag: FlaggedInfo) {
- let name
- if (flag.userIdentity.email) {
-   name = flag.userIdentity.email
- }
- else if (flag.userIdentity.userId) {
-   name = flag.userIdentity.userId
- }
- else {
-   // throw error instead of returning early,
-   // because if we return early the code in audit will fall through to link to an existing individual and we'll have this problem again.
-   throw new Error(`Account does not have a valid user identity (email or userId). Check ${flag.serviceId} implementation. It should not return invalid accounts.`)
- }
+function printAuditedUser(flag: FlaggedInfo) {
+  let name
+  let message
+  if (flag.individual) {
+    name = flag.individual.primaryEmail || flag.individual.fullName
+    message = `${name} is a known user.\n`
+  } else {
+    if (flag.userIdentity.email) {
+      name = flag.userIdentity.email
+    }
+    else if (flag.userIdentity.userId) {
+      name = flag.userIdentity.userId
+    }
+    else {
+      // throw error instead of returning early,
+      // because if we return early the code in audit will fall through to link to an existing individual and we'll have this problem again.
+      throw new Error(`Account does not have a valid user identity (email or userId). Check ${flag.serviceId} implementation. It should not return invalid accounts.`)
+    }
 
- term.cyan(`${name} is an unknown user.\n`)
+    message = `${name} is an unknown user.\n`
+  }
+
+  term.cyan(message)
+}
+
+async function shouldCreateNewIndividual(flag: FlaggedInfo) {
  const question = {
      type: 'list',
      name: 'shouldCreateIndividual',
@@ -278,7 +293,10 @@ function printFlaggedAccounts (flags: Array<FlaggedInfo>) {
     flags.forEach((flag) => {
       term.cyan(`Flag for: ${flag.serviceId}\n`)
       if (flag.individual) {
+        let serviceUserIdentity = flag.individual.serviceUserIdentities[flag.serviceId]
         term.green(`Known Individual => name: '${flag.individual.fullName}', primaryEmail: '${flag.individual.primaryEmail || ""}'`)
+        term.magenta(`\n\tUser Identity: `)
+        serviceUserIdentity.email ? term.green(serviceUserIdentity.email) : term.green(serviceUserIdentity.userId)
       } else {
         term.green(`Unknown Individual => name: '${flag.userIdentity.fullName || ''}', email: '${flag.userIdentity.email || ''}', userId: '${flag.userIdentity.userId || ''}'`)
       }

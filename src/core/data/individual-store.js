@@ -46,7 +46,7 @@ export const individualStore: IndividualStore = {
     const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
 
     if (userIdentity.email) {
-      return lodash.find(individuals, (u) => u.primaryEmail === userIdentity.email)
+      return lodash.find(individuals, (u) => u.primaryEmail === userIdentity.email || u.serviceUserIdentities[serviceId].email === userIdentity.email)
     } else if (userIdentity.userId) {
       return lodash.find(individuals, (u) => {
         const identity = u.serviceUserIdentities[serviceId]
