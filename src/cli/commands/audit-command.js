@@ -103,7 +103,7 @@ async function createNewIndividual(flag: FlaggedInfo) {
 
 async function auditForIndividual (individual: Individual, serviceId: string, assets: Array<Asset>): Promise<void> {
   assets = [...assets]
- 
+
   const allowFullAccess = await selectFullAccess(serviceId)
   if(allowFullAccess) {
     const selectedRoles = await selectRoles(serviceId, assets)
@@ -194,25 +194,6 @@ async function selectFullAccess (serviceId: string): Promise<boolean> {
 
   return (await inquirer.prompt([question])).fullAccess
 }
-//
-// async function selectServices (assetAssignments: Array<AssetAssignment>): Promise <Array<AssetAssignment>> {
-//   const question = {
-//     type: 'checkbox',
-//     name: 'selectedAssignments',
-//     // create choices for every service that isn't at least partially whitelisted yet
-//     choices: assetAssignments
-//       .map((assetAssignment) => {
-//         return {
-//           name: assetAssignment.service.id,
-//           value: assetAssignment
-//         }
-//       }),
-//     message: `Allow the following services?`
-//   }
-//
-//   return (await inquirer.prompt([question])).selectedAssignments
-// }
-
 
 function selectSortField (flag: FlaggedInfo): string {
   if (flag.individual) {
