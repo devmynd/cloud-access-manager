@@ -39,6 +39,16 @@ export const schema = buildSchema(`
     userIdentity: UserIdentity!
   }
 
+  type UserAccount {
+    identity: UserIdentity!
+    assets: [Asset]!
+  }
+
+  type ServiceUserAccount {
+    serviceId: String!
+    userAccount: UserAccount!
+  }
+
   type Group {
     name: String!
     serviceAccessRules: [ServiceAccessRuleList]!
@@ -62,6 +72,7 @@ export const schema = buildSchema(`
 
   type Query {
     audit: [FlaggedInfo]
+    accounts(serviceId: String): [ServiceUserAccount]
     services(isConfigured: Boolean): [ServiceInfo]
     groups: [Group]
     group(name: String): Group
@@ -87,6 +98,7 @@ export const schema = buildSchema(`
 
 export const root = {
   audit: accountsResolvers.performAudit,
+  accounts: accountsResolvers.listAccounts,
   configureService: serviceResolvers.configureService,
   disableService: serviceResolvers.disableService,
   services: serviceResolvers.listServices,
