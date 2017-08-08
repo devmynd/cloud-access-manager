@@ -126,7 +126,9 @@ async function selectExistingIndividual (flag: FlaggedInfo) {
   const question = {
     type: 'list',
     name: 'selectedIndividualEmail',
-    choices: individuals.map((individual) => individual.primaryEmail),
+    choices: individuals.map((individual) =>  {
+      return individual.primaryEmail || individual.serviceUserIdentities[flag.serviceId].userId || individual.serviceUserIdentities[flag.serviceId].email
+    }),
     message: 'Selected individual:'
   }
 
