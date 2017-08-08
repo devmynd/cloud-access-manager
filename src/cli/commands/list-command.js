@@ -6,25 +6,21 @@ import type { ServiceUserAccount } from '../../core/types'
 function printSummaries (accounts: Array<ServiceUserAccount>) {
   accounts.sort((lhs, rhs) => lhs.serviceId < rhs.serviceId ? 0 : 1)
 
-  let accountLookup = accounts.reduce((accountLookup, account) => {
-    accountLookup[account.serviceId] = (accountLookup[account.serviceId] || []).concat(account)
-    return accountLookup
-  }, {})
-
-  Object.keys(accountLookup).forEach((serviceId) => {
-    term.cyan(`\n${serviceId}\n`)
-    accountLookup[serviceId].forEach((account) => {
-      const userAccount = account.userAccount
-      const userIdentity = userAccount.identity.email ? userAccount.identity.email : userAccount.identity.userId
-      term.green(`\t${userIdentity}\n`)
-      userAccount.assets.forEach((asset) => {
-        term.magenta(`\t\t${asset.name}\t`)
-        if (asset.role) {
-          term.yellow(`${asset.role}\n`)
-        }
-      })
+  let serviceId = ''
+  accounts.forEach((account) => {
+    if (account.serviceId !== serviceId) {
+      serviceId = account.serviceId
+      term.cyan(`\n${serviceId}\n`)
+    }
+    const userAccount = account.userAccount
+    const userIdentity = userAccount.identity.email || userAccount.identity.userId || userAccount.identity.fullName || ''
+    term.green(`\t${userIdentity}\n`)
+    userAccount.assets.forEach((asset) => {
+      term.magenta(`\t\t${asset.name}\t`)
+      if (asset.role) {
+        term.yellow(`${asset.role}\n`)
+      }
     })
-    term(`\n\n`)
   })
 }
 

@@ -52,25 +52,26 @@ export async function interactiveAudit () {
 
     if (flag && flag.individual) {
       await auditForIndividual(flag.individual, flag.serviceId, flag.assets)
-      if (flag.individual && lodash.isEmpty(flag.individual.serviceUserIdentities[flag.serviceId])) {
-          flag.individual.serviceUserIdentities[flag.serviceId] = flag.userIdentity
-          const individual = flag.individual
-          if(individual) {
-            individualStore.save(individual)
-          }
-      }
     }
     term('\n\n')
+
+    updateServiceUserIdentity(flag)
   }
   audit()
 }
 
+function updateServiceUserIdentity(flag: ?FlaggedInfo) {
+  if (flag && flag.individual) {
+    const individual = flag.individual
+    individual.serviceUserIdentities[flag.serviceId] = flag.userIdentity
+    individualStore.save(individual)
+  }
+}
+
 function printAuditedUser (flag: FlaggedInfo) {
   let name
-  let message
   if (flag.individual) {
     name = flag.individual.primaryEmail || flag.individual.fullName
-    message = `${name} is a known user.\n`
   } else {
     if (flag.userIdentity.email) {
       name = flag.userIdentity.email
@@ -81,11 +82,9 @@ function printAuditedUser (flag: FlaggedInfo) {
       // because if we return early the code in audit will fall through to link to an existing individual and we'll have this problem again.
       throw new Error(`Account does not have a valid user identity (email or userId). Check ${flag.serviceId} implementation. It should not return invalid accounts.`)
     }
-
-    message = `${name} is an unknown user.\n`
   }
 
-  term.cyan(message)
+  term.cyan(`${flag.serviceId} flagged ${name}\n`)
 }
 
 async function shouldCreateNewIndividual (flag: FlaggedInfo) {
@@ -99,7 +98,7 @@ async function shouldCreateNewIndividual (flag: FlaggedInfo) {
       name: 'Link to an Existing Individual',
       value: false
     }],
-    message: `How would you like to proceed with this user?`
+    message: `This is an unknown user. How would you like to proceed?`
   }
 
   return (await inquirer.prompt([question])).shouldCreateIndividual
