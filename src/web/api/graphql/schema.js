@@ -2,7 +2,7 @@
 import {
   buildSchema
 } from 'graphql'
-import { serviceResolvers, groupsResolvers } from './resolvers'
+import { serviceResolvers, groupsResolvers, accountsResolvers } from './resolvers'
 
 export const schema = buildSchema(`
   type ServiceInfo {
@@ -18,9 +18,25 @@ export const schema = buildSchema(`
     role: String!
   }
 
+  type Asset {
+    name: String!
+    role: String
+  }
+
+  type UserIdentity {
+    email: String
+    userId: String
+    fullName: String
+  }
+
   type ServiceAccessRuleList {
     service: ServiceInfo!,
     accessRules: [AccessRule]!
+  }
+
+  type ServiceUserIdentity {
+    serviceId: String!
+    userIdentity: UserIdentity!
   }
 
   type Group {
@@ -28,7 +44,24 @@ export const schema = buildSchema(`
     serviceAccessRules: [ServiceAccessRuleList]!
   }
 
+  type Individual {
+    id: String!,
+    fullName: String!,
+    primaryEmail: String!,
+    serviceUserIdentities: [ServiceUserIdentity],
+    accessRules: [ServiceAccessRuleList]!,
+    groups: [String]!
+  }
+
+  type FlaggedInfo {
+    individual: Individual,
+    serviceId: String!,
+    userIdentity: UserIdentity!,
+    assets: [Asset]!
+  }
+
   type Query {
+    audit: [FlaggedInfo]
     services(isConfigured: Boolean): [ServiceInfo]
     groups: [Group]
     group(name: String): Group
@@ -53,6 +86,7 @@ export const schema = buildSchema(`
 `)
 
 export const root = {
+  audit: accountsResolvers.performAudit,
   configureService: serviceResolvers.configureService,
   disableService: serviceResolvers.disableService,
   services: serviceResolvers.listServices,
