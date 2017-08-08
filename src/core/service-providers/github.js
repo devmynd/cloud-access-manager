@@ -20,16 +20,23 @@ class GitHubProvider implements ServiceProvider {
     const org = this.api.getOrganization(this.orgName)
     let repos = (await org.getRepos()).data
 
-    //repos = lodash.filter(repos, (r) => r.name === "cloud-access-manager")
+    console.log(repos.length)
+    repos = lodash.take(repos, 3)
 
-    const repoCollabs = await Promise.all(repos.map(async (repo) => {
+    let repoCollabs = await Promise.all(repos.map(async (repo) => {
       let repoWrapper = this.api.getRepo(repo.owner.login, repo.name)
-      const collabs = await repoWrapper.getCollaborators()
-      return {
-        repo: repo,
-        collabs: collabs.data
+      try {
+        const collabs = await repoWrapper.getCollaborators()
+        return {
+          repo: repo,
+          collabs: collabs.data
+        }
+      } catch (error) {
+        return null
       }
     }))
+
+    repoCollabs = lodash.filter(repoCollabs, (rc) => !!rc)
 
     let accountsHash = {}
 
