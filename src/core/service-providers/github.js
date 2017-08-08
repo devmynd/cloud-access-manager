@@ -3,7 +3,7 @@ import type { ServiceProvider, ServiceProviderModule } from '../types'
 import GitHub from 'github-api'
 import lodash from 'lodash'
 
-let configKeys = ['OAuth Token', 'Organization Name']
+let configKeys = ['Organization Name', 'OAuth Token for Organization Owner Account']
 
 class GitHubProvider implements ServiceProvider {
   api: GitHub
@@ -11,7 +11,7 @@ class GitHubProvider implements ServiceProvider {
 
   constructor (config: Object) {
     this.api = new GitHub({
-      token: config['OAuth Token']
+      token: config['OAuth Token for Organization Owner Account']
     })
     this.orgName = config['Organization Name']
   }
@@ -19,20 +19,22 @@ class GitHubProvider implements ServiceProvider {
   async listAccounts () {
     const org = this.api.getOrganization(this.orgName)
     let repos = (await org.getRepos()).data
+    //TODO: Remove line to take in all repos
+    repos = lodash.take(repos, 20)
 
-    console.log(repos.length)
-    repos = lodash.take(repos, 3)
+    let repoCollabs = []
 
-    let repoCollabs = await Promise.all(repos.map(async (repo) => {
+    await Promise.all(repos.map(async (repo) => {
       let repoWrapper = this.api.getRepo(repo.owner.login, repo.name)
       try {
-        const collabs = await repoWrapper.getCollaborators()
-        return {
+        const collabs = (await repoWrapper.getCollaborators()).data
+        repoCollabs.push({
           repo: repo,
-          collabs: collabs.data
-        }
+          collabs: collabs
+        })
       } catch (error) {
-        return null
+        //TODO: Get the devmynd account owner credentials and don't swallow this error
+        console.log(error)
       }
     }))
 
