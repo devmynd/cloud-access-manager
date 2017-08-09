@@ -125,15 +125,17 @@ async function selectExistingIndividual (flag: FlaggedInfo) {
   term.cyan('Link this unknown user to an existing individual:\n')
   const question = {
     type: 'list',
-    name: 'selectedIndividualEmail',
+    name: 'selectedIndividual',
     choices: individuals.map((individual) =>  {
-      return individual.primaryEmail || individual.serviceUserIdentities[flag.serviceId].userId || individual.serviceUserIdentities[flag.serviceId].email
+      return {
+        name: `${individual.fullName + ' '}${individual.primaryEmail}`,
+        value: individual
+      }
     }),
     message: 'Selected individual:'
   }
 
-  const email = (await inquirer.prompt([question])).selectedIndividualEmail
-  return lodash.find(individuals, (individual) => individual.primaryEmail === email)
+  return (await inquirer.prompt([question])).selectedIndividual
 }
 
 async function confirmOverwriteServiceIdentity (serviceUserIdentity: { [string]: UserIdentity }): Promise<boolean> {
