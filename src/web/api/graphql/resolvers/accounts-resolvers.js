@@ -13,20 +13,19 @@ export function listAccounts (args: { serviceId: string }) {
 export async function performAudit () {
   const accounts = await manager.download('all')
   const auditor = new Auditor(individualStore, groupStore)
-  const flags = accounts.map((account) => {
+  return accounts.reduce((result, account) => {
     const flag = auditor.auditAccount(account)
-    if (flag && flag.individual) {
-      const individual = mapIndividualInFlag(flag)
-      return {
+    if (flag) {
+      const individual = flag.individual ? mapIndividualInFlag(flag) : null
+      result.push({
         individual: individual,
         serviceId: flag.serviceId,
         userIdentity: flag.userIdentity,
         assets: flag.assets
-      }
-     }
-  })
-
-  return flags
+      })
+    }
+    return result
+  }, [])
 }
 
 function mapIndividualInFlag(flag: FlaggedInfo) {
