@@ -16,9 +16,8 @@ export async function performAudit () {
   return accounts.reduce((result, account) => {
     const flag = auditor.auditAccount(account)
     if (flag) {
-      const individual = flag.individual ? mapIndividualInFlag(flag) : null
       result.push({
-        individual: individual,
+        individual: mapIndividual(individual),
         serviceId: flag.serviceId,
         userIdentity: flag.userIdentity,
         assets: flag.assets
@@ -28,19 +27,24 @@ export async function performAudit () {
   }, [])
 }
 
-function mapIndividualInFlag(flag: FlaggedInfo) {
-  let individual: any = flag.individual
-  const serviceUserIdentities = individual.serviceUserIdentities
-  individual.serviceUserIdentities = Object.keys(serviceUserIdentities).map((serviceId) => {
-    return { serviceId: serviceId, userIdentity: serviceUserIdentities[serviceId] }
-  })
-
-  individual.accessRules = Object.keys(individual.accessRules).map((serviceId) => {
+function mapIndividual(individual: ?Individual) {
+  if (individual) {
     return {
-      service: manager.getServiceInfo(serviceId),
-      accessRules: individual.accessRules[serviceId]
+      id: individual.id,
+      fullName: individual.fullName,
+      primaryEmail: individual.primaryEmail,
+      serviceUserIdentities: Object.keys(individual.serviceUserIdentities).map((serviceId) => {
+        return { serviceId: serviceId, userIdentity: individual.serviceUserIdentities[serviceId] }
+      }),
+      accessRules: Object.keys(individual.accessRules).map((serviceId) => {
+        return {
+          service: manager.getServiceInfo(serviceId),
+          accessRules: individual.accessRules[serviceId]
+        }
+      }),
+      groups: individual.groups
     }
-  })
-
-  return individual
+  } else {
+    return null
+  }
 }
