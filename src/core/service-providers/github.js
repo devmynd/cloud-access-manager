@@ -19,8 +19,6 @@ class GitHubProvider implements ServiceProvider {
   async listAccounts () {
     const org = this.api.getOrganization(this.orgName)
     let repos = (await org.getRepos()).data
-    //TODO: Remove line to take in all repos
-    repos = lodash.take(repos, 2)
 
     let repoCollabs = []
 
