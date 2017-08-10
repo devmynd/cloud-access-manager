@@ -5,6 +5,7 @@ import Modal from './modal'
 import UnknownUserOptions from './unknown-user-options'
 import NewIndividualInfo from './new-individual-info'
 import GroupSelectionForm from './group-selection-form'
+import IndividualAccessRulesForm from './individual-access-rules-form'
 import MessagesContainer from './messages-container'
 import lodash from 'lodash'
 
@@ -19,6 +20,7 @@ export default class FlagList extends React.Component {
 
   flagQueryResponse = `{
     individual {
+      id
       primaryEmail
       serviceUserIdentities {
         serviceId
@@ -113,6 +115,32 @@ export default class FlagList extends React.Component {
     })
   }
 
+  setIndividualAccessRules = async (selectedAccessRules) => {
+    console.log(selectedAccessRules)
+    const flag = this.state.currentFlag
+    const query = `mutation {
+      addIndividualAccessRules(
+        individualId: "${flag.individual.id}",
+        serviceId: "${flag.serviceId}",
+        accessRules: [${selectedAccessRules.map((rule) => `{
+          asset: "${rule.asset}",
+          role: "${rule.role}"
+        }`).join(',')}])
+    }`
+    console.log(query)
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Failed to add selected access rules",
+        body: response.error.message
+      })
+    } else {
+      this.setState({
+        showModal: false
+      })
+    }
+  }
+
   onGroupFormComplete = async (selectedGroups) => {
     this.pendingNewIndividual.groups = selectedGroups
     const flag = this.state.currentFlag
@@ -146,15 +174,22 @@ export default class FlagList extends React.Component {
         })
       } else {
         const newFlag = response.data.auditServiceUserAccount
+        newFlag.key = flag.key
+        const flags = this.state.flags
+        const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
         if (newFlag) {
-          // todo: show access rules
-          console.log("TODO: Show access rules")
+          flags[flagIndex] = newFlag
+          this.setState({
+            flags,
+            currentFlag: newFlag,
+            modalTitle: "Set Individual Access Rules",
+            modalContents: <IndividualAccessRulesForm flag={newFlag} onAccessRuleSelection={this.setIndividualAccessRules} />
+          })
         } else {
-          const flags = this.state.flags
-          lodash.remove(flags, (f) => f.key == flag.key)
+          delete flags[flagIndex]
           this.setState({
             showModal: false,
-            flags: flags
+            flags
           })
         }
       }

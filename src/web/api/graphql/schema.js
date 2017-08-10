@@ -97,6 +97,7 @@ export const schema = buildSchema(`
 
   type Mutation {
     createIndividual(individual: NewIndividualInput): String
+    addIndividualAccessRules(individualId: String, serviceId: String, accessRules: [AccessRuleInput]): String
     configureService(serviceId: String, configJson: String): String
     disableService(serviceId: String): String
     setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
@@ -106,6 +107,7 @@ export const schema = buildSchema(`
 
 export const root = {
   createIndividual: resolvers.individuals.createIndividual,
+  addIndividualAccessRules: resolvers.individuals.addIndividualAccessRules,
   auditAll: resolvers.accounts.performAudit,
   auditServiceUserAccount: resolvers.accounts.auditServiceUserAccount,
   accounts: resolvers.accounts.listAccounts,
