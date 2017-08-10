@@ -15,7 +15,6 @@ export default class FlagList extends React.Component {
     flags: [],
     showModal: false,
     currentFlag: null,
-    groups: []
   }
 
   flagQueryResponse = `{
@@ -58,6 +57,11 @@ export default class FlagList extends React.Component {
       groups {
         name
       }
+      services(isConfigured:true){
+        id
+        displayName
+        roles
+      }
     }`
 
     const response = await graphqlApi.request(query)
@@ -71,9 +75,11 @@ export default class FlagList extends React.Component {
     response.data.auditAll.forEach((flag) => {
       flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
     })
+    this.groups = response.data.groups.map((g) => g.name)
+    this.serviceLookup = {}
+    response.data.services.forEach((s) => { this.serviceLookup[s.id] = s })
     this.setState({
-      flags: response.data.auditAll,
-      groups: response.data.groups.map((g) => g.name)
+      flags: response.data.auditAll
     })
   }
 
@@ -119,7 +125,7 @@ export default class FlagList extends React.Component {
     }
     this.setState({
       modalTitle: `Select groups`,
-      modalContents: <GroupSelectionForm groups={this.state.groups} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
+      modalContents: <GroupSelectionForm groups={this.groups} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
     })
   }
 
@@ -207,7 +213,7 @@ export default class FlagList extends React.Component {
           flags,
           currentFlag: newFlag,
           modalTitle: "Set Individual Access Rules",
-          modalContents: <IndividualAccessRulesForm flag={newFlag} onAccessRuleSelection={this.setIndividualAccessRules} />
+          modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
         delete flags[flagIndex]
@@ -247,7 +253,6 @@ export default class FlagList extends React.Component {
         { this.state.showModal &&
           <Modal title={this.state.modalTitle} closeHandler={this.closeModal}>
             { this.state.modalContents }
-            {/* <GroupSelectionForm groups={this.state.groups} fullName={this.state.fullName} primaryEmail={this.state.primaryEmail} flag={this.props.flag} /> */}
           </Modal>
         }
 

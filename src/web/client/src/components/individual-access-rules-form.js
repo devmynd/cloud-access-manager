@@ -1,8 +1,10 @@
 import React from 'react'
+import lodash from 'lodash'
 
 export default class IndividualAccessRulesForm extends React.Component {
   state = {
-    selectedAccessRules: []
+    selectedAccessRules: [],
+    selectedRoles: {}
   }
 
   updateAccessRuleSelection = (event, targetAsset) => {
@@ -22,14 +24,53 @@ export default class IndividualAccessRulesForm extends React.Component {
     this.props.onAccessRuleSelection(this.state.selectedAccessRules)
   }
 
+  onRoleClicked = (event, role) => {
+    event.target.blur()
+    const selectedRoles = this.state.selectedRoles
+    const selectedAccessRules = this.state.selectedAccessRules
+
+    const enableRole = !selectedRoles[role]
+    selectedRoles[role] = enableRole
+
+    if(enableRole) {
+      selectedAccessRules.push({ asset: "*", role: role })
+    } else {
+      lodash.remove(selectedAccessRules, (r) => r.asset === "*" && r.role === role)
+    }
+
+    this.setState({
+      selectedRoles,
+      selectedAccessRules
+    })
+  }
+
   render() {
-    const flag = this.props.flag
+    let roleButtons
+    if (this.props.service.roles.length > 0) {
+      const flaggedRoles = lodash.uniq(this.props.assets.map((a) => a.role))
+      roleButtons = flaggedRoles.map((r) => { return { text: r, value: r }})
+    } else {
+      roleButtons = [{text: "Full Access", value: "*"}]
+    }
+
+
     return(
       <div>
-        <h2>{ flag.serviceId } </h2>
+        <h2>{ this.props.service.displayName } </h2>
+        <div className='field is-grouped'>
+          {roleButtons.map((button) => (
+            <div key={button.value} className='control'>
+              <button
+                className={`button is-primary ${this.state.selectedRoles[button.value] ? '' : 'is-outlined'}`}
+                onClick={(e) => this.onRoleClicked(e, button.value)}>
+                {button.text}
+              </button>
+            </div>
+          ))}
+        </div>
         <ul>
           {
-            flag.assets.map((asset) => {
+            this.props.assets.map((asset) => {
               return (
                 <li key={`${asset.name}-${asset.role}`}>
                     <span>
