@@ -7,6 +7,7 @@ import { individualStore } from '../../core/data/individual-store'
 import { groupStore } from '../../core/data/group-store'
 import inquirer from 'inquirer'
 import type { ServiceUserAccount, FlaggedInfo, Asset, Individual, AccessRule, UserIdentity } from '../../core/types'
+import { newIndividualFactory } from '../../core/types'
 import lodash from 'lodash'
 
 export async function audit () {
@@ -128,7 +129,7 @@ async function selectExistingIndividual (flag: FlaggedInfo) {
     name: 'selectedIndividual',
     choices: individuals.map((individual) =>  {
       return {
-        name: `${individual.fullName + ' '}${individual.primaryEmail}`,
+        name: `${individual.fullName + ' '}${individual.primaryEmail || ''}`,
         value: individual
       }
     }),
@@ -150,16 +151,9 @@ async function confirmOverwriteServiceIdentity (serviceUserIdentity: { [string]:
 
 async function createNewIndividual (flag: FlaggedInfo) {
   const groupNames = groupStore.getAll().map((group) => group.name)
-  const newIndividual = {
-    id: generateUUID(),
-    fullName: flag.userIdentity.fullName || '',
-    primaryEmail: flag.userIdentity.email || '',
-    serviceUserIdentities: {},
-    accessRules: {},
-    groups: []
-  }
+  const newIndividual =  newIndividualFactory(flag.userIdentity.fullName || flag.userIdentity.userId || '', flag.userIdentity.email, [])
   newIndividual.serviceUserIdentities[flag.serviceId] = flag.userIdentity
-  newIndividual.groups = await (selectGroups(newIndividual.primaryEmail, groupNames))
+  newIndividual.groups = await (selectGroups(groupNames))
   individualStore.save(newIndividual)
 }
 
@@ -179,7 +173,7 @@ async function auditForIndividual (individual: Individual, serviceId: string, as
 
   // select per asset access for any remaning assets that were not filtered out by full access roles.
   if (assets.length !== 0) {
-    const selectedAccessRules = await selectNewAssets(assets, serviceId, individual.primaryEmail)
+    const selectedAccessRules = await selectNewAssets(assets, serviceId)
     const individualServiceAccessRules = individual.accessRules[serviceId]
     if (individualServiceAccessRules) {
       individual.accessRules[serviceId] = individualServiceAccessRules.concat(selectedAccessRules)
@@ -193,7 +187,7 @@ async function auditForIndividual (individual: Individual, serviceId: string, as
   individualStore.save(individual)
 }
 
-async function selectNewAssets (assets: Array<Asset>, serviceId: string, primaryUserEmail: string): Promise<Array<AccessRule>> {
+async function selectNewAssets (assets: Array<Asset>, serviceId: string): Promise<Array<AccessRule>> {
   const question = {
     type: 'checkbox',
     name: 'selectedAssets',
@@ -203,14 +197,14 @@ async function selectNewAssets (assets: Array<Asset>, serviceId: string, primary
         name: `${asset.name}${roleStr}`, value: { asset: asset.name, role: asset.role ? asset.role : '*' }
       }
     }),
-    message: `${serviceId}: allow the following assets for ${primaryUserEmail}?`
+    message: `${serviceId}: allow the following assets?`
   }
   const selectedAssets = (await inquirer.prompt([question])).selectedAssets
 
   return selectedAssets
 }
 
-async function selectGroups (email: string, groupNames: Array<string>): Promise<Array<string>> {
+async function selectGroups (groupNames: Array<string>): Promise<Array<string>> {
   const question = {
     type: 'checkbox',
     name: 'selectedGroups',
@@ -219,7 +213,7 @@ async function selectGroups (email: string, groupNames: Array<string>): Promise<
         name: groupName, value: groupName
       }
     }),
-    message: `Select group membership for ${email}`
+    message: `Select group membership`
   }
   const selectedGroups = (await inquirer.prompt([question])).selectedGroups
 
@@ -282,13 +276,6 @@ function selectSortField (flag: FlaggedInfo): string {
     return flag.userIdentity.fullName
   }
   return ''
-}
-
-function generateUUID () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
 }
 
 function printFlaggedAccounts (flags: Array<FlaggedInfo>) {

@@ -2,7 +2,7 @@
 import {
   buildSchema
 } from 'graphql'
-import { serviceResolvers, groupsResolvers, accountsResolvers } from './resolvers'
+import resolvers from './resolvers'
 
 export const schema = buildSchema(`
   type ServiceInfo {
@@ -57,7 +57,7 @@ export const schema = buildSchema(`
   type Individual {
     id: String!,
     fullName: String!,
-    primaryEmail: String!,
+    primaryEmail: String,
     serviceUserIdentities: [ServiceUserIdentity],
     accessRules: [ServiceAccessRuleList]!,
     groups: [String]!
@@ -83,12 +83,19 @@ export const schema = buildSchema(`
     role: String!
   }
 
+  input NewIndividualInput {
+    fullName: String!,
+    primaryEmail: String,
+    groups: [String]!
+  }
+
   input ServiceAccessRuleListInput {
     serviceId: String!
     accessRules: [AccessRuleInput]!
   }
 
   type Mutation {
+    createIndividual(individual: NewIndividualInput): String
     configureService(serviceId: String, configJson: String): String
     disableService(serviceId: String): String
     setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
@@ -97,13 +104,14 @@ export const schema = buildSchema(`
 `)
 
 export const root = {
-  audit: accountsResolvers.performAudit,
-  accounts: accountsResolvers.listAccounts,
-  configureService: serviceResolvers.configureService,
-  disableService: serviceResolvers.disableService,
-  services: serviceResolvers.listServices,
-  setGroupAccessRules: groupsResolvers.setGroupAccessRules,
-  group: groupsResolvers.getGroup,
-  groups: groupsResolvers.listGroups,
-  delete: groupsResolvers.deleteGroup
+  createIndividual: resolvers.individuals.createIndividual,
+  audit: resolvers.accounts.performAudit,
+  accounts: resolvers.accounts.listAccounts,
+  configureService: resolvers.services.configureService,
+  disableService: resolvers.services.disableService,
+  services: resolvers.services.listServices,
+  setGroupAccessRules: resolvers.groups.setGroupAccessRules,
+  group: resolvers.groups.getGroup,
+  groups: resolvers.groups.listGroups,
+  delete: resolvers.groups.deleteGroup
 }

@@ -1,9 +1,13 @@
 // @flow
 
-import * as serviceResolvers from './service-resolvers'
-import * as groupsResolvers from './groups-resolvers'
-import * as accountsResolvers from './accounts-resolvers'
+import * as services from './services-resolvers'
+import * as groups from './groups-resolvers'
+import * as accounts from './accounts-resolvers'
+import * as individuals from './individuals-resolvers'
 
-module.exports.serviceResolvers = serviceResolvers
-module.exports.groupsResolvers = groupsResolvers
-module.exports.accountsResolvers = accountsResolvers
+export default {
+  services,
+  groups,
+  accounts,
+  individuals
+}
