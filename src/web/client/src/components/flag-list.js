@@ -112,7 +112,7 @@ export default class FlagList extends React.Component {
         { this.state.showModal &&
           <Modal title={`Manage ${this.state.currentFlag.userIdentity.email || this.state.currentFlag.userIdentity.userId}`} closeHandler={this.closeConfiguration} onMounted={this.onModalMounted}>
           { this.state.step === 1 && !this.state.currentFlag.individual && <UnknownUserOptions flag={this.state.currentFlag} nextStep={this.nextStep} /> }
-          { this.state.step === 2 && !this.state.currentFlag.individual && <NewIndividualInfo flag={this.state.currentFlag} nextStep={this.nextStep} /> }
+          { this.state.step === 2 && !this.state.currentFlag.individual && <NewIndividualInfo  flag={this.state.currentFlag} nextStep={this.nextStep} /> }
           </Modal>
         }
       </div>
