@@ -15,26 +15,40 @@ export default class GroupSelectionForm extends React.Component {
     })
   }
 
+  saveGroups = (e) => {
+    e.preventDefault()
+    console.log("todo:implement")
+  }
+
   render() {
     const groups = this.state.groups
     return (
       <div>
         <h3 className="is-centered">
           Add { this.props.fullName } to a group
-          { this.props.primaryEmail }
         </h3>
+        <h4>
+          { this.props.primaryEmail }
+        </h4>
         {
           groups.length > 0 &&
-          <ul>
-            {
-              groups.map((group) => {
-                return <label key={group.name} className="checkbox">
+          <div>
+            <ul>
+              {
+                groups.map((group) => {
+                  return (
+                    <li key={group.name}>
+                      <label className="checkbox">
                         <input type="checkbox"/>
                         {group.name}
                       </label>
-              })
-            }
-          </ul>
+                    </li>
+                  )
+                })
+              }
+            </ul>
+            <button className="button" onClick={this.saveGroups}>Save and Continue</button>
+          </div>
         }
       </div>
     )
