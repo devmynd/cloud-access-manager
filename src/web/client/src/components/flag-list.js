@@ -116,7 +116,6 @@ export default class FlagList extends React.Component {
   }
 
   setIndividualAccessRules = async (selectedAccessRules) => {
-    console.log(selectedAccessRules)
     const flag = this.state.currentFlag
     const query = `mutation {
       addIndividualAccessRules(
@@ -127,7 +126,6 @@ export default class FlagList extends React.Component {
           role: "${rule.role}"
         }`).join(',')}])
     }`
-    console.log(query)
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
@@ -135,9 +133,41 @@ export default class FlagList extends React.Component {
         body: response.error.message
       })
     } else {
+      const newFlag = await this.reCheckFlag(flag)
+      const flags = this.state.flags
+      const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
+      if (newFlag) {
+        flags[flagIndex] = newFlag
+      } else {
+        delete flags[flagIndex]
+      }
+
       this.setState({
-        showModal: false
+        showModal: false,
+        flags
       })
+    }
+  }
+
+  reCheckFlag = async (flag) => {
+    const secondParameter = flag.userIdentity.email ? `email: "${flag.userIdentity.email}"`  : `userId: "${flag.userIdentity.userId}"`
+
+    const query = `{
+      auditServiceUserAccount(serviceId: "${flag.serviceId}", ${secondParameter}) ${this.flagQueryResponse}
+    }`
+    const response = await graphqlApi.request(query)
+
+    if(response.error) {
+      this.messagesContainer.push({
+        title: 'Failed to check flag',
+        body: response.error.message
+      })
+    } else {
+      const newFlag = response.data.auditServiceUserAccount
+      if (newFlag) {
+        newFlag.key = flag.key
+        return newFlag
+      }
     }
   }
 
@@ -160,38 +190,23 @@ export default class FlagList extends React.Component {
         body: response.error.message
       })
     } else {
-      const secondParameter = flag.userIdentity.email ? `email: "${flag.userIdentity.email}"`  : `userId: "${flag.userIdentity.userId}"`
-
-      const query = `{
-        auditServiceUserAccount(serviceId: "${flag.serviceId}", ${secondParameter}) ${this.flagQueryResponse}
-      }`
-      const response = await graphqlApi.request(query)
-
-      if(response.error) {
-        this.messagesContainer.push({
-          title: 'Failed to Audit Service Account',
-          body: response.error.message
+      const newFlag = await this.reCheckFlag(flag)
+      const flags = this.state.flags
+      const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
+      if (newFlag) {
+        flags[flagIndex] = newFlag
+        this.setState({
+          flags,
+          currentFlag: newFlag,
+          modalTitle: "Set Individual Access Rules",
+          modalContents: <IndividualAccessRulesForm flag={newFlag} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
-        const newFlag = response.data.auditServiceUserAccount
-        newFlag.key = flag.key
-        const flags = this.state.flags
-        const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
-        if (newFlag) {
-          flags[flagIndex] = newFlag
-          this.setState({
-            flags,
-            currentFlag: newFlag,
-            modalTitle: "Set Individual Access Rules",
-            modalContents: <IndividualAccessRulesForm flag={newFlag} onAccessRuleSelection={this.setIndividualAccessRules} />
-          })
-        } else {
-          delete flags[flagIndex]
-          this.setState({
-            showModal: false,
-            flags
-          })
-        }
+        delete flags[flagIndex]
+        this.setState({
+          showModal: false,
+          flags
+        })
       }
     }
   }
