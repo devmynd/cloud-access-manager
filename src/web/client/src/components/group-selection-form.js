@@ -1,9 +1,11 @@
 import React from 'react'
 import graphqlApi from '../graphql-api'
+import lodash from 'lodash'
 
 export default class GroupSelectionForm extends React.Component {
   state = {
-    groups: []
+    availableGroups: [],
+    selectedGroups: []
   }
 
   componentWillMount = async () => {
@@ -11,7 +13,7 @@ export default class GroupSelectionForm extends React.Component {
     const response = await graphqlApi.request(query)
 
     this.setState({
-      groups: response.data.groups
+      availableGroups: response.data.groups
     })
   }
 
@@ -20,8 +22,18 @@ export default class GroupSelectionForm extends React.Component {
     console.log("todo:implement")
   }
 
+  updateGroupSelection = (event, groupName) => {
+    //TODO: This is not working as expected. Need to fix.
+    let selectedGroups = [...this.state.selectedGroups]
+    event.target.checked ? selectedGroups.push({name: groupName}) : lodash.remove(selectedGroups, (group) => group.name === groupName)
+
+    this.setState({
+      selectedGroups: selectedGroups
+    })
+  }
+
   render() {
-    const groups = this.state.groups
+    const availableGroups = this.state.availableGroups
     return (
       <div>
         <h3 className="is-centered">
@@ -31,15 +43,15 @@ export default class GroupSelectionForm extends React.Component {
           { this.props.primaryEmail }
         </h4>
         {
-          groups.length > 0 &&
+          availableGroups.length > 0 &&
           <div>
             <ul>
               {
-                groups.map((group) => {
+                availableGroups.map((group) => {
                   return (
                     <li key={group.name}>
                       <label className="checkbox">
-                        <input type="checkbox"/>
+                        <input onChange={(e) => this.updateGroupSelection(e, group.name)} type="checkbox"/>
                         {group.name}
                       </label>
                     </li>
