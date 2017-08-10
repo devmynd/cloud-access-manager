@@ -44,6 +44,15 @@ export default class IndividualAccessRulesForm extends React.Component {
     })
   }
 
+  isAssetChecked = (asset) => {
+    let exactMatch = !!lodash.find(this.state.selectedAccessRules, (r) => r.asset === asset.name && r.role === asset.role)
+    let fullAccessEnabledForRole = !!this.state.selectedAccessRules[asset.role]
+
+    console.log(`exact match: ${exactMatch}, fullAccess: ${fullAccessEnabledForRole}`)
+
+    return exactMatch || fullAccessEnabledForRole
+  }
+
   render() {
     let roleButtons
     if (this.props.service.roles.length > 0) {
