@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class UnknownUserOptions extends React.Component {
+export default class UnknownUserForm extends React.Component {
 
   render() {
     return (

@@ -2,8 +2,8 @@ import React from 'react'
 import graphqlApi from '../graphql-api'
 import './flag-list.scss'
 import Modal from './modal'
-import UnknownUserOptions from './unknown-user-options'
-import NewIndividualInfo from './new-individual-info'
+import UnknownUserForm from './unknown-user-form'
+import NewIndividualForm from './new-individual-form'
 import GroupSelectionForm from './group-selection-form'
 import IndividualAccessRulesForm from './individual-access-rules-form'
 import MessagesContainer from './messages-container'
@@ -84,7 +84,7 @@ export default class FlagList extends React.Component {
       modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId}`,
       modalContents: flag.individual
         ? <h1>Existing user</h1>
-        : <UnknownUserOptions flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} />
+        : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} />
     })
   }
 
@@ -100,11 +100,19 @@ export default class FlagList extends React.Component {
     const flag = this.state.currentFlag
     this.setState({
       modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || "blah"}`,
-      modalContents: <NewIndividualInfo flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
+      modalContents: <NewIndividualForm flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
     })
   }
 
   onNewIndividualFormComplete = (fullName, primaryEmail) => {
+    if (!fullName || fullName.trim() === "") {
+      this.messagesContainer.push({
+        title: "Invalid Name",
+        body: "Please fill out the individual's name."
+      })
+      return
+    }
+
     this.pendingNewIndividual = {
       fullName,
       primaryEmail

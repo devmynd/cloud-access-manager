@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class NewIndividualInfo extends React.Component {
+export default class NewIndividualForm extends React.Component {
   state = {
     fullName: this.props.flag.userIdentity.fullName || "",
     primaryEmail: this.props.flag.userIdentity.email || ""
@@ -20,7 +20,6 @@ export default class NewIndividualInfo extends React.Component {
 
   save = (e) => {
     e.preventDefault()
-    // todo: validate that fullname is not null or empty
     this.props.onNewIndividualFormComplete(this.state.fullName, this.state.primaryEmail)
   }
 
