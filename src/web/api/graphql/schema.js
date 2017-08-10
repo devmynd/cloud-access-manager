@@ -71,7 +71,8 @@ export const schema = buildSchema(`
   }
 
   type Query {
-    audit: [FlaggedInfo]
+    auditAll: [FlaggedInfo]
+    auditServiceUserAccount(serviceId: String!, email: String, userId: String): FlaggedInfo
     accounts(serviceId: String): [ServiceUserAccount]
     services(isConfigured: Boolean): [ServiceInfo]
     groups: [Group]
@@ -105,7 +106,8 @@ export const schema = buildSchema(`
 
 export const root = {
   createIndividual: resolvers.individuals.createIndividual,
-  audit: resolvers.accounts.performAudit,
+  auditAll: resolvers.accounts.performAudit,
+  auditServiceUserAccount: resolvers.accounts.auditServiceUserAccount,
   accounts: resolvers.accounts.listAccounts,
   configureService: resolvers.services.configureService,
   disableService: resolvers.services.disableService,
