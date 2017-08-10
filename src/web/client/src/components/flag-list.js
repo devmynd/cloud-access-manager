@@ -5,6 +5,7 @@ import Modal from './modal'
 import UnknownUserOptions from './unknown-user-options'
 import NewIndividualInfo from './new-individual-info'
 import GroupSelectionForm from './group-selection-form'
+import MessagesContainer from './messages-container'
 
 
 export default class FlagList extends React.Component {
@@ -97,10 +98,27 @@ export default class FlagList extends React.Component {
     })
   }
 
-  onGroupFormComplete = (selectedGroups) => {
+  onGroupFormComplete = async (selectedGroups) => {
     this.pendingNewIndividual.groups = selectedGroups
-    // todo: save individual
-    // todo: re-audit this one service user accoutn to see if the flag is still flagged
+
+    const query = `mutation {
+      createIndividual(individual: {
+        fullName: ""
+        ${this.pendingNewIndividual.primaryEmail ? `primaryEmail: "${this.pendingNewIndividual.primaryEmail}"` : ''}
+        groups: [${selectedGroups.map((g) => `"${g}"`).join(',')}]
+      })
+    }`
+
+    console.log(query)
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: 'Failed to Save New Individual',
+        body: response.error.message
+      })
+    } else {
+      
+    }
   }
 
   render() {
@@ -134,6 +152,8 @@ export default class FlagList extends React.Component {
             {/* <GroupSelectionForm groups={this.state.groups} fullName={this.state.fullName} primaryEmail={this.state.primaryEmail} flag={this.props.flag} /> */}
           </Modal>
         }
+
+        <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
       </div>
     )
   }

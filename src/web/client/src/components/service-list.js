@@ -9,8 +9,7 @@ export default class ServiceList extends React.Component {
     services: [],
     editingService: null,
     editingConfiguration: {},
-    showModal: false,
-    message: null
+    showModal: false
   }
 
   componentWillMount = async () => {
