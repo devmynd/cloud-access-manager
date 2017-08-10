@@ -1,13 +1,9 @@
 import React from 'react'
-import GroupSelectionForm from './group-selection-form'
 
 export default class NewIndividualInfo extends React.Component {
   state = {
     fullName: this.props.flag.userIdentity.fullName || "",
-    primaryEmail: this.props.flag.userIdentity.email || "",
-    groups: [],
-    showGroupForm: false,
-    showIndividualInfoFields: true
+    primaryEmail: this.props.flag.userIdentity.email || ""
   }
 
   updateFullName = (event) => {
@@ -22,43 +18,29 @@ export default class NewIndividualInfo extends React.Component {
     })
   }
 
-  showGroupForm = (e) => {
+  save = (e) => {
     e.preventDefault()
-
-    this.setState({
-      showIndividualInfoFields: false,
-      showGroupSelectionForm: true
-    })
+    this.props.onNewIndividualFormComplete(this.state.fullName, this.state.primaryEmail)
   }
-
-
 
   render() {
     return (
       <div>
-        {
-          this.state.showIndividualInfoFields &&
-          <div>
-            <div className='field'>
-              <label className="label">Full Name</label>
-              <div className='control'>
-                <input className='input' type='text' value={this.state.fullName} onChange={ this.updateFullName }/>
-              </div>
-            </div>
-            <div className='field'>
-              <label className="label">Primary Email Address</label>
-              <div className='control'>
-                <input className='input' type='text' value={ this.state.primaryEmail } onChange={ this.updatePrimaryEmail }/>
-              </div>
-            </div>
-            <div className='control'>
-              <button className='button' onClick={this.showGroupForm}>Save and Continue</button>
-            </div>
+        <div className='field'>
+          <label className="label">Full Name</label>
+          <div className='control'>
+            <input className='input' type='text' value={this.state.fullName} onChange={ this.updateFullName }/>
           </div>
-        }
-        {
-          this.state.showGroupSelectionForm && <GroupSelectionForm groups={this.state.groups} fullName={this.state.fullName} primaryEmail={this.state.primaryEmail} flag={this.props.flag} />
-        }
+        </div>
+        <div className='field'>
+          <label className="label">Primary Email Address</label>
+          <div className='control'>
+            <input className='input' type='text' value={ this.state.primaryEmail } onChange={ this.updatePrimaryEmail }/>
+          </div>
+        </div>
+        <div className='control'>
+          <button className='button' onClick={this.save}>Save and Continue</button>
+        </div>
       </div>
     )
   }

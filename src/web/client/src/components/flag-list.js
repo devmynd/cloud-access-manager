@@ -4,14 +4,14 @@ import './flag-list.scss'
 import Modal from './modal'
 import UnknownUserOptions from './unknown-user-options'
 import NewIndividualInfo from './new-individual-info'
+import GroupSelectionForm from './group-selection-form'
 
 
 export default class FlagList extends React.Component {
   state = {
     flags: [],
     showModal: false,
-    currentFlag: null,
-    step: 1
+    currentFlag: null
   }
 
   componentWillMount = async () => {
@@ -51,37 +51,56 @@ export default class FlagList extends React.Component {
     }`
 
     const response = await graphqlApi.request(query)
+    response.data.audit.forEach((flag) => {
+      flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
+    })
     this.setState({
       flags: response.data.audit
     })
   }
 
-  showIndividualModal = (flag) => {
+  showModal = (flag) => {
     this.setState({
       showModal: true,
-      currentFlag: flag
+      currentFlag: flag,
+      modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId}`,
+      modalContents: flag.individual
+        ? <h1>Existing user</h1>
+        : <UnknownUserOptions flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} />
     })
   }
 
-  onModalMounted = () => {
-    console.log("Implement")
-  }
-
-  closeConfiguration = (event) => {
+  closeModal = (event) => {
     event.preventDefault()
 
     this.setState({
-      showModal: false,
-      step: 1
+      showModal: false
     })
   }
 
-  nextStep = () => {
-    this.setState(
-      {
-        step: this.state.step + 1
-      }
-    )
+  onNewIndividualSelected = () => {
+    const flag = this.state.currentFlag
+    this.setState({
+      modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || "blah"}`,
+      modalContents: <NewIndividualInfo flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
+    })
+  }
+
+  onNewIndividualFormComplete = (fullName, primaryEmail) => {
+    this.pendingNewIndividual = {
+      fullName,
+      primaryEmail
+    }
+    this.setState({
+      modalTitle: `Select groups`,
+      modalContents: <GroupSelectionForm groups={["TODO", "GETGROUPS"]} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
+    })
+  }
+
+  onGroupFormComplete = (selectedGroups) => {
+    this.pendingNewIndividual.groups = selectedGroups
+    // todo: save individual
+    // todo: re-audit this one service user accoutn to see if the flag is still flagged
   }
 
   render() {
@@ -96,8 +115,8 @@ export default class FlagList extends React.Component {
 
         <table className='table flag-table'>
           <tbody className='uppercase-text'>
-            {flags.map((flag, index) => (
-              <tr key={index} onClick={() => this.showIndividualModal(flag)}>
+            {flags.map((flag) => (
+              <tr key={flag.key} onClick={() => this.showModal(flag)}>
                 <td className='column-padding'><span className='service-name column-padding'>{ flag.serviceId } { flag.userIdentity.email ? "EMAIL" : "USERNAME" }:</span> <span className='user-identity'>{ flag.userIdentity.email || flag.userIdentity.userId || flag.userIdentity.fullName }</span></td>
                 <td>
                   <span className='service-name'>SERVICE:</span>
@@ -110,9 +129,9 @@ export default class FlagList extends React.Component {
         </table>
 
         { this.state.showModal &&
-          <Modal title={`Manage ${this.state.currentFlag.userIdentity.email || this.state.currentFlag.userIdentity.userId}`} closeHandler={this.closeConfiguration} onMounted={this.onModalMounted}>
-          { this.state.step === 1 && !this.state.currentFlag.individual && <UnknownUserOptions flag={this.state.currentFlag} nextStep={this.nextStep} /> }
-          { this.state.step === 2 && !this.state.currentFlag.individual && <NewIndividualInfo  flag={this.state.currentFlag} nextStep={this.nextStep} /> }
+          <Modal title={this.state.modalTitle} closeHandler={this.closeModal}>
+            { this.state.modalContents }
+            {/* <GroupSelectionForm groups={this.state.groups} fullName={this.state.fullName} primaryEmail={this.state.primaryEmail} flag={this.props.flag} /> */}
           </Modal>
         }
       </div>
