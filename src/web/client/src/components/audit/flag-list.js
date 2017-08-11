@@ -205,7 +205,7 @@ export default class FlagList extends React.Component {
 
     const query = `mutation {
       createIndividual(individual: {
-        fullName: ""
+        fullName: "${this.pendingNewIndividual.fullName}"
         ${this.pendingNewIndividual.primaryEmail ? `primaryEmail: "${this.pendingNewIndividual.primaryEmail}"` : ''}
         groups: [${selectedGroups.map((g) => `"${g}"`).join(',')}]
       })

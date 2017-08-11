@@ -4,7 +4,7 @@ import { manager } from '../../../../core/service-providers/manager'
 import { Auditor } from '../../../../core/auditor'
 import { individualStore } from '../../../../core/data/individual-store'
 import { groupStore } from '../../../../core/data/group-store'
-import type { FlaggedInfo, Individual } from '../../../../core/types'
+import * as mappers from '../mappers'
 import lodash from 'lodash'
 
 export function listAccounts (args: { serviceId: string }) {
@@ -17,7 +17,7 @@ export async function performAudit () {
   return accounts.reduce((result, account) => {
     const flag = auditor.auditAccount(account)
     if (flag) {
-      result.push(mapFlag(flag))
+      result.push(mappers.mapFlag(flag))
     }
     return result
   }, [])
@@ -41,44 +41,9 @@ export async function auditServiceUserAccount (args: { serviceId: string, email:
   const account = lodash.find(accounts, (a) => matchOnEmail
       ? a.userAccount.identity.email === matchValue
       : a.userAccount.identity.userId === matchValue)
-      
+
   let flag = new Auditor(individualStore, groupStore).auditAccount(account)
   return flag
-    ? mapFlag(flag)
+    ? mappers.mapFlag(flag)
     : null
-}
-
-function mapFlag(flag: FlaggedInfo) {
-  return {
-    individual: mapIndividual(flag.individual),
-    serviceId: flag.serviceId,
-    userIdentity: flag.userIdentity,
-    assets: flag.assets
-  }
-}
-
-function mapIndividual(individual: ?Individual) {
-  if (individual && individual.serviceUserIdentities) {
-    return {
-      id: individual.id,
-      fullName: individual.fullName,
-      primaryEmail: individual.primaryEmail,
-      serviceUserIdentities: Object.keys(individual.serviceUserIdentities).map((serviceId) => {
-        if (individual && individual.serviceUserIdentities) {
-          return { serviceId: serviceId, userIdentity: individual.serviceUserIdentities[serviceId] }
-        }
-      }),
-      accessRules: Object.keys(individual.accessRules).map((serviceId) => {
-        if (individual && individual.accessRules) {
-          return {
-            service: manager.getServiceInfo(serviceId),
-            accessRules: individual.accessRules[serviceId]
-          }
-        }
-      }),
-      groups: individual.groups
-    }
-  } else {
-    return null
-  }
 }

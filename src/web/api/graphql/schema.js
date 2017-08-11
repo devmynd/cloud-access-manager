@@ -77,6 +77,7 @@ export const schema = buildSchema(`
     services(isConfigured: Boolean): [ServiceInfo]
     groups: [Group]
     group(name: String): Group
+    individuals(fuzzySearch: String): [Individual]
   }
 
   input AccessRuleInput {
@@ -108,6 +109,7 @@ export const schema = buildSchema(`
 export const root = {
   createIndividual: resolvers.individuals.createIndividual,
   addIndividualAccessRules: resolvers.individuals.addIndividualAccessRules,
+  individuals: resolvers.individuals.getIndividuals,
   auditAll: resolvers.accounts.performAudit,
   auditServiceUserAccount: resolvers.accounts.auditServiceUserAccount,
   accounts: resolvers.accounts.listAccounts,

@@ -9,6 +9,7 @@ process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.s
 export type IndividualStore = {
   save (user: Individual): void,
   getAll (): Array<Individual>,
+  getByFuzzySearch (search: string): Array<Individual>,
   getById (id: string): Individual,
   getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity): ?Individual
 }
@@ -30,6 +31,12 @@ export const individualStore: IndividualStore = {
 
   getAll () {
     const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+    return individuals
+  },
+
+  getByFuzzySearch (search: string) {
+    let individuals = this.getAll()
+    // todo filter
     return individuals
   },
 
