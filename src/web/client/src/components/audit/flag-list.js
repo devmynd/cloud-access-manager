@@ -6,6 +6,7 @@ import UnknownUserForm from './unknown-user-form'
 import NewIndividualForm from './new-individual-form'
 import GroupSelectionForm from './group-selection-form'
 import IndividualAccessRulesForm from './individual-access-rules-form'
+import LinkIndividualForm from './link-individual-form'
 import MessagesContainer from '../shared/messages-container'
 import lodash from 'lodash'
 
@@ -134,8 +135,12 @@ export default class FlagList extends React.Component {
   onLinkToIndividualSelected = () => {
     this.setState({
       modalTitle: 'Link to an individual',
-      modalContents: <h1>TODO: IMPLEMENT</h1>
+      modalContents: <LinkIndividualForm onIndividualSelected={this.onIndividualSelectedToLink}/>
     })
+  }
+
+  onIndividualSelectedToLink = (individual) => {
+    console.log(`todo: link individual ${individual.fullName}`)
   }
 
   setIndividualAccessRules = async (selectedAccessRules) => {
@@ -237,14 +242,14 @@ export default class FlagList extends React.Component {
   render() {
     const flags = this.state.flags
     return (
-      <div>
+      <div className="flag-list">
         { flags.length > 0  &&
           <h2>
             {flags.length} SERVICE ACCOUNTS
           </h2>
         }
 
-        <table className='table flag-table'>
+        <table className='table'>
           <tbody className='uppercase-text'>
             {flags.map((flag) => (
               <tr key={flag.key} onClick={() => this.showModal(flag)}>
