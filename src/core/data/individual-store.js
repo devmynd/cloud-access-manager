@@ -35,9 +35,9 @@ export const individualStore: IndividualStore = {
   },
 
   getByFuzzySearch (search: string) {
+    search = search.trim().toLowerCase()
     let individuals = this.getAll()
-    // todo filter
-    return individuals
+    return individuals.filter((i) => i.primaryEmail.toLowerCase().includes(search) || i.fullName.toLowerCase().includes(search))
   },
 
   getById (id: string) {
