@@ -1,5 +1,4 @@
 import React from 'react'
-import graphqlApi from '../graphql-api'
 import lodash from 'lodash'
 
 export default class GroupSelectionForm extends React.Component {

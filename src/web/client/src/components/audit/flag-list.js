@@ -1,12 +1,12 @@
 import React from 'react'
-import graphqlApi from '../graphql-api'
+import graphqlApi from '../../graphql-api'
 import './flag-list.scss'
-import Modal from './modal'
+import Modal from '../shared/modal'
 import UnknownUserForm from './unknown-user-form'
 import NewIndividualForm from './new-individual-form'
 import GroupSelectionForm from './group-selection-form'
 import IndividualAccessRulesForm from './individual-access-rules-form'
-import MessagesContainer from './messages-container'
+import MessagesContainer from '../shared/messages-container'
 import lodash from 'lodash'
 
 

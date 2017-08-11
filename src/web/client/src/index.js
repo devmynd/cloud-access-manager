@@ -5,10 +5,10 @@ import {render} from 'react-dom'
 import 'bulma/bulma.sass'
 import 'font-awesome/scss/font-awesome.scss'
 import { Switch, Link, Route, BrowserRouter } from 'react-router-dom'
-import ServiceList from './components/service-list'
-import GroupList from './components/group-list'
-import Group from './components/group'
-import FlagList from './components/flag-list'
+import ServiceList from './components/services/service-list'
+import GroupList from './components/groups/group-list'
+import Group from './components/groups/group'
+import FlagList from './components/audit/flag-list'
 
 const NavBar = (props) => {
   return (

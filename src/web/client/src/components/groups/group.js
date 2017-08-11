@@ -1,8 +1,8 @@
 import React from 'react'
-import graphqlApi from '../graphql-api'
+import graphqlApi from '../../graphql-api'
 import lodash from 'lodash'
-import MessagesContainer from './messages-container'
-import DropdownButton from './dropdown-button'
+import MessagesContainer from '../shared/messages-container'
+import DropdownButton from '../shared/dropdown-button'
 
 export default class Group extends React.Component {
   state = {

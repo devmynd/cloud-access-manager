@@ -1,8 +1,8 @@
 import React from 'react'
 import lodash from 'lodash'
-import Modal from './modal'
-import MessagesContainer from './messages-container'
-import graphqlApi from '../graphql-api'
+import Modal from '../shared/modal'
+import MessagesContainer from '../shared/messages-container'
+import graphqlApi from '../../graphql-api'
 
 export default class ServiceList extends React.Component {
   state = {

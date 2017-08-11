@@ -1,7 +1,7 @@
 import React from 'react'
-import graphqlApi from '../graphql-api'
-import Modal from './modal'
-import MessagesContainer from './messages-container'
+import graphqlApi from '../../graphql-api'
+import Modal from '../shared/modal'
+import MessagesContainer from '../shared/messages-container'
 import lodash from 'lodash'
 import { Link } from 'react-router-dom'
 
