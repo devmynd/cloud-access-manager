@@ -7,13 +7,16 @@ export default class IndividualAccessRulesForm extends React.Component {
     selectedRoles: {}
   }
 
-  updateAccessRuleSelection = (event, targetAsset) => {
+  updateAccessRuleSelection = (targetAsset) => {
     let selectedAccessRules = [...this.state.selectedAccessRules]
 
-    if (event.target.checked) {
-      selectedAccessRules.push({ asset: targetAsset.name, role: targetAsset.role })
+    if (this.isAssetChecked(targetAsset)) {
+      lodash.remove(selectedAccessRules, (rule) => rule.asset === targetAsset.name && rule.role === targetAsset.role )
+      if (this.state.selectedRoles[targetAsset.role]) {
+        this.toggleRole(targetAsset.role)
+      }
     } else {
-      selectedAccessRules = lodash.remove(selectedAccessRules, (rule) => rule.asset === targetAsset.name && rule.role === targetAsset.role )
+      selectedAccessRules.push({ asset: targetAsset.name, role: targetAsset.role })
     }
 
     this.setState({ selectedAccessRules })
@@ -26,6 +29,10 @@ export default class IndividualAccessRulesForm extends React.Component {
 
   onRoleClicked = (event, role) => {
     event.target.blur()
+    this.toggleRole(role)
+  }
+
+  toggleRole = (role) => {
     const selectedRoles = this.state.selectedRoles
     const selectedAccessRules = this.state.selectedAccessRules
 
@@ -46,9 +53,7 @@ export default class IndividualAccessRulesForm extends React.Component {
 
   isAssetChecked = (asset) => {
     let exactMatch = !!lodash.find(this.state.selectedAccessRules, (r) => r.asset === asset.name && r.role === asset.role)
-    let fullAccessEnabledForRole = !!this.state.selectedAccessRules[asset.role]
-
-    console.log(`exact match: ${exactMatch}, fullAccess: ${fullAccessEnabledForRole}`)
+    let fullAccessEnabledForRole = !!this.state.selectedRoles[asset.role]
 
     return exactMatch || fullAccessEnabledForRole
   }
@@ -62,10 +67,9 @@ export default class IndividualAccessRulesForm extends React.Component {
       roleButtons = [{text: "Full Access", value: "*"}]
     }
 
-
     return(
       <div>
-        <h2>{ this.props.service.displayName } </h2>
+        <h2>{ this.props.service.displayName }</h2>
         <div className='field is-grouped'>
           {roleButtons.map((button) => (
             <div key={button.value} className='control'>
@@ -86,7 +90,7 @@ export default class IndividualAccessRulesForm extends React.Component {
                       { asset.name } / { asset.role }
                     </span>
                     <label className="checkbox">
-                      <input onChange={(e) => this.updateAccessRuleSelection(e, asset)} type="checkbox"/>
+                      <input onChange={() => this.updateAccessRuleSelection(asset)} checked={this.isAssetChecked(asset)} type="checkbox"/>
                     </label>
                 </li>
               )

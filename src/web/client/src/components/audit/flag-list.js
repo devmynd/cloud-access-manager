@@ -87,10 +87,12 @@ export default class FlagList extends React.Component {
     this.setState({
       showModal: true,
       currentFlag: flag,
-      modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId}`,
+      modalTitle: flag.individual
+        ? "Set Individual Access Rules"
+        : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
       modalContents: flag.individual
-        ? <h1>Existing user</h1>
-        : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} />
+        ? <IndividualAccessRulesForm service={this.serviceLookup[flag.serviceId]} assets={flag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
+        : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} onLinkToIndividualSelected={this.onLinkToIndividualSelected} />
     })
   }
 
@@ -126,6 +128,13 @@ export default class FlagList extends React.Component {
     this.setState({
       modalTitle: `Select groups`,
       modalContents: <GroupSelectionForm groups={this.groups} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
+    })
+  }
+
+  onLinkToIndividualSelected = () => {
+    this.setState({
+      modalTitle: 'Link to an individual',
+      modalContents: <h1>TODO: IMPLEMENT</h1>
     })
   }
 

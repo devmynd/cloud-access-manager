@@ -10,7 +10,7 @@ export default class UnknownUserForm extends React.Component {
             <button className='button' onClick={this.props.onNewIndividualSelected}>Create New Individual</button>
           </div>
           <div className='control'>
-            <button className='button'>Link To An Existing Individual</button>
+            <button className='button' onClick={this.props.onLinkToIndividualSelected}>Link To An Existing Individual</button>
           </div>
         </div>
       </div>
