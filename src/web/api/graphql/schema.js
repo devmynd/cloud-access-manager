@@ -77,7 +77,7 @@ export const schema = buildSchema(`
     services(isConfigured: Boolean): [ServiceInfo]
     groups: [Group]
     group(name: String): Group
-    individuals(fuzzySearch: String): [Individual]
+    individuals(fuzzySearch: String, limit: Int): [Individual]
   }
 
   input AccessRuleInput {

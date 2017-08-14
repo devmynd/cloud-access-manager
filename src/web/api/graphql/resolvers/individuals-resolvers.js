@@ -3,6 +3,7 @@ import { individualStore } from '../../../../core/data/individual-store'
 import { newIndividualFactory } from '../../../../core/types'
 import type { AccessRule, Individual } from '../../../../core/types'
 import { mapIndividual } from '../mappers'
+import lodash from 'lodash'
 
 export function createIndividual(args: { individual: { fullName: string, primaryEmail: string, groups: Array<string> } }) {
   const individual = newIndividualFactory( args.individual.fullName, args.individual.primaryEmail, args.individual.groups )
@@ -23,12 +24,17 @@ export function addIndividualAccessRules(args: { individualId: string, serviceId
   return "Rules added successfully"
 }
 
-export function getIndividuals(args: { fuzzySearch: ?string }) {
+export function getIndividuals(args: { fuzzySearch: ?string, limit: ?number }) {
   if(args.fuzzySearch && args.fuzzySearch.trim() === "") {
     return []
   }
+
+  let individualList
   if(args.fuzzySearch) {
-    return individualStore.getByFuzzySearch(args.fuzzySearch).map(mapIndividual)
+    individualList = lodash.take(individualStore.getByFuzzySearch(args.fuzzySearch).map(mapIndividual), args.limit || 99999)
+  } else {
+    individualList = lodash.take(individualStore.getAll().map(mapIndividual), 99999)
   }
-  return individualStore.getAll().map(mapIndividual)
+  
+  return individualList.sort((lhs,rhs) => lhs.primaryEmail > rhs.primaryEmail || lhs.fullName > rhs.fullName ? 1 : -1 )
 }
