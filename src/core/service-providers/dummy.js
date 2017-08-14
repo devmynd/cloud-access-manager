@@ -17,7 +17,7 @@ class DummyProvider implements ServiceProvider {
       resolve([
         {
           identity: {
-            email: 'shamyle@devmynd.com'
+            userId: 'shamwow16'
           },
           assets: [{
             name: 'repo a',

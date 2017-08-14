@@ -139,9 +139,45 @@ export default class FlagList extends React.Component {
     })
   }
 
-  onIndividualSelectedToLink = (individual) => {
+  onIndividualSelectedToLink =  async (individual) => {
     console.log(`todo: link individual ${individual.fullName}`)
-    console.log(individual)
+    const flag = this.state.currentFlag
+    const query = `mutation {
+      linkServiceToIndividual(
+        serviceId: "${flag.serviceId}",
+        individualId:"${individual.id}",
+        fullName: "${individual.fullName}",
+        ${flag.userIdentity.email? `email "${flag.userIdentity.email}"`: ""},
+        ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"`: ""}
+      )
+    }`
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Failed to link to existing individual",
+        body: response.error.message
+      })
+    } else {
+      flag.individual = individual
+      const newFlag = await this.reCheckFlag(flag)
+      const flags = this.state.flags
+      const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
+      if (newFlag) {
+        flags[flagIndex] = newFlag
+        this.setState({
+          flags,
+          currentFlag: newFlag,
+          modalTitle: "Set Individual Access Rules",
+          modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
+        })
+      } else {
+        delete flags[flagIndex]
+        this.setState({
+          flags,
+          showModal: false
+        })
+      }
+    }
   }
 
   setIndividualAccessRules = async (selectedAccessRules) => {
