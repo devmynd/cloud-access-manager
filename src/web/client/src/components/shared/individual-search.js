@@ -44,7 +44,10 @@ export default class IndividualSearch extends React.Component {
 
   renderIndividual = (individual) => {
     return (
-      <span>{individual.fullName}!!!</span>
+      <div>
+        <span>{individual.fullName}</span>
+        <span>{ individual.primaryEmail || "" }</span>
+      </div>
     )
   }
 
