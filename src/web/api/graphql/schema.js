@@ -98,6 +98,7 @@ export const schema = buildSchema(`
 
   type Mutation {
     createIndividual(individual: NewIndividualInput): String
+    linkServiceToIndividual(serviceId: String!, individualId: String!, fullName: String, email: String, userId: String): String
     addIndividualAccessRules(individualId: String, serviceId: String, accessRules: [AccessRuleInput]): String
     configureService(serviceId: String, configJson: String): String
     disableService(serviceId: String): String
@@ -108,6 +109,7 @@ export const schema = buildSchema(`
 
 export const root = {
   createIndividual: resolvers.individuals.createIndividual,
+  linkServiceToIndividual: resolvers.individuals.linkServiceToIndividual,
   addIndividualAccessRules: resolvers.individuals.addIndividualAccessRules,
   individuals: resolvers.individuals.getIndividuals,
   auditAll: resolvers.accounts.performAudit,

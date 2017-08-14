@@ -27,3 +27,5 @@ export function newIndividualFactory(fullName: string, primaryEmail: ?string, gr
     groups
   }
 }
+
+//TODO: implement sortIndividuals method

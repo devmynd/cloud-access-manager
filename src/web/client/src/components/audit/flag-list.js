@@ -141,6 +141,7 @@ export default class FlagList extends React.Component {
 
   onIndividualSelectedToLink = (individual) => {
     console.log(`todo: link individual ${individual.fullName}`)
+    console.log(individual)
   }
 
   setIndividualAccessRules = async (selectedAccessRules) => {
