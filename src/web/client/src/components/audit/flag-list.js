@@ -140,14 +140,13 @@ export default class FlagList extends React.Component {
   }
 
   onIndividualSelectedToLink =  async (individual) => {
-    console.log(`todo: link individual ${individual.fullName}`)
     const flag = this.state.currentFlag
     const query = `mutation {
       linkServiceToIndividual(
         serviceId: "${flag.serviceId}",
         individualId:"${individual.id}",
         fullName: "${individual.fullName}",
-        ${flag.userIdentity.email? `email "${flag.userIdentity.email}"`: ""},
+        ${flag.userIdentity.email? `email: "${flag.userIdentity.email}"`: ""},
         ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"`: ""}
       )
     }`
@@ -161,7 +160,7 @@ export default class FlagList extends React.Component {
       flag.individual = individual
       const newFlag = await this.reCheckFlag(flag)
       const flags = this.state.flags
-      const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
+      const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
       if (newFlag) {
         flags[flagIndex] = newFlag
         this.setState({
@@ -200,7 +199,7 @@ export default class FlagList extends React.Component {
     } else {
       const newFlag = await this.reCheckFlag(flag)
       const flags = this.state.flags
-      const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
+      const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
       if (newFlag) {
         flags[flagIndex] = newFlag
       } else {
