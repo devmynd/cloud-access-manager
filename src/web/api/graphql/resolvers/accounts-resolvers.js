@@ -34,21 +34,28 @@ export async function performAudit () {
 export async function auditServiceUserAccount (args: { serviceId: string, email: ?string, userId: ?string }) {
   let matchOnEmail
   let matchValue
+  let userIdentity
+
   if (args.email) {
     matchOnEmail = true
+    userIdentity = { email: args.email }
     matchValue = args.email
   } else if (args.userId) {
     matchOnEmail = false
+    userIdentity = { userId: args.userId }
     matchValue = args.userId
   } else {
     throw new Error("Must supply either an email or a userId")
   }
 
-  // TODO: replace this inefficient method with finding hte account in a local cache
-  const accounts = await manager.download(args.serviceId)
-  const account = lodash.find(accounts, (a) => matchOnEmail
-      ? a.userAccount.identity.email === matchValue
-      : a.userAccount.identity.userId === matchValue)
+  let account = accountStore.get(args.serviceId, userIdentity)
+
+  if (!account) {
+    const accounts = await manager.download(args.serviceId)
+    account = lodash.find(accounts, (a) => matchOnEmail
+    ? a.userAccount.identity.email === matchValue
+    : a.userAccount.identity.userId === matchValue)
+  }
 
   let flag = new Auditor(individualStore, groupStore).auditAccount(account)
   return flag

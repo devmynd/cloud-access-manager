@@ -43,6 +43,4 @@ export const accountStore: AccountStore = {
     }
     return null
   }
-
-
 }
