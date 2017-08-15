@@ -53,35 +53,7 @@ export default class FlagList extends React.Component {
   }`
 
   componentWillMount = async () => {
-    const query = `{
-      auditAll ${this.flagQueryResponse}
-      groups {
-        name
-      }
-      services(isConfigured:true){
-        id
-        displayName
-        roles
-      }
-    }`
-
-    const response = await graphqlApi.request(query)
-    if (response.error) {
-      this.messagesContainer.push({
-        title: "Failed to run audit",
-        body: response.error.message
-      })
-      return
-    }
-    response.data.auditAll.forEach((flag) => {
-      flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
-    })
-    this.groups = response.data.groups.map((g) => g.name)
-    this.serviceLookup = {}
-    response.data.services.forEach((s) => { this.serviceLookup[s.id] = s })
-    this.setState({
-      flags: response.data.auditAll
-    })
+    await this.performAudit()
   }
 
   showModal = (flag) => {
@@ -235,6 +207,38 @@ export default class FlagList extends React.Component {
     }
   }
 
+  performAudit = async () => {
+    const query = `{
+      auditAll ${this.flagQueryResponse}
+      groups {
+        name
+      }
+      services(isConfigured:true){
+        id
+        displayName
+        roles
+      }
+    }`
+
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Failed to run audit",
+        body: response.error.message
+      })
+      return
+    }
+    response.data.auditAll.forEach((flag) => {
+      flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
+    })
+    this.groups = response.data.groups.map((g) => g.name)
+    this.serviceLookup = {}
+    response.data.services.forEach((s) => { this.serviceLookup[s.id] = s })
+    this.setState({
+      flags: response.data.auditAll
+    })
+  }
+
   onGroupFormComplete = async (selectedGroups) => {
     this.pendingNewIndividual.groups = selectedGroups
     const flag = this.state.currentFlag
@@ -283,6 +287,7 @@ export default class FlagList extends React.Component {
           flags
         })
       }
+      await this.performAudit()
     }
   }
 

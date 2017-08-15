@@ -15,8 +15,9 @@ export class Auditor {
 
   auditAccount (account: ServiceUserAccount): ?FlaggedInfo {
     const individual = this.individualStore.getByServiceUserIdentity(account.serviceId, account.userAccount.identity)
-
     if (individual) {
+      individual.serviceUserIdentities[account.serviceId] = account.userAccount.identity
+      this.individualStore.save(individual)
       return this.auditIndividual(individual, account)
     } else {
       return {
