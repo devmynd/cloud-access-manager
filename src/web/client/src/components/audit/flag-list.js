@@ -248,12 +248,23 @@ export default class FlagList extends React.Component {
     }`
 
     const response = await graphqlApi.request(query)
+    const individualId = response.data.createIndividual
+
     if (response.error) {
       this.messagesContainer.push({
         title: 'Failed to Save New Individual',
         body: response.error.message
       })
     } else {
+      const query = `mutation {
+        linkServiceToIndividual(serviceId: "${flag.serviceId}",
+          individualId:"${individualId}",
+          fullName: "${this.pendingNewIndividual.fullName}",
+          ${flag.userIdentity.email? `email: "${flag.userIdentity.email}"`: ""},
+          ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"`: ""}
+        )
+      }`
+      const linkServiceResponse = await graphqlApi.request(query)
       const newFlag = await this.reCheckFlag(flag)
       const flags = this.state.flags
       const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)

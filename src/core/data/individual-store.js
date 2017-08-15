@@ -1,22 +1,23 @@
 // @flow
 import fs from 'file-system'
 import * as helpers from './helpers'
-import type { Individual, UserIdentity } from '../types'
+import type {Individual, UserIdentity} from '../types'
 import lodash from 'lodash'
 
 process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.store.json'
 
 export type IndividualStore = {
-  save (user: Individual): void,
-  getAll (): Array<Individual>,
-  getByFuzzySearch (search: string): Array<Individual>,
-  getById (id: string): Individual,
-  getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity): ?Individual
+  save(user : Individual): void,
+  getAll(): Array < Individual >,
+  getByFuzzySearch(search : string): Array < Individual >,
+  getById(id : string): Individual,
+  getByServiceUserIdentity(serviceId : string, userIdentity : UserIdentity):
+    ? Individual
 }
 
-export const individualStore: IndividualStore = {
-  save (individual: Individual) {
-    let individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+export const individualStore : IndividualStore = {
+  save(individual : Individual) {
+    let individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     let existingIndex = lodash.findIndex(individuals, (entry) => {
       return entry.id === individual.id
     })
@@ -29,19 +30,25 @@ export const individualStore: IndividualStore = {
     fs.writeFileSync(process.env.INDIVIDUALS_PATH, JSON.stringify(individuals))
   },
 
-  getAll () {
-    const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+  getAll() {
+    const individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     return individuals
   },
 
-  getByFuzzySearch (search: string) {
+  getByFuzzySearch(search : string) {
     search = search.trim().toLowerCase()
     let individuals = this.getAll()
-    return individuals.filter((i) => i.primaryEmail.toLowerCase().includes(search) || i.fullName.toLowerCase().includes(search))
+    return individuals.filter((i) => {
+      if (i.primaryEmail) {
+        return i.primaryEmail.toLowerCase().includes(search)
+      } else {
+        return i.fullName.toLowerCase().includes(search)
+      }
+    })
   },
 
-  getById (id: string) {
-    const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+  getById(id : string) {
+    const individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     const individual = lodash.find(individuals, (i) => i.id === id)
     if (individual) {
       return individual
@@ -49,8 +56,8 @@ export const individualStore: IndividualStore = {
     throw new Error(`No individual exists with id: '${id}'`)
   },
 
-  getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity) {
-    const individuals: Array<Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+  getByServiceUserIdentity(serviceId : string, userIdentity : UserIdentity) {
+    const individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     if (userIdentity.email) {
       return lodash.find(individuals, (u) => {
         if (u.primaryEmail === userIdentity.email) {
