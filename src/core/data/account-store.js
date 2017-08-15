@@ -1,14 +1,15 @@
 // @flow
 import fs from 'file-system'
 import * as helpers from './helpers'
-import type {ServiceUserAccount} from '../types'
+import type {ServiceUserAccount, UserIdentity} from '../types'
 import lodash from 'lodash'
 
 process.env.ACCOUNTS_PATH = process.env.ACCOUNTS_PATH || './.accounts.store.json'
 
 export type AccountStore = {
   save(account: ServiceUserAccount): void,
-  getAll(): Array<ServiceUserAccount>
+  getAll(): Array<ServiceUserAccount>,
+  get(serviceId: string, userIdentity: UserIdentity): ?ServiceUserAccount
 }
 
 export const accountStore: AccountStore = {
@@ -30,5 +31,18 @@ export const accountStore: AccountStore = {
   getAll() {
       const accounts: Array<ServiceUserAccount> = helpers.readData(process.env.ACCOUNTS_PATH, [])
       return accounts
+  },
+
+  get(serviceId: string, userIdentity: UserIdentity) {
+    const accounts : Array<ServiceUserAccount> = helpers.readData(process.env.ACCOUNTS_PATH, [])
+    const account = lodash.find(accounts, (a) => {
+      return a.serviceId === serviceId && lodash.isEqual(a.userAccount.identity, userIdentity)
+    })
+    if (account) {
+      return account
+    }
+    return null
   }
+
+
 }

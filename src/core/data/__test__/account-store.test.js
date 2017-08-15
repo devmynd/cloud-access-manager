@@ -33,7 +33,7 @@ test('persists accounts initially when service accounts are downloaded', () => {
     ])
 })
 
-test.only('updates existing account when service accounts are downloaded', () => {
+test('updates existing account when service accounts are downloaded', () => {
   if (fs.existsSync(process.env.ACCOUNTS_PATH)) {
     fs.unlinkSync(process.env.ACCOUNTS_PATH)
   }
@@ -44,7 +44,8 @@ test.only('updates existing account when service accounts are downloaded', () =>
       identity: { email: "test@test.com" },
       assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
       }
-  })
+  }
+)
 
   let downloadedAccount = {
       serviceId: "test-service",
@@ -67,4 +68,40 @@ test.only('updates existing account when service accounts are downloaded', () =>
         }
     }
   ])
+})
+
+test('gets an existing account', () => {
+  if (fs.existsSync(process.env.ACCOUNTS_PATH)) {
+    fs.unlinkSync(process.env.ACCOUNTS_PATH)
+  }
+
+  let existingAccounts = [{
+    serviceId: "test-service",
+    userAccount: {
+      identity: { email: "test@test.com" },
+      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
+      }
+  },
+  {
+    serviceId: "test-service",
+    userAccount: {
+      identity: { userId: "test" },
+      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
+      }
+  }]
+
+  existingAccounts.forEach((account) => store.save(account))
+
+  const userIdentity = { email: "test@test.com" }
+
+  let retrieved = store.get("test-service", userIdentity)
+
+  expect(retrieved).not.toBeUndefined()
+  expect(retrieved).toEqual({
+    serviceId: "test-service",
+    userAccount: {
+      identity: { email: "test@test.com" },
+      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
+      }
+    })
 })
