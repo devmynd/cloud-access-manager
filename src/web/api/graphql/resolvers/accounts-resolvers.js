@@ -4,6 +4,7 @@ import { manager } from '../../../../core/service-providers/manager'
 import { Auditor } from '../../../../core/auditor'
 import { individualStore } from '../../../../core/data/individual-store'
 import { groupStore } from '../../../../core/data/group-store'
+import { accountStore } from '../../../../core/data/account-store'
 import * as mappers from '../mappers'
 import lodash from 'lodash'
 
@@ -12,7 +13,14 @@ export function listAccounts (args: { serviceId: string }) {
 }
 
 export async function performAudit () {
-  const accounts = await manager.download('all')
+  let accounts
+  accounts = accountStore.getAll()
+  if (accounts.length === 0) {
+      accounts = await manager.download('all')
+      accounts.forEach((account) => {
+        accountStore.save(account)
+      })
+  }
   const auditor = new Auditor(individualStore, groupStore)
   return accounts.reduce((result, account) => {
     const flag = auditor.auditAccount(account)
