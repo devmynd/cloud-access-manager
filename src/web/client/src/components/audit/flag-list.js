@@ -170,7 +170,7 @@ export default class FlagList extends React.Component {
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
-        delete flags[flagIndex]
+        flags.splice(flagIndex, 1)
         this.setState({
           flags,
           showModal: false
@@ -203,7 +203,7 @@ export default class FlagList extends React.Component {
       if (newFlag) {
         flags[flagIndex] = newFlag
       } else {
-        delete flags[flagIndex]
+        flags.splice(flagIndex, 1)
       }
 
       this.setState({
@@ -277,7 +277,7 @@ export default class FlagList extends React.Component {
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
-        delete flags[flagIndex]
+        flags.splice(flagIndex, 1)
         this.setState({
           showModal: false,
           flags
