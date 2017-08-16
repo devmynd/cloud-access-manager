@@ -14,10 +14,9 @@ type AccountCacheEntry = {
 }
 
 type CacheSchema = { [string]: AccountCacheEntry }
-const defaultData: CacheSchema = {}
 
 export type AccountCache = {
-  set(serviceId: string, userAccounts: Array<UserAccount>): void,
+  set(serviceId: string, userAccounts: Array<UserAccount>, asOfDate?: Date): void,
   get(serviceId: string): Array<UserAccount>,
   isCached(serviceId: string): boolean,
   getAccountByEmail(serviceId: string, email: string): ?UserAccount,
@@ -25,22 +24,24 @@ export type AccountCache = {
 }
 
 export const accountCache: AccountCache = {
-  set(serviceId: string, userAccounts: Array<UserAccount>) {
-    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, defaultData)
+  set(serviceId: string, userAccounts: Array<UserAccount>, asOfDate?: Date) {
+    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     data[serviceId] = {
       userAccounts: userAccounts,
-      cachedDate: new Date()
+      cachedDate: asOfDate || new Date()
     }
     fs.writeFileSync(process.env.ACCOUNTS_PATH, JSON.stringify(data))
   },
 
   get(serviceId: string): Array<UserAccount> {
-    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, defaultData)
-    return data[serviceId].userAccounts
+    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
+    return data.hasOwnProperty(serviceId)
+      ? data[serviceId].userAccounts
+      : []
   },
 
   isCached(serviceId: string): boolean {
-    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, defaultData)
+    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     if (data.hasOwnProperty(serviceId)) {
       const ttlMillis = timeToLiveHours * 60 * 60 * 1000
       const now = new Date()
@@ -52,14 +53,14 @@ export const accountCache: AccountCache = {
   },
 
   getAccountByEmail(serviceId: string, email: string) {
-    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, defaultData)
+    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     if(data.hasOwnProperty(serviceId)) {
       return lodash.find(data[serviceId].userAccounts, (u) => u.identity.email === email)
     }
   },
 
   getAccountByUserId(serviceId: string, userId: string) {
-    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, defaultData)
+    let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     if(data.hasOwnProperty(serviceId)) {
       return lodash.find(data[serviceId].userAccounts, (u) => u.identity.userId === userId)
     }

@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { accountCache as store } from '../account-cache'
+import { accountCache as cache } from '../account-cache'
 import fs from 'file-system'
 process.env.ACCOUNTS_PATH = './.accounts.test.store.json'
 
@@ -9,96 +9,94 @@ beforeEach(() => {
   }
 })
 
-test('persists accounts initially when service accounts are downloaded', () => {
-
-  let downloadedAccount =
-    {
-    serviceId: "test-service",
-    userAccount: {
-      identity: { email: "test@test.com" },
+describe('crud', () => {
+  beforeEach(() => {
+    cache.set('test-service', [{
+      identity: { email: "test1@test.com" },
       assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-      }
-    }
+    },{
+      identity: { userId: "test2" },
+      assets: [{name: "repo A", role: "member"}]
+    }])
+  })
 
-    store.save(downloadedAccount)
-
-    let retrieved = store.getAll()
+  test('persists accounts initially when service accounts are downloaded', () => {
+    let retrieved = cache.get('test-service')
 
     expect(retrieved).not.toBeUndefined()
-    expect(retrieved).toEqual([
-      {
-      serviceId: "test-service",
-      userAccount: {
-        identity: { email: "test@test.com" },
-        assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-        }
-      }
-    ])
-})
-
-test('updates existing account when service accounts are downloaded', () => {
-
-  store.save({
-    serviceId: "test-service",
-    userAccount: {
-      identity: { email: "test@test.com" },
+    expect(retrieved).toEqual([{
+      identity: { email: "test1@test.com" },
       assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-      }
-    }
-  )
+    },{
+      identity: { userId: "test2" },
+      assets: [{name: "repo A", role: "member"}]
+    }])
+  })
 
-  let downloadedAccount = {
-      serviceId: "test-service",
-      userAccount: {
-        identity: { email: "test@test.com" },
-        assets: [{name: "repo C", role: "member"}]
-        }
-  }
+  test('distinguishes between services', () => {
+    let retrieved = cache.get('some-other-service')
 
-  store.save(downloadedAccount)
+    expect(retrieved).toEqual([])
+  })
 
-  let retrieved = store.getAll()
-  expect(retrieved).not.toBeUndefined()
-  expect(retrieved).toEqual([
-    {
-      serviceId: "test-service",
-      userAccount: {
-        identity: { email: "test@test.com" },
-        assets: [{name: "repo C", role: "member"}]
-        }
-    }
-  ])
-})
+  test('replaces accounts for existing service when service accounts are downloaded', () => {
+    let newAccounts = [{
+      identity: { email: "test1@test.com" },
+      assets: [{name: "repo B", role: "owner"}]
+    }]
 
-test('gets an existing account', () => {
+    cache.set('test-service', newAccounts)
 
-  let existingAccounts = [{
-    serviceId: "test-service",
-    userAccount: {
-      identity: { email: "test@test.com" },
+    let retrieved = cache.get('test-service')
+    expect(retrieved).not.toBeUndefined()
+    expect(retrieved).toEqual([{
+      identity: { email: "test1@test.com" },
+      assets: [{name: "repo B", role: "owner"}]
+    }])
+  })
+
+  test('gets an existing account by email', () => {
+    let retrieved = cache.getAccountByEmail("test-service", "test1@test.com")
+
+    expect(retrieved).not.toBeUndefined()
+    expect(retrieved).toEqual({
+      identity: { email: "test1@test.com" },
       assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-      }
-  },
-  {
-    serviceId: "test-service",
-    userAccount: {
-      identity: { userId: "test" },
-      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-      }
-  }]
-
-  existingAccounts.forEach((account) => store.save(account))
-
-  const userIdentity = { email: "test@test.com" }
-
-  let retrieved = store.get("test-service", userIdentity)
-
-  expect(retrieved).not.toBeUndefined()
-  expect(retrieved).toEqual({
-    serviceId: "test-service",
-    userAccount: {
-      identity: { email: "test@test.com" },
-      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-      }
     })
+  })
+
+  test('gets an existing account by userId', () => {
+    let retrieved = cache.getAccountByUserId("test-service", "test2")
+
+    expect(retrieved).not.toBeUndefined()
+    expect(retrieved).toEqual({
+      identity: { userId: "test2" },
+      assets: [{name: "repo A", role: "member"}]
+    })
+  })
+})
+
+describe('isCached', () => {
+  test('returns false if no data', () => {
+    const result = cache.isCached('test-service')
+    expect(result).toBe(false)
+  })
+
+  test('returns true if data is available and not expired', () => {
+    const twelveHours = 1000 * 60 * 60 * 12
+    const oneMinute = 1000 * 60
+    const oneMinuteFromExpiration = new Date(new Date() - twelveHours + oneMinute)
+    cache.set('test-service', [], oneMinuteFromExpiration)
+    const result = cache.isCached('test-service')
+    expect(result).toBe(true)
+  })
+
+  test('returns false if data is expired', () => {
+    const twelveHours = 1000 * 60 * 60 * 12
+    const oneMinute = 1000 * 60
+    const oneMinuteAfterExpiration = new Date(new Date() - twelveHours - oneMinute)
+    cache.set('test-service', [], oneMinuteAfterExpiration)
+    const result = cache.isCached('test-service')
+    expect(result).toBe(true)
+  })
 })
