@@ -3,11 +3,13 @@ import { accountStore as store } from '../account-store'
 import fs from 'file-system'
 process.env.ACCOUNTS_PATH = './.accounts.test.store.json'
 
-test('persists accounts initially when service accounts are downloaded', () => {
-  // TODO: should this be in a beforeEach? Same with other tests. 
+beforeEach(() => {
   if (fs.existsSync(process.env.ACCOUNTS_PATH)) {
     fs.unlinkSync(process.env.ACCOUNTS_PATH)
   }
+})
+
+test('persists accounts initially when service accounts are downloaded', () => {
 
   let downloadedAccount =
     {
@@ -35,9 +37,6 @@ test('persists accounts initially when service accounts are downloaded', () => {
 })
 
 test('updates existing account when service accounts are downloaded', () => {
-  if (fs.existsSync(process.env.ACCOUNTS_PATH)) {
-    fs.unlinkSync(process.env.ACCOUNTS_PATH)
-  }
 
   store.save({
     serviceId: "test-service",
@@ -72,9 +71,6 @@ test('updates existing account when service accounts are downloaded', () => {
 })
 
 test('gets an existing account', () => {
-  if (fs.existsSync(process.env.ACCOUNTS_PATH)) {
-    fs.unlinkSync(process.env.ACCOUNTS_PATH)
-  }
 
   let existingAccounts = [{
     serviceId: "test-service",
