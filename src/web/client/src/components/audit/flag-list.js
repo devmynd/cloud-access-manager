@@ -21,6 +21,7 @@ export default class FlagList extends React.Component {
   flagQueryResponse = `{
     individual {
       id
+      fullName
       primaryEmail
       serviceUserIdentities {
         serviceId
@@ -214,6 +215,7 @@ export default class FlagList extends React.Component {
   }
 
   performAudit = async () => {
+    // TODO: perform audit is doing more than just an audit, update the graphql query.
     const query = `{
       auditAll ${this.flagQueryResponse}
       groups {
@@ -314,10 +316,14 @@ export default class FlagList extends React.Component {
           <tbody className='uppercase-text'>
             {flags.map((flag) => (
               <tr key={flag.key} onClick={() => this.showModal(flag)}>
-                <td className='column-padding'><span className='service-name column-padding'>{ flag.serviceId } { flag.userIdentity.email ? "EMAIL" : "USERNAME" }:</span> <span className='user-identity'>{ flag.userIdentity.email || flag.userIdentity.userId || flag.userIdentity.fullName }</span></td>
+                <td className='column-padding'>
+                  <span className='service-name column-padding'>{ this.serviceLookup[flag.serviceId].displayName } Username:</span>
+                  <span className='user-identity'>{ flag.userIdentity.email || flag.userIdentity.userId }</span>
+                  <span className='user-full-name'>{ flag.userIdentity.fullName || (flag.individual && flag.individual.fullName)}</span>
+                </td>
                 <td>
-                  <span className='service-name'>SERVICE:</span>
-                    <span className='service-id'>{ flag.serviceId }</span> / { flag.assets.map((asset) => { asset.name }).length } PROJECTS PENDING
+                  <span className='service-name'>Service:</span>
+                    <span className='service-id'>{ flag.serviceId }</span> / { flag.assets.map((asset) => { asset.name }).length } Project Pending
                 </td>
               </tr>
             )

@@ -40,10 +40,8 @@ export const serviceManager: ServiceManager = {
   async getAccountsForService (serviceId: string): Promise<Array<UserAccount>> {
     let accounts
     if (accountCache.isCached(serviceId)) {
-      console.log("getting from cache for serviceId " + serviceId)
       accounts = accountCache.get(serviceId)
     } else {
-      console.log("downloading fresh for serviceId " + serviceId)
       const provider = this.getProvider(serviceId)
       accounts = await provider.listAccounts()
       accountCache.set(serviceId, accounts)

@@ -39,11 +39,11 @@ export const individualStore : IndividualStore = {
     search = search.trim().toLowerCase()
     let individuals = this.getAll()
     return individuals.filter((i) => {
-      if (i.primaryEmail) {
-        return i.primaryEmail.toLowerCase().includes(search)
-      } else {
-        return i.fullName.toLowerCase().includes(search)
-      }
+      let nameMatch = i.fullName.toLowerCase().includes(search)
+      let emailMatch = i.primaryEmail
+        ? i.primaryEmail.toLowerCase().includes(search)
+        : false
+      return emailMatch || nameMatch
     })
   },
 
