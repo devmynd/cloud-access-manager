@@ -13,7 +13,12 @@ export type AccountStore = {
 }
 
 export const accountStore: AccountStore = {
+
+  // TODO: is there a use case that requires us to save one at a time? Would it be more efficient to save an array of accoutns?
   save(account: ServiceUserAccount) {
+    // TODO: is this the ideal structure for storing and accessing the data?
+    // How would access change if we stored it like: { [serviceId]: [UserAccount] }
+    // How would it affect the getall method? How would it affect sorting?
     let accounts : Array<ServiceUserAccount> = helpers.readData(process.env.ACCOUNTS_PATH, [])
     let existingIndex = lodash.findIndex(accounts, (entry) => {
       return entry.serviceId === account.serviceId && lodash.isEqual(entry.userAccount.identity, account.userAccount.identity)
@@ -34,6 +39,7 @@ export const accountStore: AccountStore = {
   },
 
   get(serviceId: string, userIdentity: UserIdentity) {
+    // TODO: confirm use case for this.
     const accounts : Array<ServiceUserAccount> = helpers.readData(process.env.ACCOUNTS_PATH, [])
     const account = lodash.find(accounts, (a) => {
       return a.serviceId === serviceId && lodash.isEqual(a.userAccount.identity, userIdentity)

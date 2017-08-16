@@ -1,6 +1,7 @@
 // @flow
 import { individualStore } from '../../../../core/data/individual-store'
 import { newIndividualFactory } from '../../../../core/types'
+// TODO: FlaggedInfo is no longer used
 import type { AccessRule, Individual, FlaggedInfo } from '../../../../core/types'
 import { mapIndividual } from '../mappers'
 import lodash from 'lodash'
@@ -56,8 +57,11 @@ export function getIndividuals(args: { fuzzySearch: ?string, limit: ?number }) {
   if(args.fuzzySearch) {
     individualList = lodash.take(individualStore.getByFuzzySearch(args.fuzzySearch).map(mapIndividual), args.limit || 99999)
   } else {
+    // TODO: We forgot to use the limit arg here.
     individualList = lodash.take(individualStore.getAll().map(mapIndividual), 99999)
   }
 
+  // TODO: what happens if we sort After we limited the number of records we took?
+  // TODO: Also remember to move sorting logic into the individual type and select left and right side comparison fields
   return individualList.sort((lhs,rhs) => lhs.primaryEmail > rhs.primaryEmail || lhs.fullName > rhs.fullName ? 1 : -1 )
 }

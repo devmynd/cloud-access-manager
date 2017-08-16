@@ -4,6 +4,7 @@ import fs from 'file-system'
 process.env.ACCOUNTS_PATH = './.accounts.test.store.json'
 
 test('persists accounts initially when service accounts are downloaded', () => {
+  // TODO: should this be in a beforeEach? Same with other tests. 
   if (fs.existsSync(process.env.ACCOUNTS_PATH)) {
     fs.unlinkSync(process.env.ACCOUNTS_PATH)
   }
@@ -44,8 +45,8 @@ test('updates existing account when service accounts are downloaded', () => {
       identity: { email: "test@test.com" },
       assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
       }
-  }
-)
+    }
+  )
 
   let downloadedAccount = {
       serviceId: "test-service",

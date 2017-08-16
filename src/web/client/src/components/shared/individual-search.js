@@ -60,6 +60,7 @@ export default class IndividualSearch extends React.Component {
           matchRenderer={this.renderIndividual}
           onMatchSelected={this.props.onIndividualSelected}
         />
+        {/* TODO: does this work okay? Does it cause any wierd issues having 2 message containers on the same page?  */}
         <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
       </div>
     )

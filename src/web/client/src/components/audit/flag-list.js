@@ -113,6 +113,9 @@ export default class FlagList extends React.Component {
 
   onIndividualSelectedToLink =  async (individual) => {
     const flag = this.state.currentFlag
+
+    // TODO: fullName should be flag.userIdentity.fullName, because we are linking the fullName from the service identity to the existing individual
+    // As that is clearly confusing, how might we make this mutation more clear?
     const query = `mutation {
       linkServiceToIndividual(
         serviceId: "${flag.serviceId}",
@@ -129,8 +132,10 @@ export default class FlagList extends React.Component {
         body: response.error.message
       })
     } else {
+      // TODO: Why overwrite the flag.individual?
       flag.individual = individual
       const newFlag = await this.reCheckFlag(flag)
+      /// TODO: [...this.state.flags], because what if state changes and the flagIndex is no longer accurate?
       const flags = this.state.flags
       const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
       if (newFlag) {
@@ -142,6 +147,7 @@ export default class FlagList extends React.Component {
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
+        // TODO: prefer `delete flags[flagIndex]`. Directly deletes the one property we care about, rather than iterating over the array and mapping to a new array.
         flags.splice(flagIndex, 1)
         this.setState({
           flags,
@@ -260,6 +266,7 @@ export default class FlagList extends React.Component {
         body: response.error.message
       })
     } else {
+      // TODO: fullName should be flag.userIdentity.fullName
       const query = `mutation {
         linkServiceToIndividual(serviceId: "${flag.serviceId}",
           individualId:"${individualId}",
@@ -270,6 +277,7 @@ export default class FlagList extends React.Component {
       }`
       const linkServiceResponse = await graphqlApi.request(query)
       const newFlag = await this.reCheckFlag(flag)
+      // TODO: this is similar to a few other places in the code, can we reuse? also, [...]
       const flags = this.state.flags
       const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
       if (newFlag) {
@@ -281,6 +289,7 @@ export default class FlagList extends React.Component {
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
+        // prefer delete
         flags.splice(flagIndex, 1)
         this.setState({
           showModal: false,

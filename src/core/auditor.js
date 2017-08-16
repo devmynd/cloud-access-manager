@@ -16,6 +16,7 @@ export class Auditor {
   auditAccount (account: ServiceUserAccount): ?FlaggedInfo {
     const individual = this.individualStore.getByServiceUserIdentity(account.serviceId, account.userAccount.identity)
     if (individual) {
+      // TODO: it should not be the auditor's responsibility to update and persist the individual, only to audit. 
       individual.serviceUserIdentities[account.serviceId] = account.userAccount.identity
       this.individualStore.save(individual)
       return this.auditIndividual(individual, account)
