@@ -10,7 +10,7 @@ const timeToLiveHours = 12
 
 type AccountCacheEntry = {
   userAccounts: Array<UserAccount>,
-  cachedDate: Date
+  cachedDate: string
 }
 
 type CacheSchema = { [string]: AccountCacheEntry }
@@ -28,7 +28,7 @@ export const accountCache: AccountCache = {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     data[serviceId] = {
       userAccounts: userAccounts,
-      cachedDate: asOfDate || new Date()
+      cachedDate: (asOfDate || new Date()).toString()
     }
     fs.writeFileSync(process.env.ACCOUNTS_PATH, JSON.stringify(data))
   },
@@ -43,9 +43,9 @@ export const accountCache: AccountCache = {
   isCached(serviceId: string): boolean {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     if (data.hasOwnProperty(serviceId)) {
+      let cachedDate = new Date(data[serviceId].cachedDate)
       const ttlMillis = timeToLiveHours * 60 * 60 * 1000
       const now = new Date()
-      const cachedDate = data[serviceId].cachedDate
       const expired =  (now - cachedDate > ttlMillis)
       return !expired
     }

@@ -97,6 +97,6 @@ describe('isCached', () => {
     const oneMinuteAfterExpiration = new Date(new Date() - twelveHours - oneMinute)
     cache.set('test-service', [], oneMinuteAfterExpiration)
     const result = cache.isCached('test-service')
-    expect(result).toBe(true)
+    expect(result).toBe(false)
   })
 })
