@@ -20,6 +20,9 @@ class GitHubProvider implements ServiceProvider {
     const org = this.api.getOrganization(this.orgName)
     let repos = (await org.getRepos()).data
 
+    //TODO: REMOVE
+    repos = lodash.take(repos, 3)
+
     let repoCollabs = []
 
     await Promise.all(repos.map(async (repo) => {
@@ -42,7 +45,6 @@ class GitHubProvider implements ServiceProvider {
 
     repoCollabs.forEach((repoCollab) => {
       repoCollab.collabs.forEach((collaborator) => {
-
         if(!accountsHash.hasOwnProperty(collaborator.login)){
           accountsHash[collaborator.login] = { identity: { userId: collaborator.login }, assets: [] }
         }
@@ -54,6 +56,17 @@ class GitHubProvider implements ServiceProvider {
         })
       })
     })
+
+    await Promise.all(Object.keys(accountsHash).map(async (userId) => {
+      const profile = (await this.api.getUser(userId).getProfile()).data
+      console.log(profile)
+      if(profile.name) {
+        accountsHash[userId].identity.fullName = profile.name
+      }
+      if(profile.email) {
+        accountsHash[userId].identity.email = profile.email
+      }
+    }))
 
     return Object.keys(accountsHash).map((key) => accountsHash[key])
   }

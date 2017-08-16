@@ -30,6 +30,7 @@ class HerokuProvider implements ServiceProvider {
       })
       return userLookup
     }, [])
+
     return Object.keys(userLookup).map((email) => userLookup[email])
   }
 
