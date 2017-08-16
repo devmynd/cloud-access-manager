@@ -267,7 +267,21 @@ describe('with matching individual based on email', () => {
       { name: 'project b', role: 'owner' }
     ]
   }
+
+  beforeEach(() => {
+    individualStore.save(individual)
+  })
+
   matchingIndividualTests('test service', account)
+
+  test('it links the service user identity', () => {
+    const flaggedInfo = auditor.auditAccount('test service', account)
+    expect(flaggedInfo.individual.serviceUserIdentities).toEqual({
+      'test service': {
+        email: 'test@test.com'
+      }
+    })
+  })
 })
 
 describe('with matching individual based on service user id', () => {
@@ -285,8 +299,19 @@ describe('with matching individual based on service user id', () => {
     individual.serviceUserIdentities['test service'] = {
       userId: 'matching user id'
     }
+    individualStore.save(individual)
   })
+
   matchingIndividualTests('test service', account)
+
+  test('it links the service user identity', () => {
+    const flaggedInfo = auditor.auditAccount('test service', account)
+    expect(flaggedInfo.individual.serviceUserIdentities).toEqual({
+      'test service': {
+        userId: 'matching user id'
+      }
+    })
+  })
 })
 
 describe("with matching individual, when the service doesn't have roles", () => {
