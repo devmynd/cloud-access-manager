@@ -44,23 +44,21 @@ describe('without a matching individual record', () => {
       userId: 'test123'
     }
     let account = {
-      serviceId: 'service in question',
-      userAccount: {
-        identity: identity,
-        assets: [
-          { name: 'project a', role: 'member' }
-        ]
-      }
+      identity: identity,
+      assets: [
+        { name: 'project a', role: 'member' }
+      ]
     }
     individual.serviceUserIdentities['a different service'] = identity
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount('service in question', account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual).toBeNull()
+      expect(flaggedInfo.serviceId).toBe('service in question')
       expect(flaggedInfo.userIdentity).toEqual({ userId: 'test123' })
       expect(flaggedInfo.assets).toEqual([{ name: 'project a', role: 'member' }])
     })
@@ -74,13 +72,10 @@ describe('without a matching individual record', () => {
     }
 
     let account = {
-      serviceId: 'service in question',
-      userAccount: {
-        identity: identity,
-        assets: [
-          { name: 'project a', role: 'member' }
-        ]
-      }
+      identity: identity,
+      assets: [
+        { name: 'project a', role: 'member' }
+      ]
     }
     individual.serviceUserIdentities['some other service'] = {
       fullName: 'test individual',
@@ -89,31 +84,32 @@ describe('without a matching individual record', () => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount('service in question', account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual).toBeNull()
+      expect(flaggedInfo.serviceId).toBe('service in question')
       expect(flaggedInfo.userIdentity).toEqual({ fullName: 'test individual', userId: 'some user id' })
       expect(flaggedInfo.assets).toEqual([{ name: 'project a', role: 'member' }])
     })
   })
 })
 
-const matchingIndividualTests = (account) => {
+const matchingIndividualTests = (serviceId, account) => {
   test('it flags if they have no service access rule at all', () => {
     // arrange
     individual.accessRules = {}
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual.id).toBe('123')
       expect(flaggedInfo.serviceId).toBe('test service')
-      expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
+      expect(flaggedInfo.userIdentity).toEqual(account.identity)
       expect(flaggedInfo.assets).toEqual([
         { name: 'project a', role: 'member' },
         { name: 'project b', role: 'owner' }
@@ -127,13 +123,13 @@ const matchingIndividualTests = (account) => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual.id).toBe('123')
       expect(flaggedInfo.serviceId).toBe('test service')
-      expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
+      expect(flaggedInfo.userIdentity).toEqual(account.identity)
       expect(flaggedInfo.assets).toEqual([
         { name: 'project b', role: 'owner' }
       ])
@@ -146,13 +142,13 @@ const matchingIndividualTests = (account) => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual.id).toBe('123')
       expect(flaggedInfo.serviceId).toBe('test service')
-      expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
+      expect(flaggedInfo.userIdentity).toEqual(account.identity)
       expect(flaggedInfo.assets).toEqual([
         { name: 'project a', role: 'member' }
       ])
@@ -168,13 +164,13 @@ const matchingIndividualTests = (account) => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual.id).toBe('123')
       expect(flaggedInfo.serviceId).toBe('test service')
-      expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
+      expect(flaggedInfo.userIdentity).toEqual(account.identity)
       expect(flaggedInfo.assets).toEqual([
         { name: 'project a', role: 'member' },
         { name: 'project b', role: 'owner' }
@@ -195,13 +191,13 @@ const matchingIndividualTests = (account) => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual.id).toBe('123')
       expect(flaggedInfo.serviceId).toBe('test service')
-      expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
+      expect(flaggedInfo.userIdentity).toEqual(account.identity)
       expect(flaggedInfo.assets).toEqual([
         { name: 'project b', role: 'owner' }
       ])
@@ -217,7 +213,7 @@ const matchingIndividualTests = (account) => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expect(flaggedInfo).toBeUndefined()
@@ -239,7 +235,7 @@ const matchingIndividualTests = (account) => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expect(flaggedInfo).toBeUndefined()
@@ -254,7 +250,7 @@ const matchingIndividualTests = (account) => {
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount(serviceId, account)
 
     // assert
     expect(flaggedInfo).toBeUndefined()
@@ -263,53 +259,45 @@ const matchingIndividualTests = (account) => {
 
 describe('with matching individual based on email', () => {
   let account = {
-    serviceId: 'test service',
-    userAccount: {
-      identity: {
-        email: 'test@test.com'
-      },
-      assets: [
-        { name: 'project a', role: 'member' },
-        { name: 'project b', role: 'owner' }
-      ]
-    }
+    identity: {
+      email: 'test@test.com'
+    },
+    assets: [
+      { name: 'project a', role: 'member' },
+      { name: 'project b', role: 'owner' }
+    ]
   }
-  matchingIndividualTests(account)
+  matchingIndividualTests('test service', account)
 })
 
 describe('with matching individual based on service user id', () => {
   let account = {
-    serviceId: 'test service',
-    userAccount: {
-      identity: {
-        userId: 'matching user id'
-      },
-      assets: [
-        { name: 'project a', role: 'member' },
-        { name: 'project b', role: 'owner' }
-      ]
-    }
+    identity: {
+      userId: 'matching user id'
+    },
+    assets: [
+      { name: 'project a', role: 'member' },
+      { name: 'project b', role: 'owner' }
+    ]
   }
+
   beforeEach(() => {
     individual.serviceUserIdentities['test service'] = {
       userId: 'matching user id'
     }
   })
-  matchingIndividualTests(account)
+  matchingIndividualTests('test service', account)
 })
 
 describe("with matching individual, when the service doesn't have roles", () => {
   let account = {
-    serviceId: 'test service',
-    userAccount: {
-      identity: {
-        email: 'test@test.com'
-      },
-      assets: [
-        { name: 'project a' },
-        { name: 'project b' }
-      ]
-    }
+    identity: {
+      email: 'test@test.com'
+    },
+    assets: [
+      { name: 'project a' },
+      { name: 'project b' }
+    ]
   }
 
   test('it does not flag, if they have full access', () => {
@@ -318,7 +306,7 @@ describe("with matching individual, when the service doesn't have roles", () => 
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount('test service', account)
 
     // assert
     expect(flaggedInfo).toBeUndefined()
@@ -339,7 +327,7 @@ describe("with matching individual, when the service doesn't have roles", () => 
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount('test service', account)
 
     // assert
     expect(flaggedInfo).toBeUndefined()
@@ -354,7 +342,7 @@ describe("with matching individual, when the service doesn't have roles", () => 
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount('test service', account)
 
     // assert
     expect(flaggedInfo).toBeUndefined()
@@ -368,13 +356,13 @@ describe("with matching individual, when the service doesn't have roles", () => 
     individualStore.save(individual)
 
     // act
-    let flaggedInfo = auditor.auditAccount(account)
+    let flaggedInfo = auditor.auditAccount('test service', account)
 
     // assert
     expectFlaggedInfo(flaggedInfo, () => {
       expect(flaggedInfo.individual.id).toBe('123')
       expect(flaggedInfo.serviceId).toBe('test service')
-      expect(flaggedInfo.userIdentity).toEqual(account.userAccount.identity)
+      expect(flaggedInfo.userIdentity).toEqual(account.identity)
       expect(flaggedInfo.assets).toEqual([
         { name: 'project a' }
       ])
