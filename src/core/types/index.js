@@ -1,6 +1,8 @@
 // @flow
 
-export type { ServiceUserAccount, UserAccount, UserIdentity, Asset } from './service-user-account'
+export type { Asset } from './asset'
+export type { UserIdentity } from './user-identity'
+export type { UserAccount } from './user-account'
 export type { ServiceProvider, ServiceProviderModule } from './service-provider'
 export type { FlaggedInfo } from './flagged-info'
 export type { AccessRule, ServiceAccessHash } from './access-rule'

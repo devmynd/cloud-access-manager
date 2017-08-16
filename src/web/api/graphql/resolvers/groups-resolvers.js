@@ -2,7 +2,7 @@
 
 import type { AccessRule, Group } from '../../../../core/types'
 import { groupStore } from '../../../../core/data/group-store'
-import { manager } from '../../../../core/service-providers/manager'
+import { serviceManager } from '../../../../core/service-providers/service-manager'
 
 export function setGroupAccessRules (args: {
   name: string,
@@ -41,7 +41,7 @@ function mapGroup (group: Group) {
     name: group.name,
     serviceAccessRules: Object.keys(group.accessRules).map((serviceId) => {
       return {
-        service: manager.getServiceInfo(serviceId),
+        service: serviceManager.getServiceInfo(serviceId),
         accessRules: group.accessRules[serviceId]
       }
     })

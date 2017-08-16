@@ -1,12 +1,12 @@
 // @flow
 
 import { configStore } from '../../../../core/data/config-store'
-import { manager } from '../../../../core/service-providers/manager'
+import { serviceManager } from '../../../../core/service-providers/service-manager'
 
 export async function configureService (args: { serviceId: string, configJson: string }) {
   const config = JSON.parse(args.configJson)
   configStore.save(args.serviceId, config)
-  let provider = manager.getProvider(args.serviceId)
+  let provider = serviceManager.getProvider(args.serviceId)
   if (provider) {
     try {
       await provider.testConnection()
@@ -24,7 +24,7 @@ export function disableService (args: { serviceId: string }) {
 }
 
 export function listServices (args: { isConfigured: ?boolean }) {
-  const serviceInfos = manager.getServiceInfos()
+  const serviceInfos = serviceManager.getServiceInfos()
   if (typeof (args.isConfigured) === 'undefined') {
     return serviceInfos
   }

@@ -1,6 +1,6 @@
 // @flow
 import type { FlaggedInfo, Individual } from '../../../core/types'
-import { manager } from '../../../core/service-providers/manager'
+import { serviceManager } from '../../../core/service-providers/service-manager'
 
 export function mapFlag(flag: FlaggedInfo) {
   return {
@@ -25,7 +25,7 @@ export function mapIndividual(individual: ?Individual) {
       accessRules: Object.keys(individual.accessRules).map((serviceId) => {
         if (individual && individual.accessRules) {
           return {
-            service: manager.getServiceInfo(serviceId),
+            service: serviceManager.getServiceInfo(serviceId),
             accessRules: individual.accessRules[serviceId]
           }
         }

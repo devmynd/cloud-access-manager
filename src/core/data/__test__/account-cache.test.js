@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { accountStore as store } from '../account-store'
+import { accountCache as store } from '../account-cache'
 import fs from 'file-system'
 process.env.ACCOUNTS_PATH = './.accounts.test.store.json'
 

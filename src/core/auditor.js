@@ -1,5 +1,5 @@
 // @flow
-import type { ServiceUserAccount, FlaggedInfo, Individual, Asset, AccessRule } from './types'
+import type { FlaggedInfo, Individual, Asset, AccessRule, UserAccount } from './types'
 import type { IndividualStore } from './data/individual-store'
 import type { GroupStore } from './data/group-store'
 import lodash from 'lodash'
@@ -13,33 +13,33 @@ export class Auditor {
     this.groupStore = groupStore
   }
 
-  auditAccount (account: ServiceUserAccount): ?FlaggedInfo {
-    const individual = this.individualStore.getByServiceUserIdentity(account.serviceId, account.userAccount.identity)
+  auditAccount (serviceId: string, userAccount: UserAccount): ?FlaggedInfo {
+    const individual = this.individualStore.getByServiceUserIdentity(serviceId, userAccount.identity)
     if (individual) {
-      // if we auto-matched an individual for the first time, link the service identity before we audit. 
-      if (!individual.serviceUserIdentities.hasOwnProperty(account.serviceId)) {
-        individual.serviceUserIdentities[account.serviceId] = account.userAccount.identity
+      // if we auto-matched an individual for the first time, link the service identity before we audit.
+      if (!individual.serviceUserIdentities.hasOwnProperty(serviceId)) {
+        individual.serviceUserIdentities[serviceId] = userAccount.identity
         this.individualStore.save(individual)
       }
-      return this.auditIndividual(individual, account)
+      return this.auditIndividual(individual, serviceId, userAccount)
     } else {
       return {
         individual: null,
-        serviceId: account.serviceId,
-        userIdentity: account.userAccount.identity,
-        assets: account.userAccount.assets
+        serviceId: serviceId,
+        userIdentity: userAccount.identity,
+        assets: userAccount.assets
       }
     }
   }
 
-  auditIndividual (individual: Individual, account: ServiceUserAccount): ?FlaggedInfo {
-    const accessRules = this._getAccessRules(individual, account.serviceId)
-    const unauthorizedAssets = this._findUnauthorizedAssets(account.userAccount.assets, accessRules)
+  auditIndividual (individual: Individual, serviceId: string, userAccount: UserAccount): ?FlaggedInfo {
+    const accessRules = this._getAccessRules(individual, serviceId)
+    const unauthorizedAssets = this._findUnauthorizedAssets(userAccount.assets, accessRules)
     if (unauthorizedAssets.length > 0) {
       return {
         individual: individual,
-        serviceId: account.serviceId,
-        userIdentity: account.userAccount.identity,
+        serviceId: serviceId,
+        userIdentity: userAccount.identity,
         assets: unauthorizedAssets
       }
     }

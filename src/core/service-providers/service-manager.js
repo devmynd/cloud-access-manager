@@ -1,7 +1,8 @@
 // @flow
 import { modules } from './../service-providers/index'
 import { configStore } from './../data/config-store'
-import type { ServiceProvider, ServiceProviderModule, ServiceInfo, ServiceUserAccount } from './../types'
+import { accountCache } from './../data/account-cache'
+import type { ServiceProvider, ServiceProviderModule, ServiceInfo, UserAccount } from './../types'
 import lodash from 'lodash'
 
 const moduleLookup = modules.reduce((hash, module) => {
@@ -9,14 +10,14 @@ const moduleLookup = modules.reduce((hash, module) => {
   return hash
 }, {})
 
-export type Manager = {
+export type ServiceManager = {
   getProvider (serviceId: string): ?ServiceProvider,
-  download (serviceId: 'all' | string): Promise<Array<ServiceUserAccount>>,
+  getAllAccounts (): Promise<{ [string]: Array<UserAccount> }>,
   getServiceInfos (): Array<ServiceInfo>,
   getServiceInfo (serviceId: string): ?ServiceInfo
 }
 
-export const manager: Manager = {
+export const serviceManager: ServiceManager = {
   getProvider (serviceId: string) {
     const config = configStore.get(serviceId)
     if (config) {
@@ -24,31 +25,28 @@ export const manager: Manager = {
     }
   },
 
-  async download (serviceId: 'all' | string) {
-    const serviceIds = serviceId === 'all' ? Object.keys(moduleLookup) : [serviceId]
+  async getAllAccounts () {
+    const serviceIds = Object.keys(moduleLookup)
 
-    const services: Array<{ serviceId: string, provider: ServiceProvider }> = serviceIds.reduce((providers, id) => {
-      const provider = this.getProvider(id)
-      if (provider) {
-        providers.push({ serviceId: id, provider: provider })
-      }
-      return providers
-    }, [])
-
-    const promises: Array<Promise<Array<ServiceUserAccount>>> = services.map(async (service) => {
-      const accounts = await service.provider.listAccounts()
-      return accounts.map((a) => { return { serviceId: service.serviceId, userAccount: a } })
+    let serviceAccountsHash = {}
+    const promises: Array<Promise<void>> = serviceIds.map(async (serviceId) => {
+      serviceAccountsHash[serviceId] = await this.getAccountsForService(serviceId)
     })
 
-    const userAccountLists: Array<Array<ServiceUserAccount>> = await Promise.all(promises)
+    await Promise.all(promises)
+    return serviceAccountsHash
+  },
 
-    let flattenedArray = []
-
-    userAccountLists.forEach((list) => {
-      flattenedArray = flattenedArray.concat(list)
-    })
-
-    return flattenedArray
+  async getAccountsForService (serviceId: string): Promise<Array<UserAccount>> {
+    let accounts
+    if (accountCache.isCached(serviceId)) {
+      accounts = accountCache.get(serviceId)
+    } else {
+      const provider = this.getProvider(serviceId)
+      accounts = await provider.listAccounts()
+      accountCache.set(serviceId, accounts)
+    }
+    return accounts
   },
 
   getServiceInfo (serviceId: string): ?ServiceInfo {
