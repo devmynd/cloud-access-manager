@@ -118,7 +118,7 @@ export default class FlagList extends React.Component {
       linkServiceToIndividual(
         serviceId: "${flag.serviceId}",
         individualId:"${individual.id}",
-        ${flag.userIdentity.fullName ? `email: "${flag.userIdentity.fullName}"` : ''},
+        ${flag.userIdentity.fullName ? `fullName: "${flag.userIdentity.fullName}"` : ''},
         ${flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : ''},
         ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
       )
