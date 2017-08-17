@@ -12,7 +12,7 @@ const moduleLookup = modules.reduce((hash, module) => {
 
 export type ServiceManager = {
   getProvider (serviceId: string): ?ServiceProvider,
-  getAllAccounts (): Promise<{ [string]: Array<UserAccount> }>,
+  getAccountsForService(serviceId: string): Promise<Array<UserAccount>>,
   getServiceInfos (): Array<ServiceInfo>,
   getServiceInfo (serviceId: string): ?ServiceInfo
 }
@@ -23,18 +23,6 @@ export const serviceManager: ServiceManager = {
     if (config) {
       return moduleLookup[serviceId].providerFactory(config)
     }
-  },
-
-  async getAllAccounts () {
-    const serviceIds = configStore.configuredServiceIds()
-
-    let serviceAccountsHash = {}
-    const promises: Array<Promise<void>> = serviceIds.map(async (serviceId) => {
-      serviceAccountsHash[serviceId] = await this.getAccountsForService(serviceId)
-    })
-
-    await Promise.all(promises)
-    return serviceAccountsHash
   },
 
   async getAccountsForService (serviceId: string): Promise<Array<UserAccount>> {

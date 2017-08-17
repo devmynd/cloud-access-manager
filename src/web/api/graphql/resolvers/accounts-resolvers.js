@@ -9,18 +9,17 @@ import * as mappers from '../mappers'
 
 const auditor = new Auditor(individualStore, groupStore)
 
-export async function performAudit () {
-  const serviceAccounts = await serviceManager.getAllAccounts()
+export async function auditService (args: { serviceId: string }) {
+  const serviceAccounts = await serviceManager.getAccountsForService(args.serviceId)
 
   let flags = []
-  for (let serviceId in serviceAccounts) {
-    serviceAccounts[serviceId].forEach((account) => {
-      const flag = auditor.auditAccount(serviceId, account)
-      if (flag) {
-        flags.push(mappers.mapFlag(flag))
-      }
-    })
-  }
+
+  serviceAccounts.forEach((account) => {
+    const flag = auditor.auditAccount(args.serviceId, account)
+    if (flag) {
+      flags.push(mappers.mapFlag(flag))
+    }
+  })
 
   return flags
 }

@@ -12,7 +12,7 @@ import lodash from 'lodash'
 
 export default class FlagList extends React.Component {
   state = {
-    flags: [],
+    flagsByService: {},
     showModal: false,
     currentFlag: null
   }
@@ -157,20 +157,23 @@ export default class FlagList extends React.Component {
       })
     }
     const newFlag = await this.reCheckFlag(flag)
-    const flags = [...this.state.flags]
+    let flagsByService = this.state.flagsByService
+    const flags = [...flagsByService[flag.serviceId]]
     const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
     if (newFlag) {
       flags[flagIndex] = newFlag
+      flagsByService[flag.serviceId] = flags
       this.setState({
-        flags,
+        flagsByService,
         currentFlag: newFlag,
         modalTitle: 'Set Individual Access Rules',
         modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
       })
     } else {
       flags.splice(flagIndex, 1)
+      flagsByService[flag.serviceId] = flags
       this.setState({
-        flags,
+        flagsByService,
         showModal: false
       })
     }
@@ -196,17 +199,19 @@ export default class FlagList extends React.Component {
       })
     } else {
       const newFlag = await this.reCheckFlag(flag)
-      const flags = this.state.flags
+      let flagsByService = this.state.flagsByService
+      const flags = [...flagsByService[flag.serviceId]]
       const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
       if (newFlag) {
         flags[flagIndex] = newFlag
       } else {
         flags.splice(flagIndex, 1)
       }
+      flagsByService[flag.serviceId] = flags
 
       this.setState({
         showModal: false,
-        flags
+        flagsByService
       })
     }
   }
@@ -234,24 +239,41 @@ export default class FlagList extends React.Component {
   }
 
   performAudit = async () => {
+    for (let serviceId in this.serviceLookup) {
+      const flags = await this.performAuditForService(serviceId)
+
+      let flagsByService = this.state.flagsByService
+      if (flags.length > 0) {
+        flagsByService[serviceId] = flags
+      } else {
+        delete flagsByService[serviceId]
+      }
+
+      this.setState({
+        flagsByService
+      })
+    }
+  }
+
+  performAuditForService = async (serviceId) => {
     const query = `{
-      auditAll ${this.flagQueryResponse}
+      auditService(serviceId: "${serviceId}") ${this.flagQueryResponse}
     }`
 
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
-        title: 'Failed to run audit',
+        title: `Failed to run audit for service: ${this.serviceLookup[serviceId].displayName}`,
         body: response.error.message
       })
-      return
+      return []
+    } else {
+      let flags = response.data.auditService
+      flags.forEach((flag) => {
+        flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
+      })
+      return flags
     }
-    response.data.auditAll.forEach((flag) => {
-      flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
-    })
-    this.setState({
-      flags: response.data.auditAll
-    })
   }
 
   onGroupFormComplete = async (selectedGroups) => {
@@ -281,29 +303,51 @@ export default class FlagList extends React.Component {
   }
 
   render () {
-    const flags = this.state.flags
+    const flagsByService = this.state.flagsByService
+    const flaggedServices = Object.keys(flagsByService).map((id) => this.serviceLookup[id])
+    const flagCount = lodash.sumBy(flaggedServices, (service) => flagsByService[service.id].length)
     return (
       <div className='flag-list'>
-        { flags.length > 0 &&
+        { flagCount > 0 &&
           <h2>
-            {flags.length} SERVICE ACCOUNTS
+            {flagCount} Flagged Accounts
           </h2>
         }
 
-        <table className='table'>
-          <tbody className='uppercase-text'>
-            {flags.map((flag) => (
-              <tr key={flag.key} onClick={() => this.showModal(flag)}>
-                <td className='column-padding'>
-                  <span className='service-name column-padding'>{ this.serviceLookup[flag.serviceId].displayName } Username:</span>
-                  <span className='user-identity'>{ flag.userIdentity.email || flag.userIdentity.userId }</span>
-                  <span className='user-full-name'>{ flag.userIdentity.fullName || (flag.individual && flag.individual.fullName)}</span>
-                </td>
-              </tr>
+        {
+          flaggedServices.map((service) => {
+            return (
+              <div key={service.id} className="container">
+                <h2 className="title">{service.displayName}</h2>
+
+                <table className='table'>
+                  <tbody>
+                    {flagsByService[service.id].map((flag) => (
+                      <tr key={flag.key} onClick={() => this.showModal(flag)}>
+                        <td>
+                          <div className="columns">
+                            <div className='column is-one-quarter'>{ service.displayName }</div>
+                            { flag.userIdentity.userId &&
+                              <div className='column is-one-quarter'>Username: {flag.userIdentity.userId}</div>
+                            }
+                            { flag.userIdentity.email &&
+                              <div className='column is-one-quarter'>Email: {flag.userIdentity.email}</div>
+                            }
+                            { flag.userIdentity.fullName &&
+                              <div className='column is-one-quarter'>Full Name: {flag.userIdentity.fullName}</div>
+                            }
+                          </div>
+
+                        </td>
+                      </tr>
+                    )
+                  )}
+                  </tbody>
+                </table>
+              </div>
             )
-            )}
-          </tbody>
-        </table>
+          })
+        }
 
         { this.state.showModal &&
           <Modal title={this.state.modalTitle} closeHandler={this.closeModal}>
