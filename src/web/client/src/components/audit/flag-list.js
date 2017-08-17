@@ -16,7 +16,7 @@ export default class FlagList extends React.Component {
     flagsByService: {},
     showModal: false,
     progressCount: 0,
-    progressExpectedCount: 0,
+    progressTotalCount: 0,
     progressCurrentService: null,
     currentFlag: null
   }
@@ -65,6 +65,7 @@ export default class FlagList extends React.Component {
         id
         displayName
         roles
+        isCached
       }
     }`
 
@@ -77,10 +78,11 @@ export default class FlagList extends React.Component {
       return
     }
     this.groups = response.data.groups.map((g) => g.name)
+    this.services = response.data.services
     this.serviceLookup = {}
-    response.data.services.forEach((s) => { this.serviceLookup[s.id] = s })
+    this.services.forEach((s) => { this.serviceLookup[s.id] = s })
     this.setState({
-      progressExpectedCount: response.data.services.length
+      progressTotalCount: this.services.length
     })
     await this.performAudit()
   }
@@ -319,14 +321,15 @@ export default class FlagList extends React.Component {
     const flagsByService = this.state.flagsByService
     const flaggedServices = Object.keys(flagsByService).map((id) => this.serviceLookup[id])
     const flagCount = lodash.sumBy(flaggedServices, (service) => flagsByService[service.id].length)
-    const showProgress = this.state.progressCount < this.state.progressExpectedCount
+    const allCached = lodash.every(this.services, (s) => s.isCached)
+    const showProgress = !allCached && this.state.progressCount < this.state.progressTotalCount
     return (
       <div className='flag-list'>
         {
            showProgress &&
            <AuditProgress
              completeCount={this.state.progressCount}
-             outOfCount={this.state.progressExpectedCount}
+             outOfCount={this.state.progressTotalCount}
              currentService={this.state.progressCurrentService} />
         }
         { flagCount > 0 &&

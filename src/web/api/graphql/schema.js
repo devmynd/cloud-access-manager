@@ -10,6 +10,7 @@ export const schema = buildSchema(`
     displayName: String!
     roles: [String]!
     isConfigured: Boolean!
+    isCached: Boolean!
     configKeys: [String]
   }
 

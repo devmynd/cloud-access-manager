@@ -58,6 +58,7 @@ export const serviceManager: ServiceManager = {
       displayName: module.displayName,
       roles: module.roles,
       isConfigured: configured,
+      isCached: accountCache.isCached(module.id),
       configKeys: module.configKeys
     }
   }
