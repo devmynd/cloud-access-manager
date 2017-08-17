@@ -130,11 +130,8 @@ export default class FlagList extends React.Component {
         body: response.error.message
       })
     } else {
-      // TODO: Why overwrite the flag.individual?
-      flag.individual = individual
       const newFlag = await this.reCheckFlag(flag)
-      /// TODO: [...this.state.flags], because what if state changes and the flagIndex is no longer accurate?
-      const flags = this.state.flags
+      const flags = [...this.state.flags]
       const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
       if (newFlag) {
         flags[flagIndex] = newFlag
@@ -145,7 +142,6 @@ export default class FlagList extends React.Component {
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
-        // TODO: prefer `delete flags[flagIndex]`. Directly deletes the one property we care about, rather than iterating over the array and mapping to a new array.
         flags.splice(flagIndex, 1)
         this.setState({
           flags,
@@ -212,7 +208,7 @@ export default class FlagList extends React.Component {
   }
 
   performAudit = async () => {
-    // TODO: perform audit is doing more than just an audit, update the graphql query.
+    // x perform audit is doing more than just an audit, update the graphql query.
     const query = `{
       auditAll ${this.flagQueryResponse}
       groups {
@@ -273,12 +269,15 @@ export default class FlagList extends React.Component {
           ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
         )
       }`
-      // TODO: we aren't checking anything about the linkServiceResponse, what if it failed?
-      // const linkServiceResponse = await graphqlApi.request(query)
-      await graphqlApi.request(query)
+      const linkResponse = await graphqlApi.request(query)
+      if (linkResponse.error) {
+        this.messagesContainer.push({
+          title: 'Failed to Link Service Account to New Individual',
+          body: response.error.message
+        })
+      }
       const newFlag = await this.reCheckFlag(flag)
-      // TODO: this is similar to a few other places in the code, can we reuse? also, [...]
-      const flags = this.state.flags
+      const flags = [...this.state.flags]
       const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
       if (newFlag) {
         flags[flagIndex] = newFlag
@@ -289,7 +288,6 @@ export default class FlagList extends React.Component {
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
-        // prefer delete
         flags.splice(flagIndex, 1)
         this.setState({
           showModal: false,

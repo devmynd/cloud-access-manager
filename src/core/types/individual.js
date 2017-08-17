@@ -25,4 +25,9 @@ export function newIndividualFactory (fullName: string, primaryEmail: ?string, g
   }
 }
 
-// TODO: implement sortIndividuals method
+export function individualsSorter (lhs: Individual, rhs: Individual): number {
+  if (lhs.fullName === rhs.fullName) {
+    return 0
+  }
+  return lhs.fullName > rhs.fullName ? 1 : -1
+}

@@ -56,8 +56,4 @@ export function getIndividuals (args: { fuzzySearch: ?string, limit: ?number }) 
     : individualStore.getAll(args.limit)
 
   return individualList.map(mapIndividual)
-
-  // TODO: what happens if we sort After we limited the number of records we took?
-  // TODO: Also remember to move sorting logic into the individual type and select left and right side comparison fields
-  // return individualList.sort((lhs,rhs) => lhs.primaryEmail > rhs.primaryEmail || lhs.fullName > rhs.fullName ? 1 : -1 )
 }

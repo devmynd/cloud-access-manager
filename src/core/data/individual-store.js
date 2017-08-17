@@ -2,6 +2,7 @@
 import fs from 'file-system'
 import * as helpers from './helpers'
 import type {Individual, UserIdentity} from '../types'
+import { individualsSorter } from '../types'
 import lodash from 'lodash'
 
 process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.store.json'
@@ -31,13 +32,14 @@ export const individualStore: IndividualStore = {
   },
 
   getAll (limit: ?number) {
-    const individuals: Array <Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+    let individuals: Array <Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+    individuals.sort(individualsSorter)
     return limit ? lodash.take(individuals, limit) : individuals
   },
 
   getByFuzzySearch (search: string, limit: ?number) {
     search = search.trim().toLowerCase()
-    const individuals = this.getAll().filter((i) => {
+    let individuals = this.getAll().filter((i) => {
       let nameMatch = i.fullName.toLowerCase().includes(search)
       let emailMatch = i.primaryEmail
         ? i.primaryEmail.toLowerCase().includes(search)
