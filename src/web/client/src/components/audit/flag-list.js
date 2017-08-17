@@ -53,6 +53,28 @@ export default class FlagList extends React.Component {
   }`
 
   componentWillMount = async () => {
+    const query = `{
+      groups {
+        name
+      }
+      services(isConfigured:true){
+        id
+        displayName
+        roles
+      }
+    }`
+
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: 'Failed to load group and service info',
+        body: response.error.message
+      })
+      return
+    }
+    this.groups = response.data.groups.map((g) => g.name)
+    this.serviceLookup = {}
+    response.data.services.forEach((s) => { this.serviceLookup[s.id] = s })
     await this.performAudit()
   }
 
@@ -111,13 +133,17 @@ export default class FlagList extends React.Component {
     })
   }
 
-  onIndividualSelectedToLink = async (individual) => {
+  onIndividualSelectedToLink = (individual) => {
+    this.linkIndividual(individual.id)
+  }
+
+  linkIndividual = async (individualId) => {
     const flag = this.state.currentFlag
 
     const query = `mutation {
       linkServiceToIndividual(
         serviceId: "${flag.serviceId}",
-        individualId:"${individual.id}",
+        individualId:"${individualId}",
         ${flag.userIdentity.fullName ? `fullName: "${flag.userIdentity.fullName}"` : ''},
         ${flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : ''},
         ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
@@ -129,27 +155,27 @@ export default class FlagList extends React.Component {
         title: 'Failed to link to existing individual',
         body: response.error.message
       })
+    }
+    const newFlag = await this.reCheckFlag(flag)
+    const flags = [...this.state.flags]
+    const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
+    if (newFlag) {
+      flags[flagIndex] = newFlag
+      this.setState({
+        flags,
+        currentFlag: newFlag,
+        modalTitle: 'Set Individual Access Rules',
+        modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
+      })
     } else {
-      const newFlag = await this.reCheckFlag(flag)
-      const flags = [...this.state.flags]
-      const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
-      if (newFlag) {
-        flags[flagIndex] = newFlag
-        this.setState({
-          flags,
-          currentFlag: newFlag,
-          modalTitle: 'Set Individual Access Rules',
-          modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
-        })
-      } else {
-        flags.splice(flagIndex, 1)
-        this.setState({
-          flags,
-          showModal: false
-        })
-      }
+      flags.splice(flagIndex, 1)
+      this.setState({
+        flags,
+        showModal: false
+      })
     }
   }
+
 
   setIndividualAccessRules = async (selectedAccessRules) => {
     const flag = this.state.currentFlag
@@ -208,17 +234,8 @@ export default class FlagList extends React.Component {
   }
 
   performAudit = async () => {
-    // x perform audit is doing more than just an audit, update the graphql query.
     const query = `{
       auditAll ${this.flagQueryResponse}
-      groups {
-        name
-      }
-      services(isConfigured:true){
-        id
-        displayName
-        roles
-      }
     }`
 
     const response = await graphqlApi.request(query)
@@ -232,9 +249,6 @@ export default class FlagList extends React.Component {
     response.data.auditAll.forEach((flag) => {
       flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
     })
-    this.groups = response.data.groups.map((g) => g.name)
-    this.serviceLookup = {}
-    response.data.services.forEach((s) => { this.serviceLookup[s.id] = s })
     this.setState({
       flags: response.data.auditAll
     })
@@ -261,39 +275,7 @@ export default class FlagList extends React.Component {
         body: response.error.message
       })
     } else {
-      const query = `mutation {
-        linkServiceToIndividual(serviceId: "${flag.serviceId}",
-          individualId:"${individualId}",
-          ${flag.userIdentity.fullName ? `fullName: "${flag.userIdentity.fullName}"` : ''},
-          ${flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : ''},
-          ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
-        )
-      }`
-      const linkResponse = await graphqlApi.request(query)
-      if (linkResponse.error) {
-        this.messagesContainer.push({
-          title: 'Failed to Link Service Account to New Individual',
-          body: response.error.message
-        })
-      }
-      const newFlag = await this.reCheckFlag(flag)
-      const flags = [...this.state.flags]
-      const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
-      if (newFlag) {
-        flags[flagIndex] = newFlag
-        this.setState({
-          flags,
-          currentFlag: newFlag,
-          modalTitle: 'Set Individual Access Rules',
-          modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
-        })
-      } else {
-        flags.splice(flagIndex, 1)
-        this.setState({
-          showModal: false,
-          flags
-        })
-      }
+      await this.linkIndividual(individualId)
       await this.performAudit()
     }
   }
