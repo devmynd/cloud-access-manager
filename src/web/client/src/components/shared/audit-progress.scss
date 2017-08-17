@@ -1,0 +1,12 @@
+.audit-progress {
+  $emptyProgress: #ddd;
+  $completeProgress: #666;
+
+  .progress-bar {
+    background-color: $emptyProgress;
+
+    .column.complete {
+      background-color: $completeProgress;
+    }
+  }
+}

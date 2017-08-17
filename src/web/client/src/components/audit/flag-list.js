@@ -8,12 +8,16 @@ import GroupSelectionForm from './group-selection-form'
 import IndividualAccessRulesForm from './individual-access-rules-form'
 import LinkIndividualForm from './link-individual-form'
 import MessagesContainer from '../shared/messages-container'
+import AuditProgress from '../shared/audit-progress'
 import lodash from 'lodash'
 
 export default class FlagList extends React.Component {
   state = {
     flagsByService: {},
     showModal: false,
+    progressCount: 0,
+    progressExpectedCount: 0,
+    progressCurrentService: null,
     currentFlag: null
   }
 
@@ -75,6 +79,9 @@ export default class FlagList extends React.Component {
     this.groups = response.data.groups.map((g) => g.name)
     this.serviceLookup = {}
     response.data.services.forEach((s) => { this.serviceLookup[s.id] = s })
+    this.setState({
+      progressExpectedCount: response.data.services.length
+    })
     await this.performAudit()
   }
 
@@ -179,7 +186,6 @@ export default class FlagList extends React.Component {
     }
   }
 
-
   setIndividualAccessRules = async (selectedAccessRules) => {
     const flag = this.state.currentFlag
     const query = `mutation {
@@ -239,7 +245,13 @@ export default class FlagList extends React.Component {
   }
 
   performAudit = async () => {
+    this.setState({
+      progressCount: 0
+    })
     for (let serviceId in this.serviceLookup) {
+      this.setState({
+        progressCurrentService: this.serviceLookup[serviceId].displayName
+      })
       const flags = await this.performAuditForService(serviceId)
 
       let flagsByService = this.state.flagsByService
@@ -249,8 +261,10 @@ export default class FlagList extends React.Component {
         delete flagsByService[serviceId]
       }
 
+      let progressCount = this.state.progressCount + 1
       this.setState({
-        flagsByService
+        flagsByService,
+        progressCount
       })
     }
   }
@@ -278,7 +292,6 @@ export default class FlagList extends React.Component {
 
   onGroupFormComplete = async (selectedGroups) => {
     this.pendingNewIndividual.groups = selectedGroups
-    const flag = this.state.currentFlag
 
     const query = `mutation {
       createIndividual(individual: {
@@ -306,8 +319,16 @@ export default class FlagList extends React.Component {
     const flagsByService = this.state.flagsByService
     const flaggedServices = Object.keys(flagsByService).map((id) => this.serviceLookup[id])
     const flagCount = lodash.sumBy(flaggedServices, (service) => flagsByService[service.id].length)
+    const showProgress = this.state.progressCount < this.state.progressExpectedCount
     return (
       <div className='flag-list'>
+        {
+           showProgress &&
+           <AuditProgress
+             completeCount={this.state.progressCount}
+             outOfCount={this.state.progressExpectedCount}
+             currentService={this.state.progressCurrentService} />
+        }
         { flagCount > 0 &&
           <h2>
             {flagCount} Flagged Accounts
@@ -317,15 +338,15 @@ export default class FlagList extends React.Component {
         {
           flaggedServices.map((service) => {
             return (
-              <div key={service.id} className="container">
-                <h2 className="title">{service.displayName}</h2>
+              <div key={service.id} className='container'>
+                <h2 className='title'>{service.displayName}</h2>
 
                 <table className='table'>
                   <tbody>
                     {flagsByService[service.id].map((flag) => (
                       <tr key={flag.key} onClick={() => this.showModal(flag)}>
                         <td>
-                          <div className="columns">
+                          <div className='columns'>
                             <div className='column is-one-quarter'>{ service.displayName }</div>
                             { flag.userIdentity.userId &&
                               <div className='column is-one-quarter'>Username: {flag.userIdentity.userId}</div>
