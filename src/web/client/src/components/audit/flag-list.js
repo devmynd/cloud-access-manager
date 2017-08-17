@@ -264,7 +264,7 @@ export default class FlagList extends React.Component {
       const query = `mutation {
         linkServiceToIndividual(serviceId: "${flag.serviceId}",
           individualId:"${individualId}",
-          ${flag.userIdentity.fullName ? `email: "${flag.userIdentity.fullName}"` : ''},
+          ${flag.userIdentity.fullName ? `fullName: "${flag.userIdentity.fullName}"` : ''},
           ${flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : ''},
           ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
         )

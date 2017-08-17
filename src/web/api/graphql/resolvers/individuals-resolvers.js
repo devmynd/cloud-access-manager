@@ -4,7 +4,7 @@ import { newIndividualFactory } from '../../../../core/types'
 import type { AccessRule } from '../../../../core/types'
 import { mapIndividual } from '../mappers'
 
-export function createIndividual (args: { individual: { fullName: string, primaryEmail: string, groups: Array<string> } }) {
+export function createIndividual (args: { individual: { fullName: string, primaryEmail: ?string, groups: Array<string> } }) {
   const individual = newIndividualFactory(args.individual.fullName, args.individual.primaryEmail, args.individual.groups)
   individualStore.save(individual)
   return individual.id
@@ -18,6 +18,9 @@ export function linkServiceToIndividual (args: { serviceId: string, individualId
   }
   if (args.email && args.email.trim().length > 0) {
     identity.email = args.email
+    if (!individual.primaryEmail) {
+      individual.primaryEmail = identity.email
+    }
   }
   if (args.userId && args.userId.trim().length > 0) {
     identity.userId = args.userId
