@@ -11,7 +11,7 @@ export default class IndividualAccessRulesForm extends React.Component {
     let selectedAccessRules = [...this.state.selectedAccessRules]
 
     if (this.isAssetChecked(targetAsset)) {
-      lodash.remove(selectedAccessRules, (rule) => rule.asset === targetAsset.name && rule.role === targetAsset.role )
+      lodash.remove(selectedAccessRules, (rule) => rule.asset === targetAsset.name && rule.role === targetAsset.role)
       if (this.state.selectedRoles[targetAsset.role]) {
         this.toggleRole(targetAsset.role)
       }
@@ -39,10 +39,10 @@ export default class IndividualAccessRulesForm extends React.Component {
     const enableRole = !selectedRoles[role]
     selectedRoles[role] = enableRole
 
-    if(enableRole) {
-      selectedAccessRules.push({ asset: "*", role: role })
+    if (enableRole) {
+      selectedAccessRules.push({ asset: '*', role: role })
     } else {
-      lodash.remove(selectedAccessRules, (r) => r.asset === "*" && r.role === role)
+      lodash.remove(selectedAccessRules, (r) => r.asset === '*' && r.role === role)
     }
 
     this.setState({
@@ -58,16 +58,16 @@ export default class IndividualAccessRulesForm extends React.Component {
     return exactMatch || fullAccessEnabledForRole
   }
 
-  render() {
+  render () {
     let roleButtons
     if (this.props.service.roles.length > 0) {
       const flaggedRoles = lodash.uniq(this.props.assets.map((a) => a.role))
-      roleButtons = flaggedRoles.map((r) => { return { text: r, value: r }})
+      roleButtons = flaggedRoles.map((r) => { return { text: r, value: r } })
     } else {
-      roleButtons = [{text: "Full Access", value: "*"}]
+      roleButtons = [{text: 'Full Access', value: '*'}]
     }
 
-    return(
+    return (
       <div>
         <h2>{ this.props.service.displayName }</h2>
         <div className='field is-grouped'>
@@ -86,18 +86,18 @@ export default class IndividualAccessRulesForm extends React.Component {
             this.props.assets.map((asset) => {
               return (
                 <li key={`${asset.name}-${asset.role}`}>
-                    <span>
-                      { asset.name } / { asset.role }
-                    </span>
-                    <label className="checkbox">
-                      <input onChange={() => this.updateAccessRuleSelection(asset)} checked={this.isAssetChecked(asset)} type="checkbox"/>
-                    </label>
+                  <span>
+                    { asset.name } / { asset.role }
+                  </span>
+                  <label className='checkbox'>
+                    <input onChange={() => this.updateAccessRuleSelection(asset)} checked={this.isAssetChecked(asset)} type='checkbox' />
+                  </label>
                 </li>
               )
-          })
+            })
         }
         </ul>
-        <button className="button" onClick={this.saveAccessRules}>Save and Finish</button>
+        <button className='button' onClick={this.saveAccessRules}>Save and Finish</button>
       </div>
     )
   }

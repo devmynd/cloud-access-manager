@@ -1,7 +1,7 @@
 // @flow
 import fs from 'file-system'
 import * as helpers from './helpers'
-import type { UserAccount, UserIdentity } from '../types'
+import type { UserAccount } from '../types'
 import lodash from 'lodash'
 
 process.env.ACCOUNTS_PATH = process.env.ACCOUNTS_PATH || './.accounts.store.json'
@@ -24,7 +24,7 @@ export type AccountCache = {
 }
 
 export const accountCache: AccountCache = {
-  set(serviceId: string, userAccounts: Array<UserAccount>, asOfDate?: Date) {
+  set (serviceId: string, userAccounts: Array<UserAccount>, asOfDate?: Date) {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     data[serviceId] = {
       userAccounts: userAccounts,
@@ -33,35 +33,35 @@ export const accountCache: AccountCache = {
     fs.writeFileSync(process.env.ACCOUNTS_PATH, JSON.stringify(data))
   },
 
-  get(serviceId: string): Array<UserAccount> {
+  get (serviceId: string): Array<UserAccount> {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     return data.hasOwnProperty(serviceId)
       ? data[serviceId].userAccounts
       : []
   },
 
-  isCached(serviceId: string): boolean {
+  isCached (serviceId: string): boolean {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     if (data.hasOwnProperty(serviceId)) {
       let cachedDate = new Date(data[serviceId].cachedDate)
       const ttlMillis = timeToLiveHours * 60 * 60 * 1000
       const now = new Date()
-      const expired =  (now - cachedDate > ttlMillis)
+      const expired = (now - cachedDate > ttlMillis)
       return !expired
     }
     return false
   },
 
-  getAccountByEmail(serviceId: string, email: string) {
+  getAccountByEmail (serviceId: string, email: string) {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
-    if(data.hasOwnProperty(serviceId)) {
+    if (data.hasOwnProperty(serviceId)) {
       return lodash.find(data[serviceId].userAccounts, (u) => u.identity.email === email)
     }
   },
 
-  getAccountByUserId(serviceId: string, userId: string) {
+  getAccountByUserId (serviceId: string, userId: string) {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
-    if(data.hasOwnProperty(serviceId)) {
+    if (data.hasOwnProperty(serviceId)) {
       return lodash.find(data[serviceId].userAccounts, (u) => u.identity.userId === userId)
     }
   }

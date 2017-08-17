@@ -11,13 +11,10 @@ export type Individual = {
 }
 
 function generateUUID () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
+  return (Math.random() * 16).toString()
 }
 
-export function newIndividualFactory(fullName: string, primaryEmail: ?string, groups: Array<string>): Individual {
+export function newIndividualFactory (fullName: string, primaryEmail: ?string, groups: Array<string>): Individual {
   return {
     id: generateUUID(),
     fullName,
@@ -28,4 +25,4 @@ export function newIndividualFactory(fullName: string, primaryEmail: ?string, gr
   }
 }
 
-//TODO: implement sortIndividuals method
+// TODO: implement sortIndividuals method

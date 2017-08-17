@@ -8,15 +8,15 @@ process.env.INDIVIDUALS_PATH = process.env.INDIVIDUALS_PATH || './.individuals.s
 
 export type IndividualStore = {
   save(user : Individual): void,
-  getAll(): Array < Individual >,
-  getByFuzzySearch(search : string): Array < Individual >,
-  getById(id : string): Individual,
-  getByServiceUserIdentity(serviceId : string, userIdentity : UserIdentity):
+  getAll(limit: ?number): Array<Individual>,
+  getByFuzzySearch(search: string, limit: ?number): Array <Individual>,
+  getById(id: string): Individual,
+  getByServiceUserIdentity(serviceId: string, userIdentity: UserIdentity):
     ? Individual
 }
 
-export const individualStore : IndividualStore = {
-  save(individual : Individual) {
+export const individualStore: IndividualStore = {
+  save (individual : Individual) {
     let individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     let existingIndex = lodash.findIndex(individuals, (entry) => {
       return entry.id === individual.id
@@ -30,25 +30,26 @@ export const individualStore : IndividualStore = {
     fs.writeFileSync(process.env.INDIVIDUALS_PATH, JSON.stringify(individuals))
   },
 
-  getAll() {
-    const individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
-    return individuals
+  getAll (limit: ?number) {
+    const individuals: Array <Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+    return limit ? lodash.take(individuals, limit) : individuals
   },
 
-  getByFuzzySearch(search : string) {
+  getByFuzzySearch (search: string, limit: ?number) {
     search = search.trim().toLowerCase()
-    let individuals = this.getAll()
-    return individuals.filter((i) => {
+    const individuals = this.getAll().filter((i) => {
       let nameMatch = i.fullName.toLowerCase().includes(search)
       let emailMatch = i.primaryEmail
         ? i.primaryEmail.toLowerCase().includes(search)
         : false
       return emailMatch || nameMatch
     })
+
+    return limit ? lodash.take(individuals, limit) : individuals
   },
 
-  getById(id : string) {
-    const individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+  getById (id: string) {
+    const individuals : Array <Individual> = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     const individual = lodash.find(individuals, (i) => i.id === id)
     if (individual) {
       return individual
@@ -56,7 +57,7 @@ export const individualStore : IndividualStore = {
     throw new Error(`No individual exists with id: '${id}'`)
   },
 
-  getByServiceUserIdentity(serviceId : string, userIdentity : UserIdentity) {
+  getByServiceUserIdentity (serviceId: string, userIdentity: UserIdentity) {
     const individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
     if (userIdentity.email) {
       return lodash.find(individuals, (u) => {

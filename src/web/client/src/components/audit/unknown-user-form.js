@@ -1,8 +1,7 @@
 import React from 'react'
 
 export default class UnknownUserForm extends React.Component {
-
-  render() {
+  render () {
     return (
       <div>
         <div className='field is-grouped'>

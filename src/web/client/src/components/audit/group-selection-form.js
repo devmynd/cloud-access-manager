@@ -22,15 +22,15 @@ export default class GroupSelectionForm extends React.Component {
     }
 
     this.setState({
-       selectedGroups
+      selectedGroups
     })
   }
 
-  render() {
+  render () {
     return (
       <div>
-        <h3 className="is-centered">
-          Add { this.props.individual.fullName || "this user" } to a group
+        <h3 className='is-centered'>
+          Add { this.props.individual.fullName || 'this user' } to a group
         </h3>
         <h4>
           { this.props.individual.primaryEmail }
@@ -43,8 +43,8 @@ export default class GroupSelectionForm extends React.Component {
                 this.props.groups.map((group) => {
                   return (
                     <li key={group}>
-                      <label className="checkbox">
-                        <input onChange={this.updateGroupSelection} type="checkbox" value={group}/>
+                      <label className='checkbox'>
+                        <input onChange={this.updateGroupSelection} type='checkbox' value={group} />
                         {group}
                       </label>
                     </li>
@@ -52,7 +52,7 @@ export default class GroupSelectionForm extends React.Component {
                 })
               }
             </ul>
-            <button className="button" onClick={this.saveGroups}>Save and Continue</button>
+            <button className='button' onClick={this.saveGroups}>Save and Continue</button>
           </div>
         }
       </div>

@@ -2,7 +2,7 @@
 import type { FlaggedInfo, Individual } from '../../../core/types'
 import { serviceManager } from '../../../core/service-providers/service-manager'
 
-export function mapFlag(flag: FlaggedInfo) {
+export function mapFlag (flag: FlaggedInfo) {
   return {
     individual: mapIndividual(flag.individual),
     serviceId: flag.serviceId,
@@ -11,7 +11,7 @@ export function mapFlag(flag: FlaggedInfo) {
   }
 }
 
-export function mapIndividual(individual: ?Individual) {
+export function mapIndividual (individual: ?Individual) {
   if (individual && individual.serviceUserIdentities) {
     return {
       id: individual.id,

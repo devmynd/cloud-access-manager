@@ -12,11 +12,11 @@ beforeEach(() => {
 describe('crud', () => {
   beforeEach(() => {
     cache.set('test-service', [{
-      identity: { email: "test1@test.com" },
-      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-    },{
-      identity: { userId: "test2" },
-      assets: [{name: "repo A", role: "member"}]
+      identity: { email: 'test1@test.com' },
+      assets: [{name: 'repo A', role: 'member'}, {name: 'repo B', role: 'owner'}]
+    }, {
+      identity: { userId: 'test2' },
+      assets: [{name: 'repo A', role: 'member'}]
     }])
   })
 
@@ -25,11 +25,11 @@ describe('crud', () => {
 
     expect(retrieved).not.toBeUndefined()
     expect(retrieved).toEqual([{
-      identity: { email: "test1@test.com" },
-      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
-    },{
-      identity: { userId: "test2" },
-      assets: [{name: "repo A", role: "member"}]
+      identity: { email: 'test1@test.com' },
+      assets: [{name: 'repo A', role: 'member'}, {name: 'repo B', role: 'owner'}]
+    }, {
+      identity: { userId: 'test2' },
+      assets: [{name: 'repo A', role: 'member'}]
     }])
   })
 
@@ -41,8 +41,8 @@ describe('crud', () => {
 
   test('replaces accounts for existing service when service accounts are downloaded', () => {
     let newAccounts = [{
-      identity: { email: "test1@test.com" },
-      assets: [{name: "repo B", role: "owner"}]
+      identity: { email: 'test1@test.com' },
+      assets: [{name: 'repo B', role: 'owner'}]
     }]
 
     cache.set('test-service', newAccounts)
@@ -50,28 +50,28 @@ describe('crud', () => {
     let retrieved = cache.get('test-service')
     expect(retrieved).not.toBeUndefined()
     expect(retrieved).toEqual([{
-      identity: { email: "test1@test.com" },
-      assets: [{name: "repo B", role: "owner"}]
+      identity: { email: 'test1@test.com' },
+      assets: [{name: 'repo B', role: 'owner'}]
     }])
   })
 
   test('gets an existing account by email', () => {
-    let retrieved = cache.getAccountByEmail("test-service", "test1@test.com")
+    let retrieved = cache.getAccountByEmail('test-service', 'test1@test.com')
 
     expect(retrieved).not.toBeUndefined()
     expect(retrieved).toEqual({
-      identity: { email: "test1@test.com" },
-      assets: [{name: "repo A", role: "member"}, {name: "repo B", role: "owner"}]
+      identity: { email: 'test1@test.com' },
+      assets: [{name: 'repo A', role: 'member'}, {name: 'repo B', role: 'owner'}]
     })
   })
 
   test('gets an existing account by userId', () => {
-    let retrieved = cache.getAccountByUserId("test-service", "test2")
+    let retrieved = cache.getAccountByUserId('test-service', 'test2')
 
     expect(retrieved).not.toBeUndefined()
     expect(retrieved).toEqual({
-      identity: { userId: "test2" },
-      assets: [{name: "repo A", role: "member"}]
+      identity: { userId: 'test2' },
+      assets: [{name: 'repo A', role: 'member'}]
     })
   })
 })

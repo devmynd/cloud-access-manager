@@ -10,12 +10,11 @@ import LinkIndividualForm from './link-individual-form'
 import MessagesContainer from '../shared/messages-container'
 import lodash from 'lodash'
 
-
 export default class FlagList extends React.Component {
   state = {
     flags: [],
     showModal: false,
-    currentFlag: null,
+    currentFlag: null
   }
 
   flagQueryResponse = `{
@@ -62,7 +61,7 @@ export default class FlagList extends React.Component {
       showModal: true,
       currentFlag: flag,
       modalTitle: flag.individual
-        ? "Set Individual Access Rules"
+        ? 'Set Individual Access Rules'
         : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
       modalContents: flag.individual
         ? <IndividualAccessRulesForm service={this.serviceLookup[flag.serviceId]} assets={flag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
@@ -81,15 +80,15 @@ export default class FlagList extends React.Component {
   onNewIndividualSelected = () => {
     const flag = this.state.currentFlag
     this.setState({
-      modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || "blah"}`,
+      modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || 'blah'}`,
       modalContents: <NewIndividualForm flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
     })
   }
 
   onNewIndividualFormComplete = (fullName, primaryEmail) => {
-    if (!fullName || fullName.trim() === "") {
+    if (!fullName || fullName.trim() === '') {
       this.messagesContainer.push({
-        title: "Invalid Name",
+        title: 'Invalid Name',
         body: "Please fill out the individual's name."
       })
       return
@@ -108,28 +107,26 @@ export default class FlagList extends React.Component {
   onLinkToIndividualSelected = () => {
     this.setState({
       modalTitle: 'Link to an individual',
-      modalContents: <LinkIndividualForm onIndividualSelected={this.onIndividualSelectedToLink}/>
+      modalContents: <LinkIndividualForm onIndividualSelected={this.onIndividualSelectedToLink} />
     })
   }
 
-  onIndividualSelectedToLink =  async (individual) => {
+  onIndividualSelectedToLink = async (individual) => {
     const flag = this.state.currentFlag
 
-    // TODO: fullName should be flag.userIdentity.fullName, because we are linking the fullName from the service identity to the existing individual
-    // As that is clearly confusing, how might we make this mutation more clear?
     const query = `mutation {
       linkServiceToIndividual(
         serviceId: "${flag.serviceId}",
         individualId:"${individual.id}",
-        fullName: "${individual.fullName}",
-        ${flag.userIdentity.email? `email: "${flag.userIdentity.email}"`: ""},
-        ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"`: ""}
+        ${flag.userIdentity.fullName ? `email: "${flag.userIdentity.fullName}"` : ''},
+        ${flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : ''},
+        ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
       )
     }`
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
-        title: "Failed to link to existing individual",
+        title: 'Failed to link to existing individual',
         body: response.error.message
       })
     } else {
@@ -144,7 +141,7 @@ export default class FlagList extends React.Component {
         this.setState({
           flags,
           currentFlag: newFlag,
-          modalTitle: "Set Individual Access Rules",
+          modalTitle: 'Set Individual Access Rules',
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
@@ -172,7 +169,7 @@ export default class FlagList extends React.Component {
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
-        title: "Failed to add selected access rules",
+        title: 'Failed to add selected access rules',
         body: response.error.message
       })
     } else {
@@ -193,14 +190,14 @@ export default class FlagList extends React.Component {
   }
 
   reCheckFlag = async (flag) => {
-    const secondParameter = flag.userIdentity.email ? `email: "${flag.userIdentity.email}"`  : `userId: "${flag.userIdentity.userId}"`
+    const secondParameter = flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : `userId: "${flag.userIdentity.userId}"`
 
     const query = `{
       auditServiceUserAccount(serviceId: "${flag.serviceId}", ${secondParameter}) ${this.flagQueryResponse}
     }`
     const response = await graphqlApi.request(query)
 
-    if(response.error) {
+    if (response.error) {
       this.messagesContainer.push({
         title: 'Failed to check flag',
         body: response.error.message
@@ -231,7 +228,7 @@ export default class FlagList extends React.Component {
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
-        title: "Failed to run audit",
+        title: 'Failed to run audit',
         body: response.error.message
       })
       return
@@ -268,26 +265,27 @@ export default class FlagList extends React.Component {
         body: response.error.message
       })
     } else {
-      // TODO: fullName should be flag.userIdentity.fullName
       const query = `mutation {
         linkServiceToIndividual(serviceId: "${flag.serviceId}",
           individualId:"${individualId}",
-          fullName: "${this.pendingNewIndividual.fullName}",
-          ${flag.userIdentity.email? `email: "${flag.userIdentity.email}"`: ""},
-          ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"`: ""}
+          ${flag.userIdentity.fullName ? `email: "${flag.userIdentity.fullName}"` : ''},
+          ${flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : ''},
+          ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
         )
       }`
-      const linkServiceResponse = await graphqlApi.request(query)
+      // TODO: we aren't checking anything about the linkServiceResponse, what if it failed?
+      // const linkServiceResponse = await graphqlApi.request(query)
+      await graphqlApi.request(query)
       const newFlag = await this.reCheckFlag(flag)
       // TODO: this is similar to a few other places in the code, can we reuse? also, [...]
       const flags = this.state.flags
-      const flagIndex = lodash.findIndex(flags, (f) => f.key == flag.key)
+      const flagIndex = lodash.findIndex(flags, (f) => f.key === flag.key)
       if (newFlag) {
         flags[flagIndex] = newFlag
         this.setState({
           flags,
           currentFlag: newFlag,
-          modalTitle: "Set Individual Access Rules",
+          modalTitle: 'Set Individual Access Rules',
           modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         })
       } else {
@@ -302,11 +300,11 @@ export default class FlagList extends React.Component {
     }
   }
 
-  render() {
+  render () {
     const flags = this.state.flags
     return (
-      <div className="flag-list">
-        { flags.length > 0  &&
+      <div className='flag-list'>
+        { flags.length > 0 &&
           <h2>
             {flags.length} SERVICE ACCOUNTS
           </h2>
@@ -320,10 +318,6 @@ export default class FlagList extends React.Component {
                   <span className='service-name column-padding'>{ this.serviceLookup[flag.serviceId].displayName } Username:</span>
                   <span className='user-identity'>{ flag.userIdentity.email || flag.userIdentity.userId }</span>
                   <span className='user-full-name'>{ flag.userIdentity.fullName || (flag.individual && flag.individual.fullName)}</span>
-                </td>
-                <td>
-                  <span className='service-name'>Service:</span>
-                    <span className='service-id'>{ flag.serviceId }</span> / { flag.assets.map((asset) => { asset.name }).length } Project Pending
                 </td>
               </tr>
             )

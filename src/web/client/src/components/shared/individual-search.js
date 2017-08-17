@@ -4,37 +4,34 @@ import MessagesContainer from './messages-container'
 import graphqlApi from '../../graphql-api'
 
 export default class IndividualSearch extends React.Component {
-
   query = async (text, callback) => {
-    const query = `{
-    	individuals(fuzzySearch:"${text}", limit: ${10}) {
-        id
-          primaryEmail
-        	fullName
-          serviceUserIdentities {
-            serviceId
-            userIdentity {
-              email
-              userId
-            }
+    const query = `{ individuals(fuzzySearch:"${text}", limit: ${10})
+      {
+        id, primaryEmail, fullName
+        serviceUserIdentities {
+          serviceId
+          userIdentity {
+            email
+            userId
+          }
+        }
+        accessRules {
+          service {
+            id
           }
           accessRules {
-            service {
-              id
-            }
-            accessRules {
-              asset
-              role
-            }
+            asset
+            role
           }
-          groups
+        }
+        groups
       }
     }`
 
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
-        title: "Could not access existing individuals",
+        title: 'Could not access existing individuals',
         body: response.error.message
       })
       return
@@ -46,16 +43,16 @@ export default class IndividualSearch extends React.Component {
     return (
       <div>
         <span>{individual.fullName}</span>
-        <span>{ individual.primaryEmail || "" }</span>
+        <span>{ individual.primaryEmail || '' }</span>
       </div>
     )
   }
 
-  render() {
+  render () {
     return (
       <div>
         <TypeAheadInput
-          placeholder="Search for individual by name or email"
+          placeholder='Search for individual by name or email'
           query={this.query}
           matchRenderer={this.renderIndividual}
           onMatchSelected={this.props.onIndividualSelected}

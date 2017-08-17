@@ -20,9 +20,6 @@ class GitHubProvider implements ServiceProvider {
     const org = this.api.getOrganization(this.orgName)
     let repos = (await org.getRepos()).data
 
-    //TODO: REMOVE
-    repos = lodash.take(repos, 3)
-
     let repoCollabs = []
 
     await Promise.all(repos.map(async (repo) => {
@@ -34,7 +31,6 @@ class GitHubProvider implements ServiceProvider {
           collabs: collabs
         })
       } catch (error) {
-        //TODO: Get the devmynd account owner credentials and don't swallow this error
         console.log(error)
       }
     }))
@@ -45,7 +41,7 @@ class GitHubProvider implements ServiceProvider {
 
     repoCollabs.forEach((repoCollab) => {
       repoCollab.collabs.forEach((collaborator) => {
-        if(!accountsHash.hasOwnProperty(collaborator.login)){
+        if (!accountsHash.hasOwnProperty(collaborator.login)) {
           accountsHash[collaborator.login] = { identity: { userId: collaborator.login }, assets: [] }
         }
         const account = accountsHash[collaborator.login]
@@ -60,10 +56,10 @@ class GitHubProvider implements ServiceProvider {
     await Promise.all(Object.keys(accountsHash).map(async (userId) => {
       const profile = (await this.api.getUser(userId).getProfile()).data
       console.log(profile)
-      if(profile.name) {
+      if (profile.name) {
         accountsHash[userId].identity.fullName = profile.name
       }
-      if(profile.email) {
+      if (profile.email) {
         accountsHash[userId].identity.email = profile.email
       }
     }))
@@ -74,6 +70,9 @@ class GitHubProvider implements ServiceProvider {
   async testConnection () {
     const org = this.api.getOrganization(this.orgName)
     const repos = await org.getRepos()
+    if (!repos) {
+      throw new Error('Could not access repositories on GitHub')
+    }
   }
 }
 

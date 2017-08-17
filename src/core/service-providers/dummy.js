@@ -17,7 +17,7 @@ class DummyProvider implements ServiceProvider {
       resolve([
         {
           identity: {
-            fullName: "Shamyle Ghazali",
+            fullName: 'Shamyle Ghazali',
             userId: 'shamwow16'
           },
           assets: [{
@@ -30,7 +30,7 @@ class DummyProvider implements ServiceProvider {
         },
         {
           identity: {
-            fullName: "Ty",
+            fullName: 'Ty',
             email: 'ty@devmynd.com'
           },
           assets: [{
@@ -43,7 +43,7 @@ class DummyProvider implements ServiceProvider {
         },
         {
           identity: {
-            fullName: "Mike Evans",
+            fullName: 'Mike Evans',
             email: 'mevans@devmynd.com'
           },
           assets: [{

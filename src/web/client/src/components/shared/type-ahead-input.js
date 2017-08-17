@@ -3,7 +3,7 @@ import React from 'react'
 export default class TypeAheadInput extends React.Component {
   state = {
     down: false,
-    text: "",
+    text: '',
     matches: []
   }
 
@@ -32,16 +32,16 @@ export default class TypeAheadInput extends React.Component {
 
     this.setState({
       down: false,
-      text: ""
+      text: ''
     })
   }
 
-  render() {
+  render () {
     return (
-      <div className="type-ahead-input">
+      <div className='type-ahead-input'>
         <div className={'dropdown ' + (this.state.down ? 'is-active' : '')}>
           <div className='dropdown-trigger'>
-            <input className="input" type="text" value={this.state.text} onChange={this.onInputChange} placeholder={this.props.placeholder}/>
+            <input className='input' type='text' value={this.state.text} onChange={this.onInputChange} placeholder={this.props.placeholder} />
           </div>
           <div className='dropdown-menu' id='dropdown-menu' role='menu' >
             <div className='dropdown-content'>
