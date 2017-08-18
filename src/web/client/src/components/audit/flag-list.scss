@@ -1,6 +1,11 @@
 $light-grey: #808080;
 
 .flag-list {
+
+  span i {
+    cursor: pointer;
+  }
+
   .table {
     margin-top: 20px;
 
@@ -8,6 +13,7 @@ $light-grey: #808080;
       cursor: pointer;
       border: 1px solid $light-grey;
     }
+
 
     td {
       padding: 32px 20px;

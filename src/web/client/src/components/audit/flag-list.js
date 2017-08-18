@@ -246,7 +246,7 @@ export default class FlagList extends React.Component {
     }
   }
 
-  performAudit = async () => {
+  performAudit = async (skipCache) => {
     this.setState({
       progressCount: 0
     })
@@ -254,8 +254,12 @@ export default class FlagList extends React.Component {
       this.setState({
         progressCurrentService: this.serviceLookup[serviceId].displayName
       })
-      const flags = await this.performAuditForService(serviceId)
-
+      if (skipCache) {
+        const serviceIndex = lodash.findIndex(this.services, (s) => s.id === serviceId)
+        this.services[serviceIndex].isCached = false
+      }
+      const flags = await this.performAuditForService(serviceId, skipCache)
+      
       let flagsByService = this.state.flagsByService
       if (flags.length > 0) {
         flagsByService[serviceId] = flags
@@ -271,9 +275,9 @@ export default class FlagList extends React.Component {
     }
   }
 
-  performAuditForService = async (serviceId) => {
+  performAuditForService = async (serviceId, skipCache) => {
     const query = `{
-      auditService(serviceId: "${serviceId}") ${this.flagQueryResponse}
+      auditService(serviceId: "${serviceId}", skipCache: ${skipCache ? true : false}) ${this.flagQueryResponse}
     }`
 
     const response = await graphqlApi.request(query)
@@ -337,7 +341,12 @@ export default class FlagList extends React.Component {
             {flagCount} Flagged Accounts
           </h2>
         }
-
+        {
+          <span onClick={() => this.performAudit(true)}>
+            <i className="fa fa-refresh fa-2x" aria-hidden="true"></i>
+            Re-run Audit
+          </span>
+        }
         {
           flaggedServices.map((service) => {
             return (

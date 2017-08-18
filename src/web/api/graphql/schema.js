@@ -72,7 +72,7 @@ export const schema = buildSchema(`
   }
 
   type Query {
-    auditService(serviceId: String!): [FlaggedInfo]
+    auditService(serviceId: String!, skipCache: Boolean): [FlaggedInfo]
     auditServiceUserAccount(serviceId: String!, email: String, userId: String): FlaggedInfo
     services(isConfigured: Boolean): [ServiceInfo]
     groups: [Group]

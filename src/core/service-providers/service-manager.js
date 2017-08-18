@@ -12,7 +12,7 @@ const moduleLookup = modules.reduce((hash, module) => {
 
 export type ServiceManager = {
   getProvider (serviceId: string): ?ServiceProvider,
-  getAccountsForService(serviceId: string): Promise<Array<UserAccount>>,
+  getAccountsForService(serviceId: string, skipCache: boolean): Promise<Array<UserAccount>>,
   getServiceInfos (): Array<ServiceInfo>,
   getServiceInfo (serviceId: string): ?ServiceInfo
 }
@@ -25,9 +25,9 @@ export const serviceManager: ServiceManager = {
     }
   },
 
-  async getAccountsForService (serviceId: string): Promise<Array<UserAccount>> {
+  async getAccountsForService (serviceId: string, skipCache: boolean): Promise<Array<UserAccount>> {
     let accounts
-    if (accountCache.isCached(serviceId)) {
+    if (accountCache.isCached(serviceId) && !skipCache) {
       accounts = accountCache.get(serviceId)
     } else {
       const provider = this.getProvider(serviceId)
