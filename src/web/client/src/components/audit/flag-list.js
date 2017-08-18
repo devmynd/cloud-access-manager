@@ -247,19 +247,19 @@ export default class FlagList extends React.Component {
   }
 
   performAudit = async (skipCache) => {
+
     this.setState({
-      progressCount: 0
+      progressCount: 0,
+      flagsByService: skipCache ? {} : this.state.flagsByService
     })
+
     for (let serviceId in this.serviceLookup) {
       this.setState({
         progressCurrentService: this.serviceLookup[serviceId].displayName
       })
-      if (skipCache) {
-        const serviceIndex = lodash.findIndex(this.services, (s) => s.id === serviceId)
-        this.services[serviceIndex].isCached = false
-      }
+
       const flags = await this.performAuditForService(serviceId, skipCache)
-      
+
       let flagsByService = this.state.flagsByService
       if (flags.length > 0) {
         flagsByService[serviceId] = flags
@@ -276,6 +276,12 @@ export default class FlagList extends React.Component {
   }
 
   performAuditForService = async (serviceId, skipCache) => {
+    // TODO: Should this.services be in state?
+    if (skipCache) {
+      const serviceIndex = lodash.findIndex(this.services, (s) => s.id === serviceId)
+      this.services[serviceIndex].isCached = false
+    }
+
     const query = `{
       auditService(serviceId: "${serviceId}", skipCache: ${skipCache ? true : false}) ${this.flagQueryResponse}
     }`
