@@ -2,6 +2,7 @@ import React from 'react'
 import graphqlApi from '../../graphql-api'
 import './audit.scss'
 import AuditFlags from './audit-flags'
+import ReviewFlags from './review-flags'
 import AuditProgress from '../shared/audit-progress'
 import lodash from 'lodash'
 
@@ -14,7 +15,8 @@ export default class Audit extends React.Component {
     progressCurrentService: null,
     currentFlag: null,
     allCached: false,
-    serviceLookup: {}
+    serviceLookup: {},
+    summaryMode: false
   }
 
   flagResponseFormat = `{
@@ -166,8 +168,16 @@ export default class Audit extends React.Component {
     })
   }
 
+  toggleSummary = () => {
+    let mode = this.state.summaryMode
+    this.setState({
+      summaryMode: !mode
+    })
+  }
+
   render () {
     const showProgress = !this.state.allCached && this.state.progressCount < this.state.progressTotalCount
+
     return (
       <div className='audit'>
         {
@@ -177,15 +187,23 @@ export default class Audit extends React.Component {
              outOfCount={this.state.progressTotalCount}
              currentService={this.state.progressCurrentService} />
         }
-        <AuditFlags
-          flagsByService={this.state.flagsByService}
-          serviceLookup={this.state.serviceLookup}
-          performAudit={this.performAudit}
-          updateFlag={this.updateFlag}
-          flagResponseFormat={this.flagResponseFormat}
-          showRefresh={!showProgress}
-          groups={this.state.groups}
-        />
+        <button className='button is-pulled-right' onClick={this.toggleSummary}>
+          { this.state.summaryMode ? "Back to Audit" : "Show Summary" }
+        </button>
+        {
+          this.state.summaryMode
+            ? <ReviewFlags
+              flagsByService={this.state.flagsByService}
+              serviceLookup={this.state.serviceLookup} />
+            : <AuditFlags
+              flagsByService={this.state.flagsByService}
+              serviceLookup={this.state.serviceLookup}
+              performAudit={this.performAudit}
+              updateFlag={this.updateFlag}
+              flagResponseFormat={this.flagResponseFormat}
+              showRefresh={!showProgress}
+              groups={this.state.groups} />
+        }
       </div>
     )
   }

@@ -189,7 +189,7 @@ export default class AuditFlags extends React.Component {
     return (
       <div className="audit-flags">
         { flagCount > 0 &&
-          <h2>
+          <h2 className="title">
             {flagCount} Flagged Accounts
           </h2>
         }
@@ -209,7 +209,7 @@ export default class AuditFlags extends React.Component {
           flaggedServices.map((service) => {
             return (
               <div key={service.id} className='container'>
-                <h2 className='title'>{service.displayName}</h2>
+                <h3 className='title'>{service.displayName}</h3>
 
                 <table className='table'>
                   <tbody>
