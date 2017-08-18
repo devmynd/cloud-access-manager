@@ -19,6 +19,7 @@ export type AccountCache = {
   set(serviceId: string, userAccounts: Array<UserAccount>, asOfDate?: Date): void,
   get(serviceId: string): Array<UserAccount>,
   isCached(serviceId: string): boolean,
+  getCachedDate(serviceId: string): ?Date,
   getAccountByEmail(serviceId: string, email: string): ?UserAccount,
   getAccountByUserId(serviceId: string, userId: string): ?UserAccount
 }
@@ -41,15 +42,19 @@ export const accountCache: AccountCache = {
   },
 
   isCached (serviceId: string): boolean {
+    return !!this.getCachedDate(serviceId)
+  },
+
+  getCachedDate (serviceId): ?Date {
     let data: CacheSchema = helpers.readData(process.env.ACCOUNTS_PATH, {})
     if (data.hasOwnProperty(serviceId)) {
       let cachedDate = new Date(data[serviceId].cachedDate)
       const ttlMillis = timeToLiveHours * 60 * 60 * 1000
       const now = new Date()
       const expired = (now - cachedDate > ttlMillis)
-      return !expired
+      return expired ? null : cachedDate
     }
-    return false
+    return null
   },
 
   getAccountByEmail (serviceId: string, email: string) {

@@ -27,7 +27,7 @@ export const serviceManager: ServiceManager = {
 
   async getAccountsForService (serviceId: string, skipCache: boolean): Promise<Array<UserAccount>> {
     let accounts
-    if (accountCache.isCached(serviceId) && !skipCache) {
+    if (!skipCache && accountCache.isCached(serviceId)) {
       accounts = accountCache.get(serviceId)
     } else {
       const provider = this.getProvider(serviceId)
@@ -58,7 +58,7 @@ export const serviceManager: ServiceManager = {
       displayName: module.displayName,
       roles: module.roles,
       isConfigured: configured,
-      isCached: accountCache.isCached(module.id),
+      cachedDate: accountCache.getCachedDate(module.id),
       configKeys: module.configKeys
     }
   }

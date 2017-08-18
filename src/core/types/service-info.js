@@ -5,6 +5,6 @@ export type ServiceInfo = {
   displayName: string,
   roles: Array<string>,
   isConfigured: boolean,
-  isCached: boolean,
+  cachedDate: ?Date,
   configKeys: Array<string>
 }

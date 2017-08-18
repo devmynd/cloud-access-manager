@@ -19,7 +19,8 @@ export default class FlagList extends React.Component {
     progressTotalCount: 0,
     progressCurrentService: null,
     currentFlag: null,
-    allCached: false
+    allCached: false,
+    serviceLookup: {}
   }
 
   flagQueryResponse = `{
@@ -66,7 +67,7 @@ export default class FlagList extends React.Component {
         id
         displayName
         roles
-        isCached
+        cachedDate
       }
     }`
 
@@ -80,11 +81,12 @@ export default class FlagList extends React.Component {
     }
     this.groups = response.data.groups.map((g) => g.name)
     let services = response.data.services
-    this.serviceLookup = {}
-    services.forEach((s) => { this.serviceLookup[s.id] = s })
+    let serviceLookup = {}
+    services.forEach((s) => { serviceLookup[s.id] = s })
     this.setState({
       progressTotalCount: services.length,
-      allCached: lodash.every(services, (s) => s.isCached)
+      allCached: lodash.every(services, (s) => s.cachedDate),
+      serviceLookup
     })
     await this.performAudit()
   }
@@ -97,7 +99,7 @@ export default class FlagList extends React.Component {
         ? 'Set Individual Access Rules'
         : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
       modalContents: flag.individual
-        ? <IndividualAccessRulesForm service={this.serviceLookup[flag.serviceId]} assets={flag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
+        ? <IndividualAccessRulesForm service={this.state.serviceLookup[flag.serviceId]} assets={flag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
         : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} onLinkToIndividualSelected={this.onLinkToIndividualSelected} />
     })
   }
@@ -178,7 +180,7 @@ export default class FlagList extends React.Component {
         flagsByService,
         currentFlag: newFlag,
         modalTitle: 'Set Individual Access Rules',
-        modalContents: <IndividualAccessRulesForm service={this.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
+        modalContents: <IndividualAccessRulesForm service={this.state.serviceLookup[newFlag.serviceId]} assets={newFlag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
       })
     } else {
       flags.splice(flagIndex, 1)
@@ -255,7 +257,7 @@ export default class FlagList extends React.Component {
       allCached: skipCache ? false : this.state.allCached
     })
 
-    for (let serviceId in this.serviceLookup) {
+    for (let serviceId in this.state.serviceLookup) {
 
 
       const flags = await this.performAuditForService(serviceId, skipCache)
@@ -280,7 +282,7 @@ export default class FlagList extends React.Component {
   }
 
   performAuditForService = async (serviceId, skipCache) => {
-    const service = this.serviceLookup[serviceId]
+    const service = this.state.serviceLookup[serviceId]
     const wasAllCached = this.state.allCached
     this.setState({
       progressCurrentService: service.displayName,
@@ -340,11 +342,11 @@ export default class FlagList extends React.Component {
   }
 
   render () {
-    console.log("rendering")
     const flagsByService = this.state.flagsByService
-    const flaggedServices = Object.keys(flagsByService).map((id) => this.serviceLookup[id])
+    const flaggedServices = Object.keys(flagsByService).map((id) => this.state.serviceLookup[id])
     const flagCount = lodash.sumBy(flaggedServices, (service) => flagsByService[service.id].length)
     const showProgress = !this.state.allCached && this.state.progressCount < this.state.progressTotalCount
+    const oldestCachedDate = lodash.first(flaggedServices.map((s) => new Date(s.cachedDate)).sort()) || 'never'
     return (
       <div className='flag-list'>
         {
@@ -360,9 +362,15 @@ export default class FlagList extends React.Component {
           </h2>
         }
         {
-          <span onClick={() => this.performAudit(true)}>
-            <i className="fa fa-refresh fa-2x" aria-hidden="true"></i>
-            Update Cached Accounts
+          !showProgress &&
+          <span>
+            <a className='button' onClick={() => this.performAudit(true)}>
+              <i className="fa fa-refresh fa-2x" aria-hidden="true"></i>
+              Update Cached Accounts
+            </a>
+            <span>
+              Last update: {oldestCachedDate.toString()}
+            </span>
           </span>
         }
         {
