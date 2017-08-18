@@ -53,6 +53,19 @@ class DummyProvider implements ServiceProvider {
             name: 'repo b',
             role: 'member'
           }]
+        },
+        {
+          identity: {
+            fullName: 'Jane Stanton',
+            email: 'stanjane@gmail.com'
+          },
+          assets: [{
+            name: 'repo a',
+            role: 'member'
+          }, {
+            name: 'repo b',
+            role: 'member'
+          }]
         }
       ])
     })

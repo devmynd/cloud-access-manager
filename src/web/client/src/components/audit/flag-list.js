@@ -18,7 +18,8 @@ export default class FlagList extends React.Component {
     progressCount: 0,
     progressTotalCount: 0,
     progressCurrentService: null,
-    currentFlag: null
+    currentFlag: null,
+    allCached: false
   }
 
   flagQueryResponse = `{
@@ -78,11 +79,12 @@ export default class FlagList extends React.Component {
       return
     }
     this.groups = response.data.groups.map((g) => g.name)
-    this.services = response.data.services
+    let services = response.data.services
     this.serviceLookup = {}
-    this.services.forEach((s) => { this.serviceLookup[s.id] = s })
+    services.forEach((s) => { this.serviceLookup[s.id] = s })
     this.setState({
-      progressTotalCount: this.services.length
+      progressTotalCount: services.length,
+      allCached: lodash.every(services, (s) => s.isCached)
     })
     await this.performAudit()
   }
@@ -247,16 +249,14 @@ export default class FlagList extends React.Component {
   }
 
   performAudit = async (skipCache) => {
-
     this.setState({
       progressCount: 0,
-      flagsByService: skipCache ? {} : this.state.flagsByService
+      flagsByService: skipCache ? {} : this.state.flagsByService,
+      allCached: skipCache ? false : this.state.allCached
     })
 
     for (let serviceId in this.serviceLookup) {
-      this.setState({
-        progressCurrentService: this.serviceLookup[serviceId].displayName
-      })
+
 
       const flags = await this.performAuditForService(serviceId, skipCache)
 
@@ -273,33 +273,45 @@ export default class FlagList extends React.Component {
         progressCount
       })
     }
+
+    this.setState({
+      allCached: true
+    })
   }
 
   performAuditForService = async (serviceId, skipCache) => {
-    // TODO: Should this.services be in state?
-    if (skipCache) {
-      const serviceIndex = lodash.findIndex(this.services, (s) => s.id === serviceId)
-      this.services[serviceIndex].isCached = false
-    }
+    const service = this.serviceLookup[serviceId]
+    const wasAllCached = this.state.allCached
+    this.setState({
+      progressCurrentService: service.displayName,
+      allCached: skipCache ? false : wasAllCached
+    })
 
     const query = `{
       auditService(serviceId: "${serviceId}", skipCache: ${skipCache ? true : false}) ${this.flagQueryResponse}
     }`
 
     const response = await graphqlApi.request(query)
+    let flags
     if (response.error) {
       this.messagesContainer.push({
-        title: `Failed to run audit for service: ${this.serviceLookup[serviceId].displayName}`,
+        title: `Failed to run audit for service: ${service.displayName}`,
         body: response.error.message
       })
-      return []
+      flags = []
     } else {
-      let flags = response.data.auditService
+      flags = response.data.auditService
       flags.forEach((flag) => {
         flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
       })
-      return flags
     }
+
+    if (skipCache && wasAllCached) {
+      this.setState({
+        allCached: true
+      })
+    }
+    return flags
   }
 
   onGroupFormComplete = async (selectedGroups) => {
@@ -328,11 +340,11 @@ export default class FlagList extends React.Component {
   }
 
   render () {
+    console.log("rendering")
     const flagsByService = this.state.flagsByService
     const flaggedServices = Object.keys(flagsByService).map((id) => this.serviceLookup[id])
     const flagCount = lodash.sumBy(flaggedServices, (service) => flagsByService[service.id].length)
-    const allCached = lodash.every(this.services, (s) => s.isCached)
-    const showProgress = !allCached && this.state.progressCount < this.state.progressTotalCount
+    const showProgress = !this.state.allCached && this.state.progressCount < this.state.progressTotalCount
     return (
       <div className='flag-list'>
         {
@@ -350,7 +362,7 @@ export default class FlagList extends React.Component {
         {
           <span onClick={() => this.performAudit(true)}>
             <i className="fa fa-refresh fa-2x" aria-hidden="true"></i>
-            Re-run Audit
+            Update Cached Accounts
           </span>
         }
         {
