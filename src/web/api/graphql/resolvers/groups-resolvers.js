@@ -3,6 +3,7 @@
 import type { AccessRule, Group } from '../../../../core/types'
 import { groupStore } from '../../../../core/data/group-store'
 import { serviceManager } from '../../../../core/service-providers/service-manager'
+import { mapGroup } from '../mappers'
 
 export function setGroupAccessRules (args: {
   name: string,
@@ -34,16 +35,4 @@ export function listGroups () {
 export function deleteGroup (args: { name: string }) {
   groupStore.delete(args.name)
   return `Group ${args.name} deleted!`
-}
-
-function mapGroup (group: Group) {
-  return {
-    name: group.name,
-    serviceAccessRules: Object.keys(group.accessRules).map((serviceId) => {
-      return {
-        service: serviceManager.getServiceInfo(serviceId),
-        accessRules: group.accessRules[serviceId]
-      }
-    })
-  }
 }
