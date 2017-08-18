@@ -40,22 +40,24 @@ export default class ReviewFlags extends React.Component {
                   const accounts = assets[asset]
                   return (
                     <div key={asset}>
-                      <h4>{asset}</h4>
-                      <ul>
+                      <h3 className='subtitle'>{asset}</h3>
+
+
                       { accounts.map((account) => {
                         return (
-                          <li key={Math.random()}>
-                            Role: { account.role }
-                            UserId: { account.identity.userId }
-                            Email: { account.identity.email }
-                            Full Name: { account.identity.fullName }
-                          </li>
+                          <div className='columns' key={Math.random()}>
+                            { account.identity.userId && <div className='column is-one-quarter'>Username: { account.identity.userId }</div> }
+                            { account.identity.email && <div className='column is-one-quarter'>Email: { account.identity.email }</div> }
+                            { account.identity.fullName && <div className='column is-one-quarter'>Full Name: { account.identity.fullName }</div> }
+                            { account.role && <div className='column is-one-quarter'>Role: { account.role }</div> }
+                          </div>
                         )
                       })}
-                      </ul>
+                      <hr/>
                     </div>
                   )
                 })}
+                <hr/>
               </div>
             )
           })
