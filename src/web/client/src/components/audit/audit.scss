@@ -1,0 +1,24 @@
+$light-grey: #808080;
+
+.audit {
+
+  .audit-flags {
+    span i {
+      cursor: pointer;
+    }
+
+    .table {
+      margin-top: 20px;
+
+      tr {
+        cursor: pointer;
+        border: 1px solid $light-grey;
+      }
+
+
+      td {
+        padding: 32px 20px;
+      }
+    }
+  }
+}

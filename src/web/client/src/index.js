@@ -8,7 +8,7 @@ import { Switch, Link, Route, BrowserRouter } from 'react-router-dom'
 import ServiceList from './components/services/service-list'
 import GroupList from './components/groups/group-list'
 import Group from './components/groups/group'
-import FlagList from './components/audit/flag-list'
+import Audit from './components/audit/audit'
 
 const NavBar = (props) => {
   return (
@@ -43,7 +43,7 @@ class App extends React.Component {
             <NavBarLink to='/services'>Services</NavBarLink>
           </NavBar>
           <Switch>
-            <Route exact path='/' component={FlagList} />
+            <Route exact path='/' component={Audit} />
             <Route exact path='/services' component={ServiceList} />
             <Route exact path='/groups' component={GroupList} />
             <Route path='/groups/:groupName' component={GroupMatcher} />
