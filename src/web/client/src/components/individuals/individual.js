@@ -57,6 +57,10 @@ export default class Individual extends React.Component {
     return accessRuleDescriptions
   }
 
+  removeAccessRule = (event, rule) => {
+    console.log(rule)
+  }
+
   render() {
     const individual = this.state.individual
     let accessRuleDescriptions = []
@@ -98,7 +102,11 @@ export default class Individual extends React.Component {
                     <h2 className="subtitle">Group '{group.name}' Access Rules</h2>
                     <ul>
                       {
-                        this.mapToAccessRuleDescriptions(group.serviceAccessRules).map((d) => <li key={d}>{d}</li>)
+                        this.mapToAccessRuleDescriptions(group.serviceAccessRules).map((d) =>
+                        <li key={d}>
+                          <a className="button" onClick={() => this.removeAccessRule(e, d)}>Delete</a>
+                          {d}
+                        </li>)
                       }
                     </ul>
                   </div>

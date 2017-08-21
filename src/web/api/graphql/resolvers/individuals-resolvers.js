@@ -49,6 +49,27 @@ export function addIndividualAccessRules (args: { individualId: string, serviceI
   return 'Rules added successfully'
 }
 
+export function updateIndividual (args: { individual: {
+  individualId: string,
+  fullName: string,
+  primaryEmail: string,
+  groups: Array<string>,
+  accessRules: [{
+    serviceId: string,
+    accessRules: Array<AccessRule>
+  }]
+}
+}) {
+  const individual = individualStore.getById(args.individual.individualId)
+  const updatedAccessRules = {}
+  args.individual.accessRules.forEach((ruleList) => {
+    updatedAccessRules[ruleList.serviceId] = ruleList.accessRules
+  })
+
+  individual.accessRules = updatedAccessRules
+  individualStore.save(individual)
+}
+
 export function getIndividuals (args: { fuzzySearch: ?string, limit: ?number }) {
   if (args.fuzzySearch && args.fuzzySearch.trim() === '') {
     return []

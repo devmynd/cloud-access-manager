@@ -96,6 +96,14 @@ export const schema = buildSchema(`
     accessRules: [AccessRuleInput]!
   }
 
+  input UpdateIndividualInput {
+    individualId: String!,
+    fullName: String!,
+    primaryEmail: String!,
+    groups: [String]!,
+    accessRules: [ServiceAccessRuleListInput]!
+  }
+
   type Mutation {
     createIndividual(individual: NewIndividualInput): String
     linkServiceToIndividual(serviceId: String!, individualId: String!, fullName: String, email: String, userId: String): String
@@ -104,6 +112,7 @@ export const schema = buildSchema(`
     disableService(serviceId: String): String
     setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
     delete(name: String): String
+    updateIndividual(individual: UpdateIndividualInput): String
   }
 `)
 
@@ -111,6 +120,7 @@ export const root = {
   createIndividual: resolvers.individuals.createIndividual,
   linkServiceToIndividual: resolvers.individuals.linkServiceToIndividual,
   addIndividualAccessRules: resolvers.individuals.addIndividualAccessRules,
+  updateIndividual: resolvers.individuals.updateIndividual,
   individuals: resolvers.individuals.getIndividuals,
   auditService: resolvers.accounts.auditService,
   auditServiceUserAccount: resolvers.accounts.auditServiceUserAccount,
