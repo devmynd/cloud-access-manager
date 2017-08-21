@@ -96,9 +96,10 @@ export default class Group extends React.Component {
   addService = (serviceId) => {
     const group = this.state.group
     const service = lodash.find(this.state.services, (s) => s.id === serviceId)
+    const roles = service.roles.length > 0 ? service.roles : ['*']
     const serviceAccessRule = {
       service,
-      accessRules: service.roles.map((r) => {
+      accessRules: roles.map((r) => {
         return {
           asset: '*',
           role: r
