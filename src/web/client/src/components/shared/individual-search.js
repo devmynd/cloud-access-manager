@@ -43,7 +43,9 @@ export default class IndividualSearch extends React.Component {
     return (
       <div>
         <span>{individual.fullName}</span>
-        <span>{ individual.primaryEmail || '' }</span>
+        { individual.primaryEmail &&
+          <span> ({ individual.primaryEmail })</span>
+        }
       </div>
     )
   }

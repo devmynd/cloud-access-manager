@@ -9,6 +9,7 @@ import ServiceList from './components/services/service-list'
 import GroupList from './components/groups/group-list'
 import Group from './components/groups/group'
 import Audit from './components/audit/audit'
+import Individual from './components/individuals/individual'
 
 const NavBar = (props) => {
   return (
@@ -47,6 +48,7 @@ class App extends React.Component {
             <Route exact path='/services' component={ServiceList} />
             <Route exact path='/groups' component={GroupList} />
             <Route path='/groups/:groupName' component={GroupMatcher} />
+            <Route exact path='/individuals' component={Individual} />
             <Route component={() => <p>not found</p>} />
           </Switch>
         </div>

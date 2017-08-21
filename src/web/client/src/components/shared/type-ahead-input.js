@@ -1,4 +1,5 @@
 import React from 'react'
+import './type-ahead-input.scss'
 
 export default class TypeAheadInput extends React.Component {
   state = {
