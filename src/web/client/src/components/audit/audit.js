@@ -143,6 +143,14 @@ export default class Audit extends React.Component {
       flags.forEach((flag) => {
         flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
       })
+      if (skipCache) {
+        let serviceLookup = this.state.serviceLookup
+        service.cachedDate = new Date().toString()
+        serviceLookup[service.id] = service
+        this.setState({
+          serviceLookup
+        })
+      }
     }
 
     if (skipCache && wasAllCached) {
@@ -150,6 +158,7 @@ export default class Audit extends React.Component {
         allCached: true
       })
     }
+
     return flags
   }
 
@@ -194,7 +203,9 @@ export default class Audit extends React.Component {
           this.state.summaryMode
             ? <ReviewFlags
               flagsByService={this.state.flagsByService}
-              serviceLookup={this.state.serviceLookup} />
+              serviceLookup={this.state.serviceLookup}
+              performAuditForService={this.performAuditForService}
+              />
             : <AuditFlags
               flagsByService={this.state.flagsByService}
               serviceLookup={this.state.serviceLookup}
