@@ -54,6 +54,17 @@ export default class Individual extends React.Component {
                 </ul>
               </div>
             </section>
+
+            <section className="section">
+              <div className="container">
+                <h2 className="subtitle">Groups</h2>
+                <ul>
+                  {
+                    individual.groups.map((g) => <li key={g}>{g}</li>)
+                  }
+                </ul>
+              </div>
+            </section>
           </div>
         }
       </div>
