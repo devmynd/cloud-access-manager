@@ -143,7 +143,7 @@ export default class Audit extends React.Component {
       flags.forEach((flag) => {
         flag.key = `${flag.serviceId}${flag.userIdentity.email || flag.userIdentity.userId || new Date().valueOf()}`
       })
-      if (skipCache) {
+      if (skipCache || !service.cachedDate) {
         let serviceLookup = this.state.serviceLookup
         service.cachedDate = new Date().toString()
         serviceLookup[service.id] = service

@@ -21,11 +21,9 @@ class DummyProvider implements ServiceProvider {
             userId: 'shamwow16'
           },
           assets: [{
-            name: 'repo a',
-            role: 'owner'
+            name: 'repo a'
           }, {
-            name: 'repo b',
-            role: 'member'
+            name: 'repo b'
           }]
         },
         {
@@ -34,11 +32,9 @@ class DummyProvider implements ServiceProvider {
             email: 'ty@devmynd.com'
           },
           assets: [{
-            name: 'repo a',
-            role: 'member'
+            name: 'repo a'
           }, {
-            name: 'repo b',
-            role: 'owner'
+            name: 'repo b'
           }]
         },
         {
@@ -47,11 +43,9 @@ class DummyProvider implements ServiceProvider {
             email: 'mevans@devmynd.com'
           },
           assets: [{
-            name: 'repo a',
-            role: 'member'
+            name: 'repo a'
           }, {
-            name: 'repo b',
-            role: 'member'
+            name: 'repo b'
           }]
         },
         {
@@ -60,11 +54,9 @@ class DummyProvider implements ServiceProvider {
             email: 'stanjane@gmail.com'
           },
           assets: [{
-            name: 'repo a',
-            role: 'member'
+            name: 'repo a'
           }, {
-            name: 'repo b',
-            role: 'member'
+            name: 'repo b'
           }]
         }
       ])
@@ -81,7 +73,7 @@ class DummyProvider implements ServiceProvider {
 export const dummyProviderModule: ServiceProviderModule = {
   id: 'dummy',
   displayName: 'Dummy Service',
-  roles: ['member', 'owner'],
+  roles: [],
   configKeys: configKeys,
   providerFactory (config) {
     return new DummyProvider(config)

@@ -4,7 +4,8 @@ import Modal from '../shared/modal'
 import UnknownUserForm from './unknown-user-form'
 import NewIndividualForm from './new-individual-form'
 import GroupSelectionForm from './group-selection-form'
-import IndividualAccessRulesForm from './individual-access-rules-form'
+import RoleBasedAccessRulesForm from './role-based-access-rules-form'
+import AssetBasedAccessRulesForm from './asset-based-access-rules-form'
 import LinkIndividualForm from './link-individual-form'
 import MessagesContainer from '../shared/messages-container'
 import lodash from 'lodash'
@@ -17,10 +18,10 @@ export default class AuditFlags extends React.Component {
       showModal: true,
       currentFlag: flag,
       modalTitle: flag.individual
-        ? 'Set Individual Access Rules'
+        ? 'Select Roles'
         : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
       modalContents: flag.individual
-        ? <IndividualAccessRulesForm service={this.props.serviceLookup[flag.serviceId]} assets={flag.assets} onAccessRuleSelection={this.setIndividualAccessRules} />
+        ? <RoleBasedAccessRulesForm service={this.props.serviceLookup[flag.serviceId]} assets={flag.assets} onRolesSelected={this.onRolesSelected} />
         : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} onLinkToIndividualSelected={this.onLinkToIndividualSelected} />
     })
   }
@@ -95,17 +96,59 @@ export default class AuditFlags extends React.Component {
     if (newFlag) {
       this.setState({
         currentFlag: newFlag,
-        modalTitle: 'Set Individual Access Rules',
-        modalContents: <IndividualAccessRulesForm
+        modalTitle: 'Select Roles',
+        modalContents: <RoleBasedAccessRulesForm
           service={this.props.serviceLookup[newFlag.serviceId]}
           assets={newFlag.assets}
-          onAccessRuleSelection={this.setIndividualAccessRules} />
+          onRolesSelected={this.onRolesSelected} />
       })
     } else {
       this.setState({
         showModal: false
       })
     }
+  }
+
+  onRolesSelected = (selectedRoles) => {
+    const flag = this.state.currentFlag
+
+    const onAssetsSelected = (selectedAssets) => {
+      const rules = this.createAccessRules(selectedRoles, selectedAssets)
+      this.setIndividualAccessRules(rules)
+    }
+
+    const hasFullAccess = (selectedRoles.length === 1 && selectedRoles[0] === "*")
+
+    const remainingAssets = hasFullAccess
+      ? []
+      : flag.assets.filter((a) => !selectedRoles.includes(a.role))
+
+    if (remainingAssets.length < 1) {
+      onAssetsSelected([])
+      return
+    }
+
+    this.setState({
+      modalTitle: 'Select Assets',
+      modalContents: <AssetBasedAccessRulesForm
+        service={this.props.serviceLookup[flag.serviceId]}
+        assets={remainingAssets}
+        onAssetsSelected={onAssetsSelected} />
+    })
+  }
+
+  createAccessRules = (selectedRoles, selectedAssets) => {
+    return selectedRoles.map((role) => {
+      return {
+        role: role,
+        asset: "*"
+      }
+    }).concat(selectedAssets.map((asset) => {
+      return {
+        role: asset.role,
+        asset: asset.name
+      }
+    }))
   }
 
   setIndividualAccessRules = async (selectedAccessRules) => {
@@ -116,7 +159,7 @@ export default class AuditFlags extends React.Component {
         serviceId: "${flag.serviceId}",
         accessRules: [${selectedAccessRules.map((rule) => `{
           asset: "${rule.asset}",
-          role: "${rule.role}"
+          role: "${rule.role ? rule.role : '*'}"
         }`).join(',')}])
     }`
     const response = await graphqlApi.request(query)

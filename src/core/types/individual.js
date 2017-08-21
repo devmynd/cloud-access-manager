@@ -1,5 +1,6 @@
 // @flow
 import type { ServiceAccessHash, UserIdentity } from './'
+import uuid from 'uuid/v4'
 
 export type Individual = {
   id: string,
@@ -10,13 +11,9 @@ export type Individual = {
   groups: Array<string>
 }
 
-function generateUUID () {
-  return (Math.random() * 16).toString()
-}
-
 export function newIndividualFactory (fullName: string, primaryEmail: ?string, groups: Array<string>): Individual {
   return {
-    id: generateUUID(),
+    id: uuid(),
     fullName,
     primaryEmail,
     serviceUserIdentities: {},
