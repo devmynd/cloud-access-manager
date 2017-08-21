@@ -18,6 +18,7 @@ export default class IndividualSearch extends React.Component {
         accessRules {
           service {
             id
+            displayName
           }
           accessRules {
             asset
