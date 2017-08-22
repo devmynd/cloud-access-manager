@@ -7,7 +7,7 @@ import { mapIndividual } from '../mappers'
 export function createIndividual (args: { individual: { fullName: string, primaryEmail: ?string, groups: Array<string> } }) {
   const individual = newIndividualFactory(args.individual.fullName, args.individual.primaryEmail, args.individual.groups)
   individualStore.save(individual)
-  return individual.id
+  return mapIndividual(individual)
 }
 
 export function deleteIndividual (args: { individualId: string} ) {
@@ -23,9 +23,6 @@ export function linkServiceToIndividual (args: { serviceId: string, individualId
   }
   if (args.email && args.email.trim().length > 0) {
     identity.email = args.email
-    if (!individual.primaryEmail) {
-      individual.primaryEmail = identity.email
-    }
   }
   if (args.userId && args.userId.trim().length > 0) {
     identity.userId = args.userId
@@ -99,4 +96,12 @@ export function unlinkService (args: { serviceId: string, individualId: string }
   individualStore.save(individual)
 
   return "Unlinked successfully"
+}
+
+export function updatePrimaryEmail (args: { individualId: string, primaryEmail: ?string }) {
+  const individual = individualStore.getById(args.individualId)
+  individual.primaryEmail = args.primaryEmail
+  individualStore.save(individual)
+
+  return "email updated"
 }

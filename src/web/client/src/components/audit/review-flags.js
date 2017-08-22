@@ -11,8 +11,7 @@ export default class ReviewFlags extends React.Component {
       showUpdateButtonText: false
     })
 
-    const flags = await this.props.performAuditForService(serviceId, true)
-    this.props.flagsByService[serviceId] = flags
+    await this.props.performAuditForService(serviceId, true)
 
     this.setState({
       showUpdateButtonText: true

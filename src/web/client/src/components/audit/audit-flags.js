@@ -8,6 +8,7 @@ import RoleBasedAccessRulesForm from './role-based-access-rules-form'
 import AssetBasedAccessRulesForm from './asset-based-access-rules-form'
 import LinkIndividualForm from './link-individual-form'
 import MessagesContainer from '../shared/messages-container'
+import ConfirmEmailForm from './confirm-email-form'
 import lodash from 'lodash'
 
 export default class AuditFlags extends React.Component {
@@ -15,6 +16,7 @@ export default class AuditFlags extends React.Component {
 
   showModal = (flag) => {
     this.pendingNewIndividual = null
+    this.modalBackBehavior = this.closeModal
     this.setState({
       showModal: true,
       currentFlag: flag,
@@ -22,7 +24,6 @@ export default class AuditFlags extends React.Component {
       modalTitle: flag.individual
         ? 'Select Roles'
         : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
-      modalBackBehavior: () => { this.closeModal() },
       modalContents: flag.individual
         ? <RoleBasedAccessRulesForm service={this.props.serviceLookup[flag.serviceId]} assets={flag.assets} onRolesSelected={this.onRolesSelected} />
         : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} onLinkToIndividualSelected={this.onLinkToIndividualSelected} />
@@ -39,9 +40,9 @@ export default class AuditFlags extends React.Component {
 
   onNewIndividualSelected = () => {
     const flag = this.state.currentFlag
+    this.modalBackBehavior = () => { this.showModal(this.state.originalFlag) }
     this.setState({
       modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || 'blah'}`,
-      modalBackBehavior: () => { this.showModal(this.state.originalFlag) },
       modalContents: <NewIndividualForm flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
     })
   }
@@ -59,44 +60,94 @@ export default class AuditFlags extends React.Component {
       fullName,
       primaryEmail
     }
+    this.modalBackBehavior = this.onNewIndividualSelected
     this.setState({
       modalTitle: `Select groups`,
-      modalBackBehavior: () => { this.onNewIndividualSelected() },
       modalContents: <GroupSelectionForm groups={this.props.groups} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
     })
   }
 
   onLinkToIndividualSelected = () => {
+    this.modalBackBehavior = () => { this.showModal(this.state.originalFlag) }
     this.setState({
       modalTitle: 'Link to an individual',
-      modalBackBehavior: () => { this.showModal(this.state.originalFlag) },
       modalContents: <LinkIndividualForm onIndividualSelected={this.onIndividualSelectedToLink} />
     })
   }
 
   onIndividualSelectedToLink = (individual) => {
-    this.linkIndividual(individual.id)
+    this.linkIndividual(individual, this.onLinkIndividualComplete)
   }
 
-  linkIndividual = async (individualId) => {
+  onLinkIndividualComplete = (individual) => {
+    this.modalBackBehavior = () => { this.rollbackLinkIndividual(individual) }
+    const flag = this.state.currentFlag
+    const hasIdentityEmail = flag.userIdentity.email && flag.userIdentity.email.trim() !== ""
+    if (hasIdentityEmail && flag.userIdentity.email !== individual.primaryEmail) {
+      this.setState({
+        modalTitle: "New Email Found",
+        modalContents: <ConfirmEmailForm
+          individual={individual}
+          email={flag.userIdentity.email}
+          onConfirm={() => this.onAssignPrimaryEmailChoiceSelected(true, individual, flag.userIdentity.email)}
+          onReject={() => this.onAssignPrimaryEmailChoiceSelected(false, individual, flag.userIdentity.email)} />
+      })
+    } else {
+      this.onReadyToAssignRules()
+    }
+  }
+
+  linkIndividual = async (individual, callback) => {
     const flag = this.state.currentFlag
 
     const query = `mutation {
       linkServiceToIndividual(
         serviceId: "${flag.serviceId}",
-        individualId:"${individualId}",
+        individualId:"${individual.id}",
         ${flag.userIdentity.fullName ? `fullName: "${flag.userIdentity.fullName}"` : ''},
         ${flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : ''},
         ${flag.userIdentity.userId ? `userId: "${flag.userIdentity.userId}"` : ''}
       )
     }`
+
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
         title: 'Failed to link to existing individual',
         body: response.error.message
       })
+    } else {
+      callback(individual)
     }
+  }
+
+  onAssignPrimaryEmailChoiceSelected = async (shouldAssign, individual, newEmail) => {
+    const previousEmail = individual.primaryEmail
+    if (shouldAssign) {
+      const query = `mutation { updatePrimaryEmail(individualId: "${individual.id}", primaryEmail: "${newEmail}") }`
+      const response = await graphqlApi.request(query)
+      if (response.error) {
+        this.messagesContainer.push({
+          title: 'Failed to save primary email',
+          body: response.error.message
+        })
+        return
+      }
+      // since we changed the email. some other flags might auto-match and change, so we need to re-run the audit.
+      this.props.performAudit()
+    }
+
+    this.modalBackBehavior = async () => {
+      await this.rollbackPrimaryEmail(individual, previousEmail)
+      if (shouldAssign) {
+        this.props.performAudit()
+      }
+    }
+    this.onReadyToAssignRules()
+  }
+
+  onReadyToAssignRules = async () => {
+    const flag = this.state.currentFlag
     const newFlag = await this.reCheckFlag(flag)
     this.props.updateFlag(flag, newFlag)
     if (newFlag) {
@@ -106,6 +157,19 @@ export default class AuditFlags extends React.Component {
         showModal: false
       })
     }
+  }
+
+  rollbackPrimaryEmail = async (individual, previousEmail) => {
+    const query = `mutation { updatePrimaryEmail(individualId: "${individual.id}", primaryEmail: ${previousEmail ? `"${previousEmail}"` : `null`}) }`
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: 'Failed to roll back primary email',
+        body: response.error.message
+      })
+      return
+    }
+    this.onLinkIndividualComplete(individual)
   }
 
   rollbackNewIndividual = async (individual) => {
@@ -121,9 +185,9 @@ export default class AuditFlags extends React.Component {
     }
   }
 
-  rollbackLinkIndividual = async () => {
+  rollbackLinkIndividual = async (individual) => {
     const flag = this.state.currentFlag
-    const query = `mutation { unlinkService(serviceId: "${flag.serviceId}", individualId: "${flag.individual.id}")}`
+    const query = `mutation { unlinkService(serviceId: "${flag.serviceId}", individualId: "${individual.id}")}`
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
@@ -132,6 +196,8 @@ export default class AuditFlags extends React.Component {
       })
     } else {
       this.onLinkToIndividualSelected()
+      console.log("rolling back " + flag.serviceId)
+      this.props.performAuditForService(flag.serviceId)
     }
   }
 
@@ -139,9 +205,6 @@ export default class AuditFlags extends React.Component {
     this.setState({
       currentFlag: flag,
       modalTitle: 'Select Roles',
-      modalBackBehavior: this.pendingNewIndividual
-        ? () => { this.rollbackNewIndividual(flag.individual) }
-        : () => { this.rollbackLinkIndividual() },
       modalContents: <RoleBasedAccessRulesForm
         service={this.props.serviceLookup[flag.serviceId]}
         assets={flag.assets}
@@ -168,9 +231,9 @@ export default class AuditFlags extends React.Component {
       return
     }
 
+    this.modalBackBehavior = () => { this.showRoleBasedAccessRules(flag) }
     this.setState({
       modalTitle: 'Select Assets',
-      modalBackBehavior: () => { this.showRoleBasedAccessRules(flag) },
       modalContents: <AssetBasedAccessRulesForm
         service={this.props.serviceLookup[flag.serviceId]}
         assets={remainingAssets}
@@ -226,11 +289,11 @@ export default class AuditFlags extends React.Component {
         fullName: "${this.pendingNewIndividual.fullName}"
         ${this.pendingNewIndividual.primaryEmail ? `primaryEmail: "${this.pendingNewIndividual.primaryEmail}"` : ''}
         groups: [${selectedGroups.map((g) => `"${g}"`).join(',')}]
-      })
+      }) ${this.props.individualResponseFormat}
     }`
 
     const response = await graphqlApi.request(query)
-    const individualId = response.data.createIndividual
+    const individual = response.data.createIndividual
 
     if (response.error) {
       this.messagesContainer.push({
@@ -238,8 +301,12 @@ export default class AuditFlags extends React.Component {
         body: response.error.message
       })
     } else {
-      await this.linkIndividual(individualId)
-      await this.props.performAudit()
+      this.modalBackBehavior = () => {
+        this.rollbackNewIndividual(individual)
+        this.props.performAudit()
+      }
+      this.linkIndividual(individual, this.onReadyToAssignRules)
+      this.props.performAudit()
     }
   }
 
@@ -325,7 +392,7 @@ export default class AuditFlags extends React.Component {
         }
 
         { this.state.showModal &&
-          <Modal title={this.state.modalTitle} closeHandler={this.closeModal} onBackButtonClicked={this.state.modalBackBehavior}>
+          <Modal title={this.state.modalTitle} closeHandler={this.closeModal} onBackButtonClicked={() => { this.modalBackBehavior() }}>
             { this.state.modalContents }
           </Modal>
         }

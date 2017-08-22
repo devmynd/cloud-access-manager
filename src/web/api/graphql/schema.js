@@ -105,16 +105,17 @@ export const schema = buildSchema(`
   }
 
   type Mutation {
-    createIndividual(individual: NewIndividualInput): String
+    createIndividual(individual: NewIndividualInput!): Individual
     linkServiceToIndividual(serviceId: String!, individualId: String!, fullName: String, email: String, userId: String): String
-    unlinkService(serviceId: String, individualId: String): String
-    addIndividualAccessRules(individualId: String, serviceId: String, accessRules: [AccessRuleInput]): String
-    configureService(serviceId: String, configJson: String): String
-    disableService(serviceId: String): String
-    setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
-    deleteGroup(name: String): String
-    updateIndividual(individual: UpdateIndividualInput): String
-    deleteIndividual(individualId: String): String
+    unlinkService(serviceId: String!, individualId: String!): String
+    addIndividualAccessRules(individualId: String!, serviceId: String!, accessRules: [AccessRuleInput]!): String
+    configureService(serviceId: String!, configJson: String!): String
+    disableService(serviceId: String!): String
+    setGroupAccessRules(name: String!, serviceAccessRules: [ServiceAccessRuleListInput]!): String
+    deleteGroup(name: String!): String
+    updateIndividual(individual: UpdateIndividualInput!): String
+    deleteIndividual(individualId: String!): String
+    updatePrimaryEmail(individualId: String!, primaryEmail: String): String
   }
 `)
 
@@ -134,5 +135,6 @@ export const root = {
   groups: resolvers.groups.listGroups,
   deleteGroup: resolvers.groups.deleteGroup,
   deleteIndividual: resolvers.individuals.deleteIndividual,
-  unlinkService: resolvers.individuals.unlinkService
+  unlinkService: resolvers.individuals.unlinkService,
+  updatePrimaryEmail: resolvers.individuals.updatePrimaryEmail
 }

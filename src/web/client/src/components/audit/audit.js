@@ -19,29 +19,31 @@ export default class Audit extends React.Component {
     summaryMode: false
   }
 
-  flagResponseFormat = `{
-    individual {
-      id
-      fullName
-      primaryEmail
-      serviceUserIdentities {
-        serviceId
-        userIdentity {
-          email
-          userId
-        }
+  individualResponseFormat = `{
+    id
+    fullName
+    primaryEmail
+    serviceUserIdentities {
+      serviceId
+      userIdentity {
+        email
+        userId
+      }
+    }
+    accessRules {
+      service {
+        id
       }
       accessRules {
-        service {
-          id
-        }
-        accessRules {
-          asset
-          role
-        }
+        asset
+        role
       }
-      groups
     }
+    groups
+  }`
+
+  flagResponseFormat = `{
+    individual ${this.individualResponseFormat}
     serviceId
     userIdentity {
       email
@@ -95,22 +97,7 @@ export default class Audit extends React.Component {
     })
 
     for (let serviceId in this.state.serviceLookup) {
-
-
-      const flags = await this.performAuditForService(serviceId, skipCache)
-
-      let flagsByService = this.state.flagsByService
-      if (flags.length > 0) {
-        flagsByService[serviceId] = flags
-      } else {
-        delete flagsByService[serviceId]
-      }
-
-      let progressCount = this.state.progressCount + 1
-      this.setState({
-        flagsByService,
-        progressCount
-      })
+      await this.performAuditForService(serviceId, skipCache)
     }
 
     this.setState({
@@ -153,13 +140,19 @@ export default class Audit extends React.Component {
       }
     }
 
-    if (skipCache && wasAllCached) {
-      this.setState({
-        allCached: true
-      })
+    let flagsByService = this.state.flagsByService
+    if (flags.length > 0) {
+      flagsByService[serviceId] = flags
+    } else {
+      delete flagsByService[serviceId]
     }
 
-    return flags
+    let progressCount = this.state.progressCount + 1
+    this.setState({
+      flagsByService,
+      progressCount,
+      allCached: (skipCache && wasAllCached) ? true : this.state.allCached
+    })
   }
 
   updateFlag = (oldFlag, newFlag) => {
@@ -210,8 +203,10 @@ export default class Audit extends React.Component {
               flagsByService={this.state.flagsByService}
               serviceLookup={this.state.serviceLookup}
               performAudit={this.performAudit}
+              performAuditForService={this.performAuditForService}
               updateFlag={this.updateFlag}
               flagResponseFormat={this.flagResponseFormat}
+              individualResponseFormat={this.individualResponseFormat}
               showRefresh={!showProgress}
               groups={this.state.groups} />
         }
