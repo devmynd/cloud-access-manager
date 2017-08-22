@@ -7,6 +7,7 @@ export default class Individual extends React.Component {
   state = {
     individual: null,
     groups: [],
+    // TODO: Not used
     individualAccessRules: {}
   }
 
@@ -143,6 +144,7 @@ export default class Individual extends React.Component {
                     individual.accessRules.map((serviceAccessRule) =>
                       serviceAccessRule.accessRules.map((rule) =>
                       <li key={serviceAccessRule.service.id + rule.asset + rule.role}>
+                        {/* TODO: Why not use the mapToAccessRuleDescriptions helper here?  */}
                         {serviceAccessRule.service.displayName} { rule.asset === "*" ? null : ` / ${rule.asset}`} { rule.role === "*" ? null  : ` / ${rule.role}` }
                         <a className="button" onClick={() => this.removeAccessRule(serviceAccessRule.service.id, rule)}>Delete</a>
                       </li>))

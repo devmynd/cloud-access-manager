@@ -49,6 +49,8 @@ export function addIndividualAccessRules (args: { individualId: string, serviceI
   return 'Rules added successfully'
 }
 
+// TODO: what if here, and in the schema, we made all the individual's field optional, then we only update whichever fields are supplied?
+// would that be better or worse? 
 export function updateIndividual (args: { individual: {
   individualId: string,
   fullName: string,
@@ -66,9 +68,12 @@ export function updateIndividual (args: { individual: {
     updatedAccessRules[ruleList.serviceId] = ruleList.accessRules
   })
 
+  // TODO: is this if check needed?
   if (args.individual.groups) {
     individual.groups = args.individual.groups
   }
+
+  // TODO: What about fullname and primary email?
 
   individual.accessRules = updatedAccessRules
   individualStore.save(individual)
