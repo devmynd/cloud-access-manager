@@ -66,6 +66,10 @@ export function updateIndividual (args: { individual: {
     updatedAccessRules[ruleList.serviceId] = ruleList.accessRules
   })
 
+  if (args.individual.groups) {
+    individual.groups = args.individual.groups
+  }
+
   individual.accessRules = updatedAccessRules
   individualStore.save(individual)
 

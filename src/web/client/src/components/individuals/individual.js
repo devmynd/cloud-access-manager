@@ -71,6 +71,16 @@ export default class Individual extends React.Component {
     this.save(individual)
   }
 
+  removeGroup = (groupName) => {
+    const individual = this.state.individual
+    const groupIndex = lodash.findIndex(individual.groups, (g) => g === groupName)
+    individual.groups.splice(groupIndex, 1)
+    //TODO: Groups do get removed but when the last remaining group is removed, the individual
+    // is saved in json file with a groups array of [""] instead of []. Need to figure out where and why
+    // this is happening
+    this.save(individual)
+  }
+
   mapServiceAccessRuleToMutation = (serviceAccessRule) => {
     return `{
       serviceId:"${serviceAccessRule.service.id}",
@@ -151,6 +161,7 @@ export default class Individual extends React.Component {
                         this.mapToAccessRuleDescriptions(group.serviceAccessRules).map((d) => <li key={d}>{d}</li>)
                       }
                     </ul>
+                    <a className="button" onClick={() => this.removeGroup(group.name)}>Delete</a>
                   </div>
                 </section>
               ))
