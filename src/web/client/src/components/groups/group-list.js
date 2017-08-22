@@ -78,7 +78,7 @@ export default class GroupList extends React.Component {
   }
 
   delete = async (name) => {
-    const query = `mutation { delete(name: "${name}") }`
+    const query = `mutation { deleteGroup(name: "${name}") }`
     const response = await graphqlApi.request(query)
 
     if (response.error) {

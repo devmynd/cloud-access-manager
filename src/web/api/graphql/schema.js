@@ -107,12 +107,14 @@ export const schema = buildSchema(`
   type Mutation {
     createIndividual(individual: NewIndividualInput): String
     linkServiceToIndividual(serviceId: String!, individualId: String!, fullName: String, email: String, userId: String): String
+    unlinkService(serviceId: String, individualId: String): String
     addIndividualAccessRules(individualId: String, serviceId: String, accessRules: [AccessRuleInput]): String
     configureService(serviceId: String, configJson: String): String
     disableService(serviceId: String): String
     setGroupAccessRules(name: String, serviceAccessRules: [ServiceAccessRuleListInput]): String
-    delete(name: String): String
+    deleteGroup(name: String): String
     updateIndividual(individual: UpdateIndividualInput): String
+    deleteIndividual(individualId: String): String
   }
 `)
 
@@ -130,5 +132,7 @@ export const root = {
   setGroupAccessRules: resolvers.groups.setGroupAccessRules,
   group: resolvers.groups.getGroup,
   groups: resolvers.groups.listGroups,
-  delete: resolvers.groups.deleteGroup
+  deleteGroup: resolvers.groups.deleteGroup,
+  deleteIndividual: resolvers.individuals.deleteIndividual,
+  unlinkService: resolvers.individuals.unlinkService
 }

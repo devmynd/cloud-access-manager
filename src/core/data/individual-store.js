@@ -13,7 +13,8 @@ export type IndividualStore = {
   getByFuzzySearch(search: string, limit: ?number): Array <Individual>,
   getById(id: string): Individual,
   getByServiceUserIdentity(serviceId: string, userIdentity: UserIdentity):
-    ? Individual
+    ? Individual,
+  delete(individualId: string): void
 }
 
 export const individualStore: IndividualStore = {
@@ -78,5 +79,16 @@ export const individualStore: IndividualStore = {
       })
     }
     throw new Error('Cannot match a service account that has no email or userId')
+  },
+
+  delete (individualId: string) {
+    let individuals : Array < Individual > = helpers.readData(process.env.INDIVIDUALS_PATH, [])
+    let existingIndex = lodash.findIndex(individuals, (entry) => {
+      return entry.id === individualId
+    })
+    if(existingIndex !== -1) {
+      individuals.splice(existingIndex, 1)
+    }
+    fs.writeFileSync(process.env.INDIVIDUALS_PATH, JSON.stringify(individuals))
   }
 }

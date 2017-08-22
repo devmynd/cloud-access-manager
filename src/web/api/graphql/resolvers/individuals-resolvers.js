@@ -10,6 +10,11 @@ export function createIndividual (args: { individual: { fullName: string, primar
   return individual.id
 }
 
+export function deleteIndividual (args: { individualId: string} ) {
+  individualStore.delete(args.individualId)
+  return "Deleted"
+}
+
 export function linkServiceToIndividual (args: { serviceId: string, individualId: string, fullName: ?string, email: ?string, userId: ?string }) {
   const individual = individualStore.getById(args.individualId)
   let identity = {}
@@ -86,4 +91,12 @@ export function getIndividuals (args: { fuzzySearch: ?string, limit: ?number }) 
     : individualStore.getAll(args.limit)
 
   return individualList.map(mapIndividual)
+}
+
+export function unlinkService (args: { serviceId: string, individualId: string }) {
+  const individual = individualStore.getById(args.individualId)
+  delete individual.serviceUserIdentities[args.serviceId]
+  individualStore.save(individual)
+
+  return "Unlinked successfully"
 }

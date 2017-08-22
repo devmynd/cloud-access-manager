@@ -14,12 +14,15 @@ export default class AuditFlags extends React.Component {
   state = { }
 
   showModal = (flag) => {
+    this.pendingNewIndividual = null
     this.setState({
       showModal: true,
       currentFlag: flag,
+      originalFlag: flag,
       modalTitle: flag.individual
         ? 'Select Roles'
         : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
+      modalBackBehavior: () => { this.closeModal() },
       modalContents: flag.individual
         ? <RoleBasedAccessRulesForm service={this.props.serviceLookup[flag.serviceId]} assets={flag.assets} onRolesSelected={this.onRolesSelected} />
         : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} onLinkToIndividualSelected={this.onLinkToIndividualSelected} />
@@ -38,6 +41,7 @@ export default class AuditFlags extends React.Component {
     const flag = this.state.currentFlag
     this.setState({
       modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || 'blah'}`,
+      modalBackBehavior: () => { this.showModal(this.state.originalFlag) },
       modalContents: <NewIndividualForm flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
     })
   }
@@ -57,6 +61,7 @@ export default class AuditFlags extends React.Component {
     }
     this.setState({
       modalTitle: `Select groups`,
+      modalBackBehavior: () => { this.onNewIndividualSelected() },
       modalContents: <GroupSelectionForm groups={this.props.groups} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
     })
   }
@@ -64,6 +69,7 @@ export default class AuditFlags extends React.Component {
   onLinkToIndividualSelected = () => {
     this.setState({
       modalTitle: 'Link to an individual',
+      modalBackBehavior: () => { this.showModal(this.state.originalFlag) },
       modalContents: <LinkIndividualForm onIndividualSelected={this.onIndividualSelectedToLink} />
     })
   }
@@ -94,19 +100,53 @@ export default class AuditFlags extends React.Component {
     const newFlag = await this.reCheckFlag(flag)
     this.props.updateFlag(flag, newFlag)
     if (newFlag) {
-      this.setState({
-        currentFlag: newFlag,
-        modalTitle: 'Select Roles',
-        modalContents: <RoleBasedAccessRulesForm
-          service={this.props.serviceLookup[newFlag.serviceId]}
-          assets={newFlag.assets}
-          onRolesSelected={this.onRolesSelected} />
-      })
+      this.showRoleBasedAccessRules(newFlag)
     } else {
       this.setState({
         showModal: false
       })
     }
+  }
+
+  rollbackNewIndividual = async (individual) => {
+    const query = `mutation { deleteIndividual(individualId: "${individual.id}")}`
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Error rolling back newly created individual",
+        body: response.error.message
+      })
+    } else {
+      this.onNewIndividualFormComplete(individual.fullName, individual.primaryEmail)
+    }
+  }
+
+  rollbackLinkIndividual = async () => {
+    const flag = this.state.currentFlag
+    const query = `mutation { unlinkService(serviceId: "${flag.serviceId}", individualId: "${flag.individual.id}")}`
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Error rolling back link to individual",
+        body: response.error.message
+      })
+    } else {
+      this.onLinkToIndividualSelected()
+    }
+  }
+
+  showRoleBasedAccessRules = (flag) => {
+    this.setState({
+      currentFlag: flag,
+      modalTitle: 'Select Roles',
+      modalBackBehavior: this.pendingNewIndividual
+        ? () => { this.rollbackNewIndividual(flag.individual) }
+        : () => { this.rollbackLinkIndividual() },
+      modalContents: <RoleBasedAccessRulesForm
+        service={this.props.serviceLookup[flag.serviceId]}
+        assets={flag.assets}
+        onRolesSelected={this.onRolesSelected} />
+    })
   }
 
   onRolesSelected = (selectedRoles) => {
@@ -130,6 +170,7 @@ export default class AuditFlags extends React.Component {
 
     this.setState({
       modalTitle: 'Select Assets',
+      modalBackBehavior: () => { this.showRoleBasedAccessRules(flag) },
       modalContents: <AssetBasedAccessRulesForm
         service={this.props.serviceLookup[flag.serviceId]}
         assets={remainingAssets}
@@ -284,7 +325,7 @@ export default class AuditFlags extends React.Component {
         }
 
         { this.state.showModal &&
-          <Modal title={this.state.modalTitle} closeHandler={this.closeModal}>
+          <Modal title={this.state.modalTitle} closeHandler={this.closeModal} onBackButtonClicked={this.state.modalBackBehavior}>
             { this.state.modalContents }
           </Modal>
         }
