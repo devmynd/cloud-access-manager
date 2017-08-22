@@ -2,13 +2,12 @@ import React from 'react'
 import IndividualSearch from '../shared/individual-search'
 import graphqlApi from '../../graphql-api'
 import lodash from 'lodash'
+import MessagesContainer from '../shared/messages-container'
 
 export default class Individual extends React.Component {
   state = {
     individual: null,
-    groups: [],
-    // TODO: Not used
-    individualAccessRules: {}
+    groups: []
   }
 
   componentDidMount = async () => {
@@ -43,22 +42,15 @@ export default class Individual extends React.Component {
     })
   }
 
-  mapToAccessRuleDescriptions = (serviceAccessRules) => {
-    let accessRuleDescriptions = []
-    serviceAccessRules.forEach((serviceAccess) => {
-      serviceAccess.accessRules.forEach((rule) => {
-        let desc = serviceAccess.service.displayName
-        if (rule.asset !== "*") {
-          desc += ` / ${rule.asset}`
-        }
-        if (rule.role !== "*") {
-          desc += ` / ${rule.role}`
-        }
-        accessRuleDescriptions.push(desc)
-      })
-    })
-
-    return accessRuleDescriptions
+  createAccessRuleDescription = (service, rule) => {
+    let desc = service.displayName
+    if (rule.asset !== "*") {
+      desc += ` / ${rule.asset}`
+    }
+    if (rule.role !== "*") {
+      desc += ` / ${rule.role}`
+    }
+    return desc
   }
 
   removeAccessRule = (serviceId, accessRule) => {
@@ -105,18 +97,22 @@ export default class Individual extends React.Component {
       })
     }`
 
-    //TODO: Implement error handling for response with errors
-    await graphqlApi.request(query)
 
-    this.setState({ individual })
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Error saving changes to individual",
+        body: response.error.message
+      })
+    } else {
+      this.setState({ individual })
+    }
   }
 
   render() {
     const individual = this.state.individual
-    let accessRuleDescriptions = []
     let memberOfGroups = []
     if (individual) {
-      accessRuleDescriptions = this.mapToAccessRuleDescriptions(individual.accessRules)
       memberOfGroups = this.state.groups.filter((group) => individual.groups.includes(group.name))
     }
 
@@ -139,13 +135,13 @@ export default class Individual extends React.Component {
                 <h2 className="subtitle">Individual Access Rules</h2>
                 <ul>
                   {
-                    individual.accessRules.map((serviceAccessRule) =>
-                      serviceAccessRule.accessRules.map((rule) =>
-                      <li key={serviceAccessRule.service.id + rule.asset + rule.role}>
-                        {/* TODO: Why not use the mapToAccessRuleDescriptions helper here?  */}
-                        {serviceAccessRule.service.displayName} { rule.asset === "*" ? null : ` / ${rule.asset}`} { rule.role === "*" ? null  : ` / ${rule.role}` }
-                        <a className="button" onClick={() => this.removeAccessRule(serviceAccessRule.service.id, rule)}>Delete</a>
-                      </li>))
+                    individual.accessRules.map((serviceAccess) =>
+                      serviceAccess.accessRules.map((rule) => {
+                        const desc = this.createAccessRuleDescription(serviceAccess.service, rule)
+                        return (<li key={desc}>{desc}
+                                  <a className="button" onClick={() => this.removeAccessRule(serviceAccess.service.id, rule)}>Delete</a>
+                                </li>)
+                      }))
                   }
                 </ul>
               </div>
@@ -158,7 +154,11 @@ export default class Individual extends React.Component {
                     <h2 className="subtitle">Group '{group.name}' Access Rules</h2>
                     <ul>
                       {
-                        this.mapToAccessRuleDescriptions(group.serviceAccessRules).map((d) => <li key={d}>{d}</li>)
+                        group.serviceAccessRules.map((serviceAccess) =>
+                          serviceAccess.accessRules
+                            .map((r) => this.createAccessRuleDescription(serviceAccess.service, r))
+                            .map((d) => <li key={d}>{d}</li>)
+                        )
                       }
                     </ul>
                     <a className="button" onClick={() => this.removeGroup(group.name)}>Delete</a>
@@ -168,6 +168,7 @@ export default class Individual extends React.Component {
             }
           </div>
         }
+        <MessagesContainer ref={(m) => { this.messagesContainer = m}} />
       </div>
     )
   }
