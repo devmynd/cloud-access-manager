@@ -60,7 +60,7 @@ export default class Individual extends React.Component {
     return accessRuleDescriptions
   }
 
-  removeAccessRule = (event, serviceId, accessRule) => {
+  removeAccessRule = (serviceId, accessRule) => {
     const individual = this.state.individual
     const serviceIndex = lodash.findIndex(individual.accessRules, (serviceAccessRule) => {
       return serviceAccessRule.service.id === serviceId
@@ -134,7 +134,7 @@ export default class Individual extends React.Component {
                       serviceAccessRule.accessRules.map((rule) =>
                       <li key={serviceAccessRule.service.id + rule.asset + rule.role}>
                         {serviceAccessRule.service.displayName} { rule.asset === "*" ? null : ` / ${rule.asset}`} { rule.role === "*" ? null  : ` / ${rule.role}` }
-                        <a className="button" onClick={(e) => this.removeAccessRule(e, serviceAccessRule.service.id, rule)}>Delete</a>
+                        <a className="button" onClick={() => this.removeAccessRule(serviceAccessRule.service.id, rule)}>Delete</a>
                       </li>))
                   }
                 </ul>
