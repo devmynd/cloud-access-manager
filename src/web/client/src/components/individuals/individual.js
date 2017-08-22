@@ -76,9 +76,6 @@ export default class Individual extends React.Component {
     const individual = this.state.individual
     const groupIndex = lodash.findIndex(individual.groups, (g) => g === groupName)
     individual.groups.splice(groupIndex, 1)
-    //TODO: Groups do get removed but when the last remaining group is removed, the individual
-    // is saved in json file with a groups array of [""] instead of []. Need to figure out where and why
-    // this is happening
     this.save(individual)
   }
 
@@ -97,12 +94,13 @@ export default class Individual extends React.Component {
   }
 
   save = async (individual) => {
+    console.log(individual.groups)
     const query = `mutation {
       updateIndividual(individual: {
         individualId: "${individual.id}",
         fullName: "${individual.fullName}",
         accessRules: [${individual.accessRules.map(this.mapServiceAccessRuleToMutation).join(',')}],
-        groups: "${individual.groups}",
+        groups: [${individual.groups.map((g) => `"${g}"`).join(',')}],
         primaryEmail: "${individual.primaryEmail}"
       })
     }`
