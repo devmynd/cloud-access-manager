@@ -1,11 +1,13 @@
 import React from 'react'
 import IndividualSearch from '../shared/individual-search'
 import graphqlApi from '../../graphql-api'
+import lodash from 'lodash'
 
 export default class Individual extends React.Component {
   state = {
     individual: null,
-    groups: []
+    groups: [],
+    individualAccessRules: {}
   }
 
   componentDidMount = async () => {
@@ -54,11 +56,50 @@ export default class Individual extends React.Component {
         accessRuleDescriptions.push(desc)
       })
     })
+
     return accessRuleDescriptions
   }
 
-  removeAccessRule = (event, rule) => {
-    console.log(rule)
+  removeAccessRule = (event, serviceId, accessRule) => {
+    const individual = this.state.individual
+    const serviceIndex = lodash.findIndex(individual.accessRules, (serviceAccessRule) => {
+      return serviceAccessRule.service.id === serviceId
+    })
+
+    lodash.remove(individual.accessRules[serviceIndex].accessRules, (r) => r === accessRule)
+
+    this.save(individual)
+  }
+
+  mapServiceAccessRuleToMutation = (serviceAccessRule) => {
+    return `{
+      serviceId:"${serviceAccessRule.service.id}",
+      accessRules: [${serviceAccessRule.accessRules.map(this.mapAccessRuleToMutation).join(',')}]
+    }`
+  }
+
+  mapAccessRuleToMutation = (accessRule) => {
+    return `{
+      asset: "${accessRule.asset}",
+      role: "${accessRule.role}"
+    }`
+  }
+
+  save = async (individual) => {
+    const query = `mutation {
+      updateIndividual(individual: {
+        individualId: "${individual.id}",
+        fullName: "${individual.fullName}",
+        accessRules: [${individual.accessRules.map(this.mapServiceAccessRuleToMutation).join(',')}],
+        groups: "${individual.groups}",
+        primaryEmail: "${individual.primaryEmail}"
+      })
+    }`
+
+    //TODO: Implement error handling for response with errors
+    await graphqlApi.request(query)
+
+    this.setState({ individual })
   }
 
   render() {
@@ -89,7 +130,12 @@ export default class Individual extends React.Component {
                 <h2 className="subtitle">Individual Access Rules</h2>
                 <ul>
                   {
-                    accessRuleDescriptions.map((d) => <li key={d}>{d}</li>)
+                    individual.accessRules.map((serviceAccessRule) =>
+                      serviceAccessRule.accessRules.map((rule) =>
+                      <li key={serviceAccessRule.service.id + rule.asset + rule.role}>
+                        {serviceAccessRule.service.displayName} { rule.asset === "*" ? null : ` / ${rule.asset}`} { rule.role === "*" ? null  : ` / ${rule.role}` }
+                        <a className="button" onClick={(e) => this.removeAccessRule(e, serviceAccessRule.service.id, rule)}>Delete</a>
+                      </li>))
                   }
                 </ul>
               </div>
@@ -102,11 +148,7 @@ export default class Individual extends React.Component {
                     <h2 className="subtitle">Group '{group.name}' Access Rules</h2>
                     <ul>
                       {
-                        this.mapToAccessRuleDescriptions(group.serviceAccessRules).map((d) =>
-                        <li key={d}>
-                          <a className="button" onClick={() => this.removeAccessRule(e, d)}>Delete</a>
-                          {d}
-                        </li>)
+                        this.mapToAccessRuleDescriptions(group.serviceAccessRules).map((d) => <li key={d}>{d}</li>)
                       }
                     </ul>
                   </div>

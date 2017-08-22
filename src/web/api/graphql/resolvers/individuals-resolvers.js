@@ -68,6 +68,8 @@ export function updateIndividual (args: { individual: {
 
   individual.accessRules = updatedAccessRules
   individualStore.save(individual)
+
+  return "Individual updated successfully"
 }
 
 export function getIndividuals (args: { fuzzySearch: ?string, limit: ?number }) {
