@@ -71,7 +71,9 @@ export default class AuditFlags extends React.Component {
     this.modalBackBehavior = () => { this.showModal(this.state.originalFlag) }
     this.setState({
       modalTitle: 'Link to an individual',
-      modalContents: <LinkIndividualForm onIndividualSelected={this.onIndividualSelectedToLink} />
+      modalContents: <LinkIndividualForm
+        onIndividualSelected={this.onIndividualSelectedToLink}
+        linkToService={this.props.serviceLookup[this.state.currentFlag.serviceId]} />
     })
   }
 

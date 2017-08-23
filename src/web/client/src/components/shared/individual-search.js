@@ -41,22 +41,28 @@ export default class IndividualSearch extends React.Component {
   }
 
   renderIndividual = (individual) => {
+    const additionalDetails = this.props.additionalDetailsRenderer
+      ? this.props.additionalDetailsRenderer(individual)
+      : false
+
     return (
       <div>
         <span>{individual.fullName}</span>
         { individual.primaryEmail &&
           <span> ({ individual.primaryEmail })</span>
         }
+        { additionalDetails }
       </div>
     )
   }
 
   render () {
     return (
-      <div>
+      <div className="indvidual-search">
         <TypeAheadInput
           placeholder='Search for individual by name or email'
           query={this.query}
+          isMatchDisabled={this.props.shouldDisableIndividual}
           matchRenderer={this.renderIndividual}
           onMatchSelected={this.props.onIndividualSelected}
         />

@@ -46,13 +46,18 @@ export default class TypeAheadInput extends React.Component {
           </div>
           <div className='dropdown-menu' id='dropdown-menu' role='menu' >
             <div className='dropdown-content'>
-              {this.state.matches.map((match) => (
-                <a key={Math.random()}
-                  onClick={() => this.onMatchSelected(match)}
-                  className='dropdown-item'>
-                  {this.props.matchRenderer(match)}
-                </a>
-              ))}
+              {
+                this.state.matches.map((match) => {
+                  const isDisabled = this.props.isMatchDisabled ? this.props.isMatchDisabled(match) : false
+                  return (
+                    <a key={Math.random()}
+                      onClick={isDisabled ? null : () => this.onMatchSelected(match)}
+                      className={'dropdown-item' + (isDisabled ? " disabled" : "")}>
+                      {this.props.matchRenderer(match)}
+                    </a>
+                  )
+                })
+              }
             </div>
           </div>
         </div>

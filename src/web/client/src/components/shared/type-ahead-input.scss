@@ -5,4 +5,11 @@
     width: 100%;
     max-width: 100%;
   }
+
+  .disabled, .disabled:hover {
+    cursor: not-allowed;
+    background-color: #ddd;
+    font-style: italic;
+    color: #999;
+  }
 }
