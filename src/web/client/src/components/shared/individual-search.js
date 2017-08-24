@@ -13,6 +13,7 @@ export default class IndividualSearch extends React.Component {
           userIdentity {
             email
             userId
+            fullName
           }
         }
         accessRules {

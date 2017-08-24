@@ -85,8 +85,29 @@ export default class Individual extends React.Component {
     }`
   }
 
+  unlinkService = async (serviceId) => {
+    let individual = this.state.individual
+    const query = `mutation {
+      unlinkService(
+        serviceId: "${serviceId}",
+        individualId: "${individual.id}") }`
+    const response = await graphqlApi.request(query)
+    if(response.error) {
+      this.messagesContainer.push({
+        title: "Error unlinking service",
+        body: response.error.message
+      })
+      return
+    }
+
+    lodash.remove(individual.serviceUserIdentities, (id) => id.serviceId === serviceId)
+    this.setState({
+      individual
+    })
+  }
+
+  // TODO: break up into seperate save methods to be consistent with other mutations
   save = async (individual) => {
-    console.log(individual.groups)
     const query = `mutation {
       updateIndividual(individual: {
         individualId: "${individual.id}",
@@ -112,8 +133,15 @@ export default class Individual extends React.Component {
   render() {
     const individual = this.state.individual
     let memberOfGroups = []
+    let primaryLinkedAccounts = []
+    let alternateLinkedAccounts = []
     if (individual) {
       memberOfGroups = this.state.groups.filter((group) => individual.groups.includes(group.name))
+      const linkedAccountPartition = lodash.partition(
+        individual.serviceUserIdentities,
+        (sid) => sid.userIdentity.email && sid.userIdentity.email === individual.primaryEmail)
+      primaryLinkedAccounts = linkedAccountPartition[0]
+      alternateLinkedAccounts = linkedAccountPartition[1]
     }
 
     return (
@@ -127,6 +155,72 @@ export default class Individual extends React.Component {
                 <h2 className="subtitle">Name</h2>
                 <p>{individual.fullName}</p>
                 <p>{individual.primaryEmail}</p>
+              </div>
+            </section>
+
+            <section className="section">
+              <div className="container">
+                <h2 className="subtitle">Linked Service Accounts</h2>
+
+
+                {
+                  primaryLinkedAccounts.length > 0 &&
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Primary Email</th>
+                        <th>Accounts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        primaryLinkedAccounts.map((serviceIdentity, index) => (
+                          <tr key={serviceIdentity.serviceId}>
+                            <td>{index === 0 && serviceIdentity.userIdentity.email}</td>
+                            <td>{serviceIdentity.serviceId}</td>
+                          </tr>
+                        ))
+                      }
+                    </tbody>
+                  </table>
+                }
+                {
+                  alternateLinkedAccounts.length > 0 &&
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Identity</th>
+                        <th>Account</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        alternateLinkedAccounts.map((serviceIdentity) => (
+                          <tr key={serviceIdentity.serviceId}>
+                            <td>
+                              <ul>
+                                { serviceIdentity.userIdentity.fullName &&
+                                  <li>Full Name: {serviceIdentity.userIdentity.fullName}</li>
+                                }
+                                { serviceIdentity.userIdentity.email &&
+                                  <li>Email: {serviceIdentity.userIdentity.email}</li>
+                                }
+                                { serviceIdentity.userIdentity.userId &&
+                                  <li>Username: {serviceIdentity.userIdentity.userId}</li>
+                                }
+                              </ul>
+                            </td>
+                            <td>{serviceIdentity.serviceId}</td>
+                            <td>
+                              <a className="button" onClick={() => this.unlinkService(serviceIdentity.serviceId)}>Unlink</a>
+                            </td>
+                          </tr>
+                        ))
+                      }
+                    </tbody>
+                  </table>
+                }
               </div>
             </section>
 
@@ -161,7 +255,7 @@ export default class Individual extends React.Component {
                         )
                       }
                     </ul>
-                    <a className="button" onClick={() => this.removeGroup(group.name)}>Delete</a>
+                    <a className="button" onClick={() => this.removeGroup(group.name)}>Remove from {group.name} group</a>
                   </div>
                 </section>
               ))
