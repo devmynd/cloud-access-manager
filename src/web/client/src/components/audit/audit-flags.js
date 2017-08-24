@@ -1,6 +1,7 @@
 import React from 'react'
 import graphqlApi from '../../graphql-api'
 import Modal from '../shared/modal'
+import ModalWizard from '../shared/modal-wizard'
 import UnknownUserForm from './unknown-user-form'
 import NewIndividualForm from './new-individual-form'
 import GroupSelectionForm from './group-selection-form'
@@ -11,8 +12,58 @@ import MessagesContainer from '../shared/messages-container'
 import ConfirmEmailForm from './confirm-email-form'
 import lodash from 'lodash'
 
+
+class DummyStep1 extends React.Component {
+
+  shouldHideNextStep = true
+
+  customAction = () => {
+    console.log("I make my own choices!!!")
+    this.props.goToStep("step-2")
+  }
+
+  chooseNextStep = () => {
+    return "step-2"
+  }
+
+  render() {
+    return <a className="button" onClick={this.customAction}>Custom Action Button</a>
+  }
+}
+
+class DummyStep2 extends React.Component {
+
+  save = () => {
+    console.log("Saving step 2")
+  }
+
+  rollback = () => {
+    console.log("rolling back step 2")
+  }
+
+  chooseNextStep = () => {
+    return "step-3"
+  }
+
+  render() {
+    return <h1>Hello world 2</h1>
+  }
+}
+
+class DummyStep3 extends React.Component {
+  render() {
+    return <h1>Hello world 3</h1>
+  }
+}
+
 export default class AuditFlags extends React.Component {
   state = { }
+
+  wizardSteps = {
+    "step-1": (ref, context, goToStep) => <DummyStep1 ref={ref} context={context} goToStep={goToStep} />,
+    "step-2": (ref, context, goToStep) => <DummyStep2 ref={ref} context={context} />,
+    "step-3": (ref, context, goToStep) => <DummyStep3 ref={ref} context={context} />,
+  }
 
   showModal = (flag) => {
     this.pendingNewIndividual = null
@@ -341,6 +392,8 @@ export default class AuditFlags extends React.Component {
     const flagCount = lodash.sumBy(flaggedServices, (service) => flagsByService[service.id].length)
     return (
       <div className="audit-flags">
+        <a className="button" onClick={() => this.wizard.start()}>Test Show Wizard</a>
+
         { flagCount > 0 &&
           <h2 className="title">
             {flagCount} Flagged Accounts
@@ -400,6 +453,8 @@ export default class AuditFlags extends React.Component {
         }
 
         <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
+
+        <ModalWizard ref={(wiz) => { this.wizard = wiz }} steps={this.wizardSteps} firstStepId="step-1"/>
       </div>
     )
   }
