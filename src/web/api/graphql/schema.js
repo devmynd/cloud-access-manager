@@ -96,14 +96,6 @@ export const schema = buildSchema(`
     accessRules: [AccessRuleInput]!
   }
 
-  input UpdateIndividualInput {
-    individualId: String!,
-    fullName: String!,
-    primaryEmail: String!,
-    groups: [String]!,
-    accessRules: [ServiceAccessRuleListInput]!
-  }
-
   type Mutation {
     createIndividual(individual: NewIndividualInput!): Individual
     linkServiceToIndividual(serviceId: String!, individualId: String!, fullName: String, email: String, userId: String): String
@@ -113,7 +105,8 @@ export const schema = buildSchema(`
     disableService(serviceId: String!): String
     setGroupAccessRules(name: String!, serviceAccessRules: [ServiceAccessRuleListInput]!): String
     deleteGroup(name: String!): String
-    updateIndividual(individual: UpdateIndividualInput!): String
+    updateIndividualGroups(individualId: String!, groups: [String]!): String
+    updateIndividualAccessRules(individualId: String!, accessRules: [ServiceAccessRuleListInput]!): String
     deleteIndividual(individualId: String!): String
     updatePrimaryEmail(individualId: String!, primaryEmail: String): String
   }
@@ -123,7 +116,8 @@ export const root = {
   createIndividual: resolvers.individuals.createIndividual,
   linkServiceToIndividual: resolvers.individuals.linkServiceToIndividual,
   addIndividualAccessRules: resolvers.individuals.addIndividualAccessRules,
-  updateIndividual: resolvers.individuals.updateIndividual,
+  updateIndividualGroups: resolvers.individuals.updateIndividualGroups,
+  updateIndividualAccessRules: resolvers.individuals.updateIndividualAccessRules,
   individuals: resolvers.individuals.getIndividuals,
   auditService: resolvers.accounts.auditService,
   auditServiceUserAccount: resolvers.accounts.auditServiceUserAccount,

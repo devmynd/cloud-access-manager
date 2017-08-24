@@ -51,24 +51,17 @@ export function addIndividualAccessRules (args: { individualId: string, serviceI
   return 'Rules added successfully'
 }
 
-export function updateIndividual (args: { individual: {
+export function updateIndividualAccessRules ( args: {
   individualId: string,
-  fullName: string,
-  primaryEmail: string,
-  groups: Array<string>,
   accessRules: [{
     serviceId: string,
     accessRules: Array<AccessRule>
   }]
-}
 }) {
-  const individual = individualStore.getById(args.individual.individualId)
-  individual.fullName = args.individual.fullName
-  individual.primaryEmail = args.individual.primaryEmail
-  individual.groups = args.individual.groups
+  const individual = individualStore.getById(args.individualId)
 
   const updatedAccessRules = {}
-  args.individual.accessRules.forEach((ruleList) => {
+  args.accessRules.forEach((ruleList) => {
     updatedAccessRules[ruleList.serviceId] = ruleList.accessRules
   })
   individual.accessRules = updatedAccessRules
@@ -77,6 +70,19 @@ export function updateIndividual (args: { individual: {
 
   return "Individual updated successfully"
 }
+
+export function updateIndividualGroups (args: {
+  individualId: string,
+  groups: Array<string>
+}) {
+  const individual = individualStore.getById(args.individualId)
+  individual.groups = args.groups
+
+  individualStore.save(individual)
+
+  return "Individual updated successfully"
+}
+
 
 export function getIndividuals (args: { fuzzySearch: ?string, limit: ?number }) {
   if (args.fuzzySearch && args.fuzzySearch.trim() === '') {

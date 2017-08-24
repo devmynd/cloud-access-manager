@@ -62,14 +62,14 @@ export default class Individual extends React.Component {
 
     lodash.remove(individual.accessRules[serviceIndex].accessRules, (r) => r === accessRule)
 
-    this.save(individual)
+    this.saveAccessRules(individual)
   }
 
   removeGroup = (groupName) => {
     const individual = this.state.individual
     const groupIndex = lodash.findIndex(individual.groups, (g) => g === groupName)
     individual.groups.splice(groupIndex, 1)
-    this.save(individual)
+    this.saveGroups(individual)
   }
 
   mapServiceAccessRuleToMutation = (serviceAccessRule) => {
@@ -89,7 +89,7 @@ export default class Individual extends React.Component {
   addGroup = (groupName) => {
     let individual = this.state.individual
     individual.groups.push(groupName)
-    this.save(individual)
+    this.saveGroups(individual)
   }
 
   unlinkService = async (serviceId) => {
@@ -113,23 +113,37 @@ export default class Individual extends React.Component {
     })
   }
 
-  // TODO: break up into seperate save methods to be consistent with other mutations
-  save = async (individual) => {
+  saveGroups = async (individual) => {
     const query = `mutation {
-      updateIndividual(individual: {
+      updateIndividualGroups(
         individualId: "${individual.id}",
-        fullName: "${individual.fullName}",
-        accessRules: [${individual.accessRules.map(this.mapServiceAccessRuleToMutation).join(',')}],
-        groups: [${individual.groups.map((g) => `"${g}"`).join(',')}],
-        primaryEmail: "${individual.primaryEmail}"
-      })
+        groups: [${individual.groups.map((g) => `"${g}"`).join(',')}]
+      )
     }`
-
 
     const response = await graphqlApi.request(query)
     if (response.error) {
       this.messagesContainer.push({
-        title: "Error saving changes to individual",
+        title: "Error saving changes to groups",
+        body: response.error.message
+      })
+    } else {
+      this.setState({ individual })
+    }
+  }
+
+  saveAccessRules = async (individual) => {
+    const query = `mutation {
+      updateIndividualAccessRules(
+        individualId: "${individual.id}",
+        accessRules: [${individual.accessRules.map(this.mapServiceAccessRuleToMutation).join(',')}]
+      )
+    }`
+
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: "Error saving changes to access rules",
         body: response.error.message
       })
     } else {
