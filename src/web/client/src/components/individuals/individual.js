@@ -3,6 +3,7 @@ import IndividualSearch from '../shared/individual-search'
 import graphqlApi from '../../graphql-api'
 import lodash from 'lodash'
 import MessagesContainer from '../shared/messages-container'
+import DropdownButton from '../shared/dropdown-button'
 
 export default class Individual extends React.Component {
   state = {
@@ -85,6 +86,12 @@ export default class Individual extends React.Component {
     }`
   }
 
+  addGroup = (groupName) => {
+    let individual = this.state.individual
+    individual.groups.push(groupName)
+    this.save(individual)
+  }
+
   unlinkService = async (serviceId) => {
     let individual = this.state.individual
     const query = `mutation {
@@ -133,10 +140,15 @@ export default class Individual extends React.Component {
   render() {
     const individual = this.state.individual
     let memberOfGroups = []
+    let addGroupOptions = []
     let primaryLinkedAccounts = []
     let alternateLinkedAccounts = []
     if (individual) {
-      memberOfGroups = this.state.groups.filter((group) => individual.groups.includes(group.name))
+
+      const membershipPartition = lodash.partition(this.state.groups, (group) => individual.groups.includes(group.name))
+      memberOfGroups = membershipPartition[0]
+      addGroupOptions = membershipPartition[1].map((g) => { return { text: g.name, value: g.name }})
+
       const linkedAccountPartition = lodash.partition(
         individual.serviceUserIdentities,
         (sid) => sid.userIdentity.email && sid.userIdentity.email === individual.primaryEmail)
@@ -241,6 +253,13 @@ export default class Individual extends React.Component {
               </div>
             </section>
 
+            { addGroupOptions.length > 0 } {
+              <DropdownButton className='is-pulled-right'
+                title={`Add ${individual.fullName} to a group`}
+                options={addGroupOptions}
+                onValueSelected={this.addGroup} />
+            }
+
             {
               memberOfGroups.map((group) => (
                 <section key={group.name} className="section">
@@ -260,6 +279,8 @@ export default class Individual extends React.Component {
                 </section>
               ))
             }
+
+
           </div>
         }
         <MessagesContainer ref={(m) => { this.messagesContainer = m}} />

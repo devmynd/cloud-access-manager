@@ -44,7 +44,7 @@ export default class DropdownButton extends React.Component {
           <div className='dropdown-menu' id='dropdown-menu' role='menu'>
             <div className='dropdown-content'>
               {this.state.options.map((option) => (
-                <a key={option.value}
+                <a key={option.text}
                   value={option.value}
                   onClick={this.onOptionClick}
                   className='dropdown-item'>
