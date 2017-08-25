@@ -89,7 +89,7 @@ export default class GroupSelectionForm extends React.Component {
     if (event.target.checked) {
       selectedGroups.push(targetGroup)
     } else {
-      selectedGroups = lodash.remove(selectedGroups, (group) => group === targetGroup)
+      lodash.remove(selectedGroups, (group) => group === targetGroup)
     }
 
     this.setState({

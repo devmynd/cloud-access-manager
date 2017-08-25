@@ -23,12 +23,13 @@ export default class AssetBasedAccessRulesForm extends React.Component {
 
   save = async () => {
     const flag = this.props.context.flag
-    const accessRules = this.state.selectedAssets.map((asset) => {
+    let accessRules = this.props.context.accessRules
+    accessRules = accessRules.concat(this.state.selectedAssets.map((asset) => {
       return {
         role: asset.role,
         asset: asset.name
       }
-    })
+    }))
 
     const query = `mutation {
       addIndividualAccessRules(
@@ -58,7 +59,7 @@ export default class AssetBasedAccessRulesForm extends React.Component {
         <div className='field is-grouped'>
           <ul>
           {
-            this.props.context.flag.assets.map((asset) => {
+            this.props.context.remainingAssets.map((asset) => {
               return (
                 <li key={`${asset.name}-${asset.role}`}>
                   <span>

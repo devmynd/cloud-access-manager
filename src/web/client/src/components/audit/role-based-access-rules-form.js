@@ -25,6 +25,7 @@ export default class RoleBasedAccessRulesForm extends React.Component {
 
     // IF ASSETS REMAIN, PREPARE FOR NEXT SCREEN
     if (remainingAssets.length > 0) {
+      this.props.context.remainingAssets = remainingAssets
       this.props.context.accessRules = accessRules
       this.nextStep = "asset-based-access-rules-form"
       return

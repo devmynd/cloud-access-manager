@@ -5,6 +5,7 @@ import AuditFlags from './audit-flags'
 import ReviewFlags from './review-flags'
 import AuditProgress from '../shared/audit-progress'
 import lodash from 'lodash'
+import MessagesContainer from '../shared/messages-container'
 
 export default class Audit extends React.Component {
   state = {
@@ -155,6 +156,29 @@ export default class Audit extends React.Component {
     })
   }
 
+  reCheckFlag = async (flag) => {
+    const secondParameter = flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : `userId: "${flag.userIdentity.userId}"`
+
+    const query = `{
+      auditServiceUserAccount(serviceId: "${flag.serviceId}", ${secondParameter}) ${this.flagResponseFormat}
+    }`
+    const response = await graphqlApi.request(query)
+
+    if (response.error) {
+      this.messagesContainer.push({
+        title: 'Failed to check flag',
+        body: response.error.message
+      })
+    } else {
+      const newFlag = response.data.auditServiceUserAccount
+      if (newFlag) {
+        newFlag.key = flag.key
+      }
+      this.updateFlag(flag, newFlag)
+      return newFlag
+    }
+  }
+
   updateFlag = (oldFlag, newFlag) => {
     let flagsByService = this.state.flagsByService
     const flags = [...flagsByService[oldFlag.serviceId]]
@@ -208,8 +232,11 @@ export default class Audit extends React.Component {
               flagResponseFormat={this.flagResponseFormat}
               individualResponseFormat={this.individualResponseFormat}
               showRefresh={!showProgress}
-              groups={this.state.groups} />
+              groups={this.state.groups}
+              reCheckFlag={this.reCheckFlag}
+            />
         }
+        <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
       </div>
     )
   }

@@ -3,15 +3,21 @@ import React from 'react'
 export default class UnknownUserForm extends React.Component {
 
   onNewIndividualSelected = () => {
-    this.props.context.goToStep("new-individual-form")
+    this.nextStep = "new-individual-form"
+    this.props.context.goToNext()
   }
 
   onLinkToIndividualSelected = () => {
-    this.props.context.goToStep("link-individual-form")
+    this.nextStep = "link-individual-form"
+    this.props.context.goToNext()
   }
 
   rollback = () => {
     this.props.context.flag = this.props.context.originalFlag
+  }
+
+  chooseNextStep = () => {
+    return this.nextStep
   }
 
   render () {

@@ -55,11 +55,7 @@ export default class ModalWizard extends React.Component {
 
   start = (stepId, context) => {
     context = context || {}
-    context.goToStep = (stepId) => {
-      this.saveCurrentStep(() => {
-        this.goToStep(stepId)
-      })
-    }
+    context.goToNext = this.onNextButtonClicked
     this.context = context
     this.viewStack = []
     this.goToStep(stepId)
@@ -127,7 +123,7 @@ export default class ModalWizard extends React.Component {
       <Modal title={this.state.step.title} closeHandler={this.closeModal}>
         <div className="section">
           { this.state.step.component }
-          <div className="footer">
+          <div>
             { !this.state.step.hideNextButton &&
               <a className="icon is-pulled-right" onClick={this.onNextButtonClicked}>
                 Next
