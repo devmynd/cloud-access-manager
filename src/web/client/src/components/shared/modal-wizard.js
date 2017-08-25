@@ -17,6 +17,8 @@ export default class ModalWizard extends React.Component {
   }
 
   start = (context) => {
+    context = context || {}
+    context.goToStep = this.goToStep
     this.context = context
     this.viewStack = []
     this.goToStep(this.props.firstStepId)
@@ -25,8 +27,8 @@ export default class ModalWizard extends React.Component {
   goToStep = (stepId) => {
     if (this.currentStep) {
       this.viewStack.push({
-        instance: this.currentStep,
-        view: this.state.currentView
+        reference: this.currentStep,
+        step: this.state.step
       })
       if (this.currentStep.save) { this.currentStep.save() }
     }
@@ -40,15 +42,15 @@ export default class ModalWizard extends React.Component {
   showStep = (step) => {
     this.setState({
       showModal: true,
-      currentView: step
+      step: step
     })
   }
 
   onBackButtonClicked = () => {
     const previousStep = this.viewStack.pop()
     if (previousStep) {
-      if (previousStep.instance.rollback) { previousStep.instance.rollback() }
-      this.showStep(previousStep.view)
+      if (previousStep.reference.rollback) { previousStep.reference.rollback() }
+      this.showStep(previousStep.step)
     } else {
       this.closeModal()
     }
@@ -65,15 +67,16 @@ export default class ModalWizard extends React.Component {
 
   render() {
     return this.state.showModal &&
-      <Modal title="TODO: TITLE" closeHandler={this.closeModal}>
+      <Modal title={this.state.step.title} closeHandler={this.closeModal}>
         <div className="section">
-          { this.state.currentView }
-
+          { this.state.step.component }
           <div className="footer">
-            <a className="icon is-pulled-right" onClick={this.onNextButtonClicked}>
-              Next
-              <i className="fa fa-chevron-right"></i>
-            </a>
+            { !this.state.step.hideNextButton &&
+              <a className="icon is-pulled-right" onClick={this.onNextButtonClicked}>
+                Next
+                <i className="fa fa-chevron-right"></i>
+              </a>
+            }
             <a className="icon" onClick={this.onBackButtonClicked}>
               <i className="fa fa-chevron-left"></i>
               Back

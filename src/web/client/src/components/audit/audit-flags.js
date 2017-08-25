@@ -19,7 +19,7 @@ class DummyStep1 extends React.Component {
 
   customAction = () => {
     console.log("I make my own choices!!!")
-    this.props.goToStep("step-2")
+    this.props.context.goToStep("step-2")
   }
 
   chooseNextStep = () => {
@@ -60,9 +60,25 @@ export default class AuditFlags extends React.Component {
   state = { }
 
   wizardSteps = {
-    "step-1": (ref, context, goToStep) => <DummyStep1 ref={ref} context={context} goToStep={goToStep} />,
-    "step-2": (ref, context, goToStep) => <DummyStep2 ref={ref} context={context} />,
-    "step-3": (ref, context, goToStep) => <DummyStep3 ref={ref} context={context} />,
+    "step-1": (ref, context) => {
+      return {
+        title: "Dummy Step 1",
+        hideNextButton: true,
+        component: <DummyStep1 ref={ref} context={context} />
+      }
+    },
+    "step-2": (ref, context) => {
+      return {
+        title: "Dummy Step 2",
+        component: <DummyStep2 ref={ref} context={context} />
+      }
+    },
+    "step-3": (ref, context) => {
+      return {
+        title: "Dummy Step 3",
+        component: <DummyStep3 ref={ref} context={context} />
+      }
+    },
   }
 
   showModal = (flag) => {
