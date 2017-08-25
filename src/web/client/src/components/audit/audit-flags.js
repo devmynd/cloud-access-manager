@@ -45,16 +45,30 @@ export default class AuditFlags extends React.Component {
         component: <GroupSelectionForm ref={ref} context={context} />
       }
     },
+    "role-based-access-rules-form": (ref, context) => {
+      return {
+        title: "Grant Access for Any Asset by Role",
+        component: <RoleBasedAccessRulesForm ref={ref} context={context} />
+      }
+    },
+    "asset-based-access-rules-form": (ref, context) => {
+      return {
+        title: "Grant Access for Specific Assets",
+        component: <AssetBasedAccessRulesForm ref={ref} context={context} />
+      }
+    },
   }
 
   showModal = (flag) => {
     const context = {
       flag: flag,
       originalFlag: flag,
+      service: this.props.serviceLookup[flag.serviceId],
       groups: this.props.groups,
       individualResponseFormat: this.props.individualResponseFormat,
       messagesContainer: this.messagesContainer,
       refreshAudit: this.props.performAudit,
+      refreshAuditForService: this.props.performAuditForService,
       reCheckFlag: this.reCheckFlag
     }
     const firstStep = flag.individual ? "role-based-access-rules-form" : "unknown-user-form"
@@ -240,85 +254,85 @@ export default class AuditFlags extends React.Component {
     }
   }
 
-  showRoleBasedAccessRules = (flag) => {
-    this.setState({
-      currentFlag: flag,
-      modalTitle: 'Select Roles',
-      modalContents: <RoleBasedAccessRulesForm
-        service={this.props.serviceLookup[flag.serviceId]}
-        assets={flag.assets}
-        onRolesSelected={this.onRolesSelected} />
-    })
-  }
+  // showRoleBasedAccessRules = (flag) => {
+  //   this.setState({
+  //     currentFlag: flag,
+  //     modalTitle: 'Select Roles',
+  //     modalContents: <RoleBasedAccessRulesForm
+  //       service={this.props.serviceLookup[flag.serviceId]}
+  //       assets={flag.assets}
+  //       onRolesSelected={this.onRolesSelected} />
+  //   })
+  // }
 
-  onRolesSelected = (selectedRoles) => {
-    const flag = this.state.currentFlag
-
-    const onAssetsSelected = (selectedAssets) => {
-      const rules = this.createAccessRules(selectedRoles, selectedAssets)
-      this.setIndividualAccessRules(rules)
-    }
-
-    const hasFullAccess = (selectedRoles.length === 1 && selectedRoles[0] === "*")
-
-    const remainingAssets = hasFullAccess
-      ? []
-      : flag.assets.filter((a) => !selectedRoles.includes(a.role))
-
-    if (remainingAssets.length < 1) {
-      onAssetsSelected([])
-      return
-    }
-
-    this.modalBackBehavior = () => { this.showRoleBasedAccessRules(flag) }
-    this.setState({
-      modalTitle: 'Select Assets',
-      modalContents: <AssetBasedAccessRulesForm
-        service={this.props.serviceLookup[flag.serviceId]}
-        assets={remainingAssets}
-        onAssetsSelected={onAssetsSelected} />
-    })
-  }
-
-  createAccessRules = (selectedRoles, selectedAssets) => {
-    return selectedRoles.map((role) => {
-      return {
-        role: role,
-        asset: "*"
-      }
-    }).concat(selectedAssets.map((asset) => {
-      return {
-        role: asset.role,
-        asset: asset.name
-      }
-    }))
-  }
-
-  setIndividualAccessRules = async (selectedAccessRules) => {
-    const flag = this.state.currentFlag
-    const query = `mutation {
-      addIndividualAccessRules(
-        individualId: "${flag.individual.id}",
-        serviceId: "${flag.serviceId}",
-        accessRules: [${selectedAccessRules.map((rule) => `{
-          asset: "${rule.asset}",
-          role: "${rule.role ? rule.role : '*'}"
-        }`).join(',')}])
-    }`
-    const response = await graphqlApi.request(query)
-    if (response.error) {
-      this.messagesContainer.push({
-        title: 'Failed to add selected access rules',
-        body: response.error.message
-      })
-    } else {
-      const newFlag = await this.reCheckFlag(flag)
-      this.props.updateFlag(flag, newFlag)
-      this.setState({
-        showModal: false
-      })
-    }
-  }
+  // onRolesSelected = (selectedRoles) => {
+  //   const flag = this.state.currentFlag
+  //
+  //   const onAssetsSelected = (selectedAssets) => {
+  //     const rules = this.createAccessRules(selectedRoles, selectedAssets)
+  //     this.setIndividualAccessRules(rules)
+  //   }
+  //
+  //   const hasFullAccess = (selectedRoles.length === 1 && selectedRoles[0] === "*")
+  //
+  //   const remainingAssets = hasFullAccess
+  //     ? []
+  //     : flag.assets.filter((a) => !selectedRoles.includes(a.role))
+  //
+  //   if (remainingAssets.length < 1) {
+  //     onAssetsSelected([])
+  //     return
+  //   }
+  //
+  //   this.modalBackBehavior = () => { this.showRoleBasedAccessRules(flag) }
+  //   this.setState({
+  //     modalTitle: 'Select Assets',
+  //     modalContents: <AssetBasedAccessRulesForm
+  //       service={this.props.serviceLookup[flag.serviceId]}
+  //       assets={remainingAssets}
+  //       onAssetsSelected={onAssetsSelected} />
+  //   })
+  // }
+  //
+  // createAccessRules = (selectedRoles, selectedAssets) => {
+  //   return selectedRoles.map((role) => {
+  //     return {
+  //       role: role,
+  //       asset: "*"
+  //     }
+  //   }).concat(selectedAssets.map((asset) => {
+  //     return {
+  //       role: asset.role,
+  //       asset: asset.name
+  //     }
+  //   }))
+  // }
+  // 
+  // setIndividualAccessRules = async (selectedAccessRules) => {
+  //   const flag = this.state.currentFlag
+  //   const query = `mutation {
+  //     addIndividualAccessRules(
+  //       individualId: "${flag.individual.id}",
+  //       serviceId: "${flag.serviceId}",
+  //       accessRules: [${selectedAccessRules.map((rule) => `{
+  //         asset: "${rule.asset}",
+  //         role: "${rule.role ? rule.role : '*'}"
+  //       }`).join(',')}])
+  //   }`
+  //   const response = await graphqlApi.request(query)
+  //   if (response.error) {
+  //     this.messagesContainer.push({
+  //       title: 'Failed to add selected access rules',
+  //       body: response.error.message
+  //     })
+  //   } else {
+  //     const newFlag = await this.reCheckFlag(flag)
+  //     this.props.updateFlag(flag, newFlag)
+  //     this.setState({
+  //       showModal: false
+  //     })
+  //   }
+  // }
 
   // onGroupFormComplete = async (selectedGroups) => {
   //   this.pendingNewIndividual.groups = selectedGroups
@@ -366,9 +380,9 @@ export default class AuditFlags extends React.Component {
       const newFlag = response.data.auditServiceUserAccount
       if (newFlag) {
         newFlag.key = flag.key
-        this.props.updateFlag(flag, newFlag)
-        return newFlag
       }
+      this.props.updateFlag(flag, newFlag)
+      return newFlag
     }
   }
 

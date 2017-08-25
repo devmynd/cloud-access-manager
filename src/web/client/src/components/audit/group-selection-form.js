@@ -78,7 +78,7 @@ export default class GroupSelectionForm extends React.Component {
 
   chooseNextStep = () => {
     if (this.props.context.flag) {
-      return "dummy-step"
+      return "role-based-access-rules-form"
     }
   }
 
