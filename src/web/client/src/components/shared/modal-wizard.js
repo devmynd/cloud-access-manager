@@ -1,6 +1,43 @@
 import React from 'react'
 import Modal from './modal'
 
+// class DummyStep extends React.Component {
+//   save = async () => {
+//     console.log("Saving step")
+//   }
+//
+//   rollback = async () => {
+//     console.log("rolling back step")
+//   }
+//
+//   validate = () => {
+//     return true  // if all valid
+//   }
+//
+//   chooseNextStep = () => {
+//     return "step-2"
+//   }
+//
+//   myCustomAction = () => {
+//     console.log("I make my own choices!!!")
+//     this.props.context.goToStep("step-3")
+//   }
+//
+//   render() {
+//     return <a className="button" onClick={this.myCustomAction}>Custom Action Button</a>
+//   }
+// }
+//
+// this.props.steps = {
+//   "step-1": (ref, context) => {
+//     return {
+//       title: "Dummy Step 1",
+//       hideNextButton: true,
+//       component: <DummyStep ref={ref} context={context} />
+//     }
+//   }
+// }
+
 export default class ModalWizard extends React.Component {
   state = {
     showModal: false,
@@ -16,27 +53,43 @@ export default class ModalWizard extends React.Component {
     })
   }
 
-  start = (context) => {
+  start = (stepId, context) => {
     context = context || {}
-    context.goToStep = this.goToStep
+    context.goToStep = (stepId) => {
+      this.saveCurrentStep(() => {
+        this.goToStep(stepId)
+      })
+    }
     this.context = context
     this.viewStack = []
-    this.goToStep(this.props.firstStepId)
+    this.goToStep(stepId)
   }
 
-  goToStep = (stepId) => {
+  saveCurrentStep = async (callback) => {
     if (this.currentStep) {
+      if(this.currentStep.validate && !this.currentStep.validate()) {
+        return
+      }
       this.viewStack.push({
         reference: this.currentStep,
         step: this.state.step
       })
-      if (this.currentStep.save) { this.currentStep.save() }
+      if (this.currentStep.save) {
+        await this.currentStep.save()
+      }
     }
 
-    const nextStepFactory = this.props.steps[stepId]
+    callback()
+  }
 
-    const nextStep = nextStepFactory((instance) => {this.currentStep = instance}, this.context, this.goToStep)
-    this.showStep(nextStep)
+  goToStep = async (stepId) => {
+    if(this.props.steps.hasOwnProperty(stepId)){
+      const nextStepFactory = this.props.steps[stepId]
+      const nextStep = nextStepFactory((ref) => {this.currentStep = ref}, this.context)
+      this.showStep(nextStep)
+    } else {
+      throw new Error(`Invalid step id ${stepId}. Be sure you've defined the step.`)
+    }
   }
 
   showStep = (step) => {
@@ -46,10 +99,12 @@ export default class ModalWizard extends React.Component {
     })
   }
 
-  onBackButtonClicked = () => {
+  onBackButtonClicked = async () => {
     const previousStep = this.viewStack.pop()
     if (previousStep) {
-      if (previousStep.reference.rollback) { previousStep.reference.rollback() }
+      if (previousStep.reference.rollback) {
+        await previousStep.reference.rollback()
+      }
       this.showStep(previousStep.step)
     } else {
       this.closeModal()
@@ -57,12 +112,14 @@ export default class ModalWizard extends React.Component {
   }
 
   onNextButtonClicked = () => {
-    const nextStepId = this.currentStep.chooseNextStep && this.currentStep.chooseNextStep()
-    if (nextStepId) {
-      this.goToStep(nextStepId)
-    } else {
-      this.closeModal()
-    }
+    this.saveCurrentStep(() => {
+      const nextStepId = this.currentStep.chooseNextStep && this.currentStep.chooseNextStep()
+      if (nextStepId) {
+        this.goToStep(nextStepId)
+      } else {
+        this.closeModal()
+      }
+    })
   }
 
   render() {

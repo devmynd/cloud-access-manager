@@ -12,127 +12,97 @@ import MessagesContainer from '../shared/messages-container'
 import ConfirmEmailForm from './confirm-email-form'
 import lodash from 'lodash'
 
-
-class DummyStep1 extends React.Component {
-
-  shouldHideNextStep = true
-
-  customAction = () => {
-    console.log("I make my own choices!!!")
-    this.props.context.goToStep("step-2")
-  }
-
-  chooseNextStep = () => {
-    return "step-2"
-  }
-
-  render() {
-    return <a className="button" onClick={this.customAction}>Custom Action Button</a>
-  }
-}
-
-class DummyStep2 extends React.Component {
-
-  save = () => {
-    console.log("Saving step 2")
-  }
-
-  rollback = () => {
-    console.log("rolling back step 2")
-  }
-
-  chooseNextStep = () => {
-    return "step-3"
-  }
-
-  render() {
-    return <h1>Hello world 2</h1>
-  }
-}
-
-class DummyStep3 extends React.Component {
-  render() {
-    return <h1>Hello world 3</h1>
-  }
+function DummyStep() {
+  return <p>Dummy Step</p>
 }
 
 export default class AuditFlags extends React.Component {
   state = { }
 
   wizardSteps = {
-    "step-1": (ref, context) => {
+    "dummy-step": (ref, context) => {
       return {
-        title: "Dummy Step 1",
+        title: "dummy",
+        component: <DummyStep ref={ref} />
+      }
+    },
+    "unknown-user-form": (ref, context) => {
+      return {
+        title: `Unknown User`,
         hideNextButton: true,
-        component: <DummyStep1 ref={ref} context={context} />
+        component: <UnknownUserForm ref={ref} context={context} />
       }
     },
-    "step-2": (ref, context) => {
+    "new-individual-form": (ref, context) => {
       return {
-        title: "Dummy Step 2",
-        component: <DummyStep2 ref={ref} context={context} />
+        title: "Create New Individual",
+        component: <NewIndividualForm ref={ref} context={context} />
       }
     },
-    "step-3": (ref, context) => {
+    "group-selection-form": (ref, context) => {
       return {
-        title: "Dummy Step 3",
-        component: <DummyStep3 ref={ref} context={context} />
+        title: "Add New Individual to Groups",
+        component: <GroupSelectionForm ref={ref} context={context} />
       }
     },
   }
 
   showModal = (flag) => {
-    this.pendingNewIndividual = null
-    this.modalBackBehavior = this.closeModal
-    this.setState({
-      showModal: true,
-      currentFlag: flag,
+    const context = {
+      flag: flag,
       originalFlag: flag,
-      modalTitle: flag.individual
-        ? 'Select Roles'
-        : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
-      modalContents: flag.individual
-        ? <RoleBasedAccessRulesForm service={this.props.serviceLookup[flag.serviceId]} assets={flag.assets} onRolesSelected={this.onRolesSelected} />
-        : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} onLinkToIndividualSelected={this.onLinkToIndividualSelected} />
-    })
-  }
-
-  closeModal = (event) => {
-    if (event) { event.preventDefault() }
-
-    this.setState({
-      showModal: false
-    })
-  }
-
-  onNewIndividualSelected = () => {
-    const flag = this.state.currentFlag
-    this.modalBackBehavior = () => { this.showModal(this.state.originalFlag) }
-    this.setState({
-      modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || 'blah'}`,
-      modalContents: <NewIndividualForm flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
-    })
-  }
-
-  onNewIndividualFormComplete = (fullName, primaryEmail) => {
-    if (!fullName || fullName.trim() === '') {
-      this.messagesContainer.push({
-        title: 'Invalid Name',
-        body: "Please fill out the individual's name."
-      })
-      return
+      groups: this.props.groups,
+      individualResponseFormat: this.props.individualResponseFormat,
+      messagesContainer: this.messagesContainer,
+      refreshAudit: this.props.performAudit,
+      reCheckFlag: this.reCheckFlag
     }
+    const firstStep = flag.individual ? "role-based-access-rules-form" : "unknown-user-form"
+    this.wizard.start(firstStep, context)
 
-    this.pendingNewIndividual = {
-      fullName,
-      primaryEmail
-    }
-    this.modalBackBehavior = this.onNewIndividualSelected
-    this.setState({
-      modalTitle: `Select groups`,
-      modalContents: <GroupSelectionForm groups={this.props.groups} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
-    })
+    // this.pendingNewIndividual = null
+    // this.modalBackBehavior = this.closeModal
+    // this.setState({
+    //   showModal: true,
+    //   currentFlag: flag,
+    //   originalFlag: flag,
+    //   modalTitle: flag.individual
+    //     ? 'Select Roles'
+    //     : `Unknown User: ${flag.userIdentity.email || flag.userIdentity.userId}`,
+    //   modalContents: flag.individual
+    //     ? <RoleBasedAccessRulesForm service={this.props.serviceLookup[flag.serviceId]} assets={flag.assets} onRolesSelected={this.onRolesSelected} />
+    //     : <UnknownUserForm flag={flag} onNewIndividualSelected={this.onNewIndividualSelected} onLinkToIndividualSelected={this.onLinkToIndividualSelected} />
+    // })
   }
+
+  // onNewIndividualSelected = () => {
+  //   const flag = this.state.currentFlag
+  //   this.modalBackBehavior = () => { this.showModal(this.state.originalFlag) }
+  //   this.setState({
+  //     modalTitle: `Manage ${flag.userIdentity.email || flag.userIdentity.userId || 'blah'}`,
+  //     modalContents: <NewIndividualForm flag={flag} onNewIndividualFormComplete={this.onNewIndividualFormComplete} onNewIndividualSelected={this.onNewIndividualSelected} />
+  //   })
+  // }
+
+  // onNewIndividualFormComplete = (fullName, primaryEmail) => {
+  //   if (!fullName || fullName.trim() === '') {
+  //     this.messagesContainer.push({
+  //       title: 'Invalid Name',
+  //       body: "Please fill out the individual's name."
+  //     })
+  //     return
+  //   }
+  //
+  //   this.pendingNewIndividual = {
+  //     fullName,
+  //     primaryEmail
+  //   }
+  //   this.modalBackBehavior = this.onNewIndividualSelected
+  //   this.setState({
+  //     modalTitle: `Select groups`,
+  //     modalContents: <GroupSelectionForm groups={this.props.groups} onGroupFormComplete={this.onGroupFormComplete} individual={this.pendingNewIndividual} />
+  //   })
+  // }
 
   onLinkToIndividualSelected = () => {
     this.modalBackBehavior = () => { this.showModal(this.state.originalFlag) }
@@ -241,18 +211,18 @@ export default class AuditFlags extends React.Component {
     this.onLinkIndividualComplete(individual)
   }
 
-  rollbackNewIndividual = async (individual) => {
-    const query = `mutation { deleteIndividual(individualId: "${individual.id}")}`
-    const response = await graphqlApi.request(query)
-    if (response.error) {
-      this.messagesContainer.push({
-        title: "Error rolling back newly created individual",
-        body: response.error.message
-      })
-    } else {
-      this.onNewIndividualFormComplete(individual.fullName, individual.primaryEmail)
-    }
-  }
+  // rollbackNewIndividual = async (individual) => {
+  //   const query = `mutation { deleteIndividual(individualId: "${individual.id}")}`
+  //   const response = await graphqlApi.request(query)
+  //   if (response.error) {
+  //     this.messagesContainer.push({
+  //       title: "Error rolling back newly created individual",
+  //       body: response.error.message
+  //     })
+  //   } else {
+  //     this.onNewIndividualFormComplete(individual.fullName, individual.primaryEmail)
+  //   }
+  // }
 
   rollbackLinkIndividual = async (individual) => {
     const flag = this.state.currentFlag
@@ -350,34 +320,34 @@ export default class AuditFlags extends React.Component {
     }
   }
 
-  onGroupFormComplete = async (selectedGroups) => {
-    this.pendingNewIndividual.groups = selectedGroups
-
-    const query = `mutation {
-      createIndividual(individual: {
-        fullName: "${this.pendingNewIndividual.fullName}"
-        ${this.pendingNewIndividual.primaryEmail ? `primaryEmail: "${this.pendingNewIndividual.primaryEmail}"` : ''}
-        groups: [${selectedGroups.map((g) => `"${g}"`).join(',')}]
-      }) ${this.props.individualResponseFormat}
-    }`
-
-    const response = await graphqlApi.request(query)
-    const individual = response.data.createIndividual
-
-    if (response.error) {
-      this.messagesContainer.push({
-        title: 'Failed to Save New Individual',
-        body: response.error.message
-      })
-    } else {
-      this.modalBackBehavior = () => {
-        this.rollbackNewIndividual(individual)
-        this.props.performAudit()
-      }
-      this.linkIndividual(individual, this.onReadyToAssignRules)
-      this.props.performAudit()
-    }
-  }
+  // onGroupFormComplete = async (selectedGroups) => {
+  //   this.pendingNewIndividual.groups = selectedGroups
+  //
+  //   const query = `mutation {
+  //     createIndividual(individual: {
+  //       fullName: "${this.pendingNewIndividual.fullName}"
+  //       ${this.pendingNewIndividual.primaryEmail ? `primaryEmail: "${this.pendingNewIndividual.primaryEmail}"` : ''}
+  //       groups: [${selectedGroups.map((g) => `"${g}"`).join(',')}]
+  //     }) ${this.props.individualResponseFormat}
+  //   }`
+  //
+  //   const response = await graphqlApi.request(query)
+  //   const individual = response.data.createIndividual
+  //
+  //   if (response.error) {
+  //     this.messagesContainer.push({
+  //       title: 'Failed to Save New Individual',
+  //       body: response.error.message
+  //     })
+  //   } else {
+  //     this.modalBackBehavior = () => {
+  //       this.rollbackNewIndividual(individual)
+  //       this.props.performAudit()
+  //     }
+  //     this.linkIndividual(individual, this.onReadyToAssignRules)
+  //     this.props.performAudit()
+  //   }
+  // }
 
   reCheckFlag = async (flag) => {
     const secondParameter = flag.userIdentity.email ? `email: "${flag.userIdentity.email}"` : `userId: "${flag.userIdentity.userId}"`
@@ -396,6 +366,7 @@ export default class AuditFlags extends React.Component {
       const newFlag = response.data.auditServiceUserAccount
       if (newFlag) {
         newFlag.key = flag.key
+        this.props.updateFlag(flag, newFlag)
         return newFlag
       }
     }
@@ -408,8 +379,6 @@ export default class AuditFlags extends React.Component {
     const flagCount = lodash.sumBy(flaggedServices, (service) => flagsByService[service.id].length)
     return (
       <div className="audit-flags">
-        <a className="button" onClick={() => this.wizard.start()}>Test Show Wizard</a>
-
         { flagCount > 0 &&
           <h2 className="title">
             {flagCount} Flagged Accounts
@@ -470,7 +439,7 @@ export default class AuditFlags extends React.Component {
 
         <MessagesContainer ref={(container) => { this.messagesContainer = container }} />
 
-        <ModalWizard ref={(wiz) => { this.wizard = wiz }} steps={this.wizardSteps} firstStepId="step-1"/>
+        <ModalWizard ref={(wiz) => { this.wizard = wiz }} steps={this.wizardSteps}/>
       </div>
     )
   }
