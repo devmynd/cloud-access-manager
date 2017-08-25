@@ -52,6 +52,10 @@ export default class AssetBasedAccessRulesForm extends React.Component {
     this.props.context.reCheckFlag(flag)
   }
 
+  onFinishClick = () => {
+    this.props.context.goToNext()
+  }
+
   render() {
     return (
       <div>
@@ -73,6 +77,7 @@ export default class AssetBasedAccessRulesForm extends React.Component {
             })
           }
           </ul>
+          <a className="button" onClick={this.onFinishClick}>Save and Finish</a>
         </div>
       </div>
     )

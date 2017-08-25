@@ -42,6 +42,7 @@ export default class ConfirmEmailForm extends React.Component {
   }
 
   rollback = async () => {
+    this.props.context.flag = this.props.context.originalFlag
     const individual = this.props.context.linkedIndividual
     const previousEmail = individual.primaryEmail
 
@@ -55,12 +56,13 @@ export default class ConfirmEmailForm extends React.Component {
       throw response.error
     }
 
+
     // NOTIFY PARENT TO REFRESH AUDIT SINCE EMAIL MAY CHANGE AUTO-MATCHING
     this.props.context.refreshAudit()
   }
 
   chooseNextStep = () => {
-    return this.nextStep
+    return this.nextStep || "save-and-finish"
   }
 
   render() {

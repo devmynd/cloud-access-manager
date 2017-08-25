@@ -61,6 +61,7 @@ export default class GroupSelectionForm extends React.Component {
   }
 
   rollback = async () => {
+    this.props.context.flag = this.props.context.originalFlag
     const individual = this.props.context.createdIndividual
     const query = `mutation { deleteIndividual(individualId: "${individual.id}")}`
     const response = await graphqlApi.request(query)
@@ -80,6 +81,7 @@ export default class GroupSelectionForm extends React.Component {
     if (this.props.context.flag) {
       return "role-based-access-rules-form"
     }
+    return "save-and-finish"
   }
 
   updateGroupSelection = (event) => {

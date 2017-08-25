@@ -63,6 +63,7 @@ export default class LinkIndividualForm extends React.Component {
 
   rollback = async () => {
     const individual = this.props.context.linkedIndividual
+    this.props.context.flag = this.props.context.originalFlag
     const flag = this.props.context.flag
 
     const query = `mutation { unlinkService(serviceId: "${flag.serviceId}", individualId: "${individual.id}")}`
@@ -75,12 +76,14 @@ export default class LinkIndividualForm extends React.Component {
       throw response.error
     }
 
+
+
     // NOTIFY PARENT TO REFRESH AUDIT FOR THIS SERVICE
     this.props.context.refreshAuditForService(flag.serviceId)
   }
 
   chooseNextStep = () => {
-    return this.nextStep
+    return this.nextStep || "save-and-finish"
   }
 
   render () {

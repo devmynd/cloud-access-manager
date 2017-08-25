@@ -44,13 +44,26 @@ export default class ModalWizard extends React.Component {
     currentStep: null
   }
 
-  closeModal = (event) => {
-    if (event) { event.preventDefault() }
+  exitEarly = async () => {
+    await this.rollback()
+    this.closeModal()
+  }
 
+  closeModal = () => {
     this.setState({
       showModal: false,
       currentStep: null
     })
+  }
+
+  rollback = async () => {
+    let step = this.viewStack.pop()
+    if (step){
+      if (step.reference.rollback) {
+        await step.reference.rollback()
+      }
+      this.rollback()
+    }
   }
 
   start = (stepId, context) => {
@@ -120,7 +133,7 @@ export default class ModalWizard extends React.Component {
 
   render() {
     return this.state.showModal &&
-      <Modal title={this.state.step.title} closeHandler={this.closeModal}>
+      <Modal title={this.state.step.title} closeHandler={this.exitEarly}>
         <div className="section">
           { this.state.step.component }
           <div>

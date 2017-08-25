@@ -53,7 +53,7 @@ export default class RoleBasedAccessRulesForm extends React.Component {
   }
 
   chooseNextStep = () => {
-    return this.nextStep
+    return this.nextStep || "save-and-finish"
   }
 
   onRoleClicked = (event, role) => {

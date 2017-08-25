@@ -8,6 +8,7 @@ import AssetBasedAccessRulesForm from './asset-based-access-rules-form'
 import LinkIndividualForm from './link-individual-form'
 import MessagesContainer from '../shared/messages-container'
 import ConfirmEmailForm from './confirm-email-form'
+import SaveAndFinish from './save-and-finish'
 import lodash from 'lodash'
 
 export default class AuditFlags extends React.Component {
@@ -56,9 +57,17 @@ export default class AuditFlags extends React.Component {
     "asset-based-access-rules-form": (ref, context) => {
       return {
         title: "Grant Access for Specific Assets",
+        hideNextButton: true,
         component: <AssetBasedAccessRulesForm ref={ref} context={context} />
       }
     },
+    "save-and-finish": (ref, context) => {
+      return {
+        title: "No Flagged Assets Remaining",
+        hideNextButton: true,
+        component: <SaveAndFinish ref={ref} context={context} />
+      }
+    }
   }
 
   startWizard = (flag) => {
