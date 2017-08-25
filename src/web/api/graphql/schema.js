@@ -101,6 +101,7 @@ export const schema = buildSchema(`
     linkServiceToIndividual(serviceId: String!, individualId: String!, fullName: String, email: String, userId: String): String
     unlinkService(serviceId: String!, individualId: String!): String
     addIndividualAccessRules(individualId: String!, serviceId: String!, accessRules: [AccessRuleInput]!): String
+    removeIndividualAccessRules(individualId: String!, serviceId: String!, accessRules: [AccessRuleInput]!): String
     configureService(serviceId: String!, configJson: String!): String
     disableService(serviceId: String!): String
     setGroupAccessRules(name: String!, serviceAccessRules: [ServiceAccessRuleListInput]!): String
@@ -116,6 +117,7 @@ export const root = {
   createIndividual: resolvers.individuals.createIndividual,
   linkServiceToIndividual: resolvers.individuals.linkServiceToIndividual,
   addIndividualAccessRules: resolvers.individuals.addIndividualAccessRules,
+  removeIndividualAccessRules: resolvers.individuals.removeIndividualAccessRules,
   updateIndividualGroups: resolvers.individuals.updateIndividualGroups,
   updateIndividualAccessRules: resolvers.individuals.updateIndividualAccessRules,
   individuals: resolvers.individuals.getIndividuals,

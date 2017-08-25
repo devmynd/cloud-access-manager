@@ -3,6 +3,7 @@ import { individualStore } from '../../../../core/data/individual-store'
 import { newIndividualFactory } from '../../../../core/types'
 import type { AccessRule } from '../../../../core/types'
 import { mapIndividual } from '../mappers'
+import lodash from 'lodash'
 
 export function createIndividual (args: { individual: { fullName: string, primaryEmail: ?string, groups: Array<string> } }) {
   const individual = newIndividualFactory(args.individual.fullName, args.individual.primaryEmail, args.individual.groups)
@@ -49,6 +50,23 @@ export function addIndividualAccessRules (args: { individualId: string, serviceI
 
   individualStore.save(individual)
   return 'Rules added successfully'
+}
+
+export function removeIndividualAccessRules (args: { individualId: string, serviceId: string, accessRules: Array<AccessRule>}) {
+  const individual = individualStore.getById(args.individualId)
+
+  let existingRules = individual.accessRules[args.serviceId]
+
+  if (existingRules) {
+    args.accessRules.forEach((rule) => {
+      const ruleIndex = lodash.findIndex(existingRules, (e) => e == rule)
+      existingRules.splice(ruleIndex, 1)
+    })
+  }
+  individual.accessRules[args.serviceId] = existingRules
+
+  individualStore.save(individual)
+  return 'Rules removed successfully'
 }
 
 export function updateIndividualAccessRules ( args: {

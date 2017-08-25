@@ -52,9 +52,30 @@ export default class RoleBasedAccessRulesForm extends React.Component {
     this.props.context.reCheckFlag(flag)
   }
 
-  rollback = () => {
+  rollback = async () => {
     let accessRules = this.props.context.accessRules
-    throw new Error("TODO: rollback newly added access rules")
+    const flag = this.props.context.flag
+
+    const query = `mutation {
+      removeIndividualAccessRules(
+        individualId: "${flag.individual.id}",
+        serviceId: "${flag.serviceId}",
+        accessRules: [${accessRules.map((rule) => `{
+          asset: "${rule.asset}",
+          role: "${rule.role ? rule.role : '*'}"
+        }`).join(',')}])
+    }`
+
+    const response = await graphqlApi.request(query)
+    if (response.error) {
+      this.messagesContainer.push({
+        title: 'Failed to remove access rules',
+        body: response.error.message
+      })
+      throw response.error
+    }
+
+    this.props.context.reCheckFlag(flag)
   }
 
   chooseNextStep = () => {
