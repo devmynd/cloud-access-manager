@@ -6,6 +6,10 @@ export default class NewIndividualForm extends React.Component {
     primaryEmail: this.props.context.flag.userIdentity.email || ''
   }
 
+  componentDidMount = () => {
+    this.fullNameInput.focus()
+  }
+
   updateFullName = (event) => {
     this.setState({
       fullName: event.target.value
@@ -23,6 +27,7 @@ export default class NewIndividualForm extends React.Component {
       this.setState({
         fullNameInvalid: true
       })
+      this.fullNameInput.focus()
       return false
     }
     return true
@@ -39,13 +44,22 @@ export default class NewIndividualForm extends React.Component {
     return "group-selection-form"
   }
 
+  onSubmit = () => {
+    console.log("submit")
+  }
+
   render () {
     return (
       <div>
         <div className='field'>
           <label className='label'>Full Name</label>
           <div className='control'>
-            <input className={`input ${this.state.fullNameInvalid ? 'is-danger' : ''}`} type='text' value={this.state.fullName} onChange={this.updateFullName} />
+            <input
+              className={`input ${this.state.fullNameInvalid ? 'is-danger' : ''}`}
+              type='text'
+              value={this.state.fullName}
+              onChange={this.updateFullName}
+              ref={(ref) => {this.fullNameInput = ref}}/>
           </div>
         </div>
         <div className='field'>

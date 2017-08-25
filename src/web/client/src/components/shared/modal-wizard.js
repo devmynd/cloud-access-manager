@@ -131,10 +131,15 @@ export default class ModalWizard extends React.Component {
     })
   }
 
+  onSubmit = (event) => {
+    event.preventDefault()
+    this.onNextButtonClicked()
+  }
+
   render() {
     return this.state.showModal &&
       <Modal title={this.state.step.title} closeHandler={this.exitEarly}>
-        <div className="section">
+        <form className="section" onSubmit={this.onSubmit}>
           { this.state.step.component }
           <div>
             { !this.state.step.hideNextButton &&
@@ -148,7 +153,8 @@ export default class ModalWizard extends React.Component {
               Back
             </a>
           </div>
-        </div>
+          <input type="submit" style={{display:"none"}} />
+        </form>
       </Modal>
   }
 }

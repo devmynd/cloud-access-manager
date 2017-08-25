@@ -16,6 +16,7 @@ export default class RoleBasedAccessRulesForm extends React.Component {
         asset: "*"
       }
     })
+    this.props.context.accessRules = accessRules
 
     let flag = this.props.context.flag
     const hasFullAccess = (selectedRoles.length === 1 && selectedRoles[0] === "*")
@@ -26,7 +27,6 @@ export default class RoleBasedAccessRulesForm extends React.Component {
     // IF ASSETS REMAIN, PREPARE FOR NEXT SCREEN
     if (remainingAssets.length > 0) {
       this.props.context.remainingAssets = remainingAssets
-      this.props.context.accessRules = accessRules
       this.nextStep = "asset-based-access-rules-form"
       return
     }
@@ -52,11 +52,17 @@ export default class RoleBasedAccessRulesForm extends React.Component {
     this.props.context.reCheckFlag(flag)
   }
 
+  rollback = () => {
+    let accessRules = this.props.context.accessRules
+    throw new Error("TODO: rollback newly added access rules")
+  }
+
   chooseNextStep = () => {
     return this.nextStep || "save-and-finish"
   }
 
   onRoleClicked = (event, role) => {
+    event.preventDefault()
     event.target.blur()
     this.toggleRole(role)
   }

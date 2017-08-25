@@ -30,6 +30,7 @@ export default class AssetBasedAccessRulesForm extends React.Component {
         asset: asset.name
       }
     }))
+    this.props.context.accessRules = accessRules
 
     const query = `mutation {
       addIndividualAccessRules(
@@ -50,6 +51,11 @@ export default class AssetBasedAccessRulesForm extends React.Component {
     }
 
     this.props.context.reCheckFlag(flag)
+  }
+
+  rollback = () => {
+    let accessRules = this.props.context.accessRules
+    throw new Error("TODO: rollback newly added access rules")
   }
 
   onFinishClick = () => {
