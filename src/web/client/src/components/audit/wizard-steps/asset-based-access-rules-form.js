@@ -53,32 +53,6 @@ export default class AssetBasedAccessRulesForm extends React.Component {
     this.props.context.reCheckFlag(flag)
   }
 
-  rollback = async () => {
-    let accessRules = this.props.context.accessRules
-    const flag = this.props.context.flag
-
-    const query = `mutation {
-      removeIndividualAccessRules(
-        individualId: "${flag.individual.id}",
-        serviceId: "${flag.serviceId}",
-        accessRules: [${accessRules.map((rule) => `{
-          asset: "${rule.asset}",
-          role: "${rule.role ? rule.role : '*'}"
-        }`).join(',')}])
-    }`
-
-    const response = await graphqlApi.request(query)
-    if (response.error) {
-      this.messagesContainer.push({
-        title: 'Failed to remove access rules',
-        body: response.error.message
-      })
-      throw response.error
-    }
-
-    this.props.context.reCheckFlag(flag)
-  }
-
   onFinishClick = () => {
     this.props.context.goToNext()
   }

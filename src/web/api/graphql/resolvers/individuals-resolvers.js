@@ -59,8 +59,7 @@ export function removeIndividualAccessRules (args: { individualId: string, servi
 
   if (existingRules) {
     args.accessRules.forEach((rule) => {
-      const ruleIndex = lodash.findIndex(existingRules, (e) => e == rule)
-      existingRules.splice(ruleIndex, 1)
+      lodash.remove(existingRules, (e) => e.asset === rule.asset && e.role === rule.role)
     })
   }
   individual.accessRules[args.serviceId] = existingRules

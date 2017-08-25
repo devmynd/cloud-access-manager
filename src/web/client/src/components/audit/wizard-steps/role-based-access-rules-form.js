@@ -62,7 +62,7 @@ export default class RoleBasedAccessRulesForm extends React.Component {
         serviceId: "${flag.serviceId}",
         accessRules: [${accessRules.map((rule) => `{
           asset: "${rule.asset}",
-          role: "${rule.role ? rule.role : '*'}"
+          role: "${rule.role}"
         }`).join(',')}])
     }`
 
