@@ -11,8 +11,7 @@
     "launch": "open -a \"/Applications/Google Chrome.app\" lib/web/client/index.html",
     "watch": "webpack -d --watch",
     "test": "npm run prebuild  && npm run core && jest lib/",
-    "standard": "standard --fix",
-    "wipe": "rm .accounts.store.json && rm .individuals.store.json"
+    "standard": "standard --fix"
   },
   "repository": "git@github.com:devmynd/cloud-access-manager.git",
   "author": "Michael Evans <michael.evans@devmynd.com>",

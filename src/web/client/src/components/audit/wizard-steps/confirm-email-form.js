@@ -1,5 +1,5 @@
 import React from 'react'
-import graphqlApi from '../../graphql-api'
+import graphqlApi from '../../../graphql-api'
 
 export default class ConfirmEmailForm extends React.Component {
 

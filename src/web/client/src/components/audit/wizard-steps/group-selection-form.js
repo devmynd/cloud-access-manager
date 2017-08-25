@@ -1,6 +1,6 @@
 import React from 'react'
 import lodash from 'lodash'
-import graphqlApi from '../../graphql-api'
+import graphqlApi from '../../../graphql-api'
 
 export default class GroupSelectionForm extends React.Component {
   state = {

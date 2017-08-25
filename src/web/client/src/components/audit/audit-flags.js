@@ -1,15 +1,16 @@
 import React from 'react'
-import ModalWizard from '../shared/modal-wizard'
-import UnknownUserForm from './unknown-user-form'
-import NewIndividualForm from './new-individual-form'
-import GroupSelectionForm from './group-selection-form'
-import RoleBasedAccessRulesForm from './role-based-access-rules-form'
-import AssetBasedAccessRulesForm from './asset-based-access-rules-form'
-import LinkIndividualForm from './link-individual-form'
-import MessagesContainer from '../shared/messages-container'
-import ConfirmEmailForm from './confirm-email-form'
-import SaveAndFinish from './save-and-finish'
 import lodash from 'lodash'
+
+import ModalWizard from '../shared/modal-wizard'
+import MessagesContainer from '../shared/messages-container'
+
+import UnknownUserForm from './wizard-steps/unknown-user-form'
+import NewIndividualForm from './wizard-steps/new-individual-form'
+import GroupSelectionForm from './wizard-steps/group-selection-form'
+import RoleBasedAccessRulesForm from './wizard-steps/role-based-access-rules-form'
+import AssetBasedAccessRulesForm from './wizard-steps/asset-based-access-rules-form'
+import ConfirmEmailForm from './wizard-steps/confirm-email-form'
+import SaveAndFinish from './wizard-steps/save-and-finish'
 
 export default class AuditFlags extends React.Component {
   state = { }
@@ -20,13 +21,6 @@ export default class AuditFlags extends React.Component {
         title: `Unknown User`,
         hideNextButton: true,
         component: <UnknownUserForm ref={ref} context={context} />
-      }
-    },
-    "link-individual-form": (ref, context) => {
-      return {
-        title: "Link Service to Existing Individual",
-        hideNextButton: true,
-        component: <LinkIndividualForm ref={ref} context={context} />
       }
     },
     "confirm-email-form": (ref, context) => {
