@@ -5,7 +5,8 @@ import graphqlApi from '../../../graphql-api'
 
 export default class UnknownUserForm extends React.Component {
 
-  onNewIndividualSelected = () => {
+  onNewIndividualSelected = (event) => {
+    event.preventDefault()
     this.nextStep = "new-individual-form"
     this.props.context.linkedIndividual = null
     this.props.context.goToNext()

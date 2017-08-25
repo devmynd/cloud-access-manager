@@ -3,12 +3,14 @@ import graphqlApi from '../../../graphql-api'
 
 export default class ConfirmEmailForm extends React.Component {
 
-  onConfirm = () => {
+  onConfirm = (event) => {
+    event.preventDefault()
     this.confirmed = true
     this.props.context.goToNext()
   }
 
-  onReject = () => {
+  onReject = (event) => {
+    event.preventDefault()
     this.confirmed = false
     this.props.context.goToNext()
   }
