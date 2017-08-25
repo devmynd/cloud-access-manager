@@ -1,6 +1,8 @@
 import React from 'react'
 import Modal from './modal'
 
+// EXAMPLE WIZARD STEP
+
 // class DummyStep extends React.Component {
 //   save = async () => {
 //     console.log("Saving step")
@@ -19,8 +21,7 @@ import Modal from './modal'
 //   }
 //
 //   myCustomAction = () => {
-//     console.log("I make my own choices!!!")
-//     this.props.context.goToStep("step-3")
+//     this.props.context.goToNext()
 //   }
 //
 //   render() {
@@ -32,7 +33,7 @@ import Modal from './modal'
 //   "step-1": (ref, context) => {
 //     return {
 //       title: "Dummy Step 1",
-//       hideNextButton: true,
+//       hideNextButton: true, // HIDDEN BECAUSE WE WILL TRIGGER NEXT STEP OURSELVES WITH A CUSTOM BUTTON
 //       component: <DummyStep ref={ref} context={context} />
 //     }
 //   }
